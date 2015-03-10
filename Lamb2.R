@@ -45,11 +45,7 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
     log.lamb <- log(lamb.old[Index0])
     log.lamb[is.na(log.lamb)] <- 0
     log.density1 <- log.lamb + eta.h # n*GQ matrix #
-    const <- matrix(0, n, GQ) # n*GQ matrix #
-    # WE DO IN PLACE MULTIPLICATION / variable 'tempLamb0' is holding the results
-    # const0 <- exp.es; const0[1] = const0[1] +0 # "touch the variable"
-    # calc_y_M_Hadamard(const0, lamb.old, as.integer(Index1-1))
-    # const[nk != 0, ] <- rowsum(const0, Index) 
+    const <- matrix(0, n, GQ) # n*GQ matrix 
     const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index) 
     log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
     log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
