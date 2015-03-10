@@ -90,7 +90,7 @@ calc_M1_M2_M3 <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signatur
 	return Rcpp::wrap( M1.cwiseProduct(M2).cwiseProduct(M3)  );  	 
 ' )
 
-print('Compliling calc_M1_M2_M3_b')
+print('Compliling calc_M1_M2_M3_Hadamard')
 calc_M1_M2_M3_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 ="matrix", M_i2 ="matrix", M_i3 ="matrix", v_i = "vector"), body='	
 	// Calculate the Hadamard product $M1 M2 M3$ using indeces at v
 	// This function does IN-PLACE multiplication
@@ -111,7 +111,7 @@ calc_M1_M2_M3_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen", 
 	//return Rcpp::wrap( M1 ); // This function returns VOID
 ' )
 
-print('Compliling calc_M1_M2_M3_b')
+print('Compliling calc_y_M1_Hadamard')
 calc_y_M_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 ="matrix", v_i1 = "vector", v_i2 = "vector"), body='	
 	// Calculate the product $ y$
  	using Eigen::Map;		 		// to map input variable to an existing array of data
