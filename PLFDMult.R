@@ -1,0 +1,52 @@
+
+#================== Profile Likelihood Method with Forward Difference for Model I & II ==================#
+
+PLFDMult <- function (model, theta, tol, iter, delta) {
+  
+  pl <- if(model == 1) LHMult1(theta) / n else LHMult2(theta) / n
+  
+  para <- List2VecMult(theta)
+  lamb.init <- theta$lamb
+  len <- length(para)
+  
+  PLs <- matrix(0, len, len)
+  for (i in 1:len) {
+    for (j in i:len) {
+      para1 <- para
+      para1[i] <- para[i] + delta
+      para1[j] <- para1[j] + delta
+      result <- if(model == 1) LambMult1(para1, lamb.init, tol, iter) else LambMult2(para1, lamb.init, tol, iter)
+      para1.list <- Vec2ListMult(para1, ncz, ncb)
+      theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
+                           Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
+      PLs[i, j] <- if(model == 1) LHMult1(theta.input1) / n else LHMult2(theta.input1) / n
+    }
+  }
+  
+  pls <- rep(0, len)
+  for (i in 1:len) {
+    para1 <- para
+    para1[i] <- para[i] + delta
+    result <- if(model == 1) LambMult1(para1, lamb.init, tol, iter) else LambMult2(para1, lamb.init, tol, iter)
+    para1.list <- Vec2ListMult(para1, ncz, ncb)
+    theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
+                         Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
+    pls[i] <- if(model == 1) LHMult1(theta.input1) / n else LHMult2(theta.input1) / n
+  }
+  
+  I <- matrix(0, len, len)
+  for (i in 1:len) {
+    for (j in i:len) {
+      I[i, j] <- - (PLs[i,j] - pls[i] - pls[j] + pl) / (delta ^ 2)
+    }
+  }
+  I <- I + t(I) - diag(diag(I))
+  svd_I <- svd(I)
+  V <- svd_I$v %*% diag(1 / svd_I$d) %*% t(svd_I$u) / n
+  Valpha.name <- if (model == 1) paste("alpha:", alpha.name, sep = "") else "alpha"
+  Vnames <- c(paste("gamma.", 1:ncb, sep = ""), paste(rep("phi:", ncz), phi.names, sep = ""), Valpha.name, 
+              "sigma.e", "sigma.b")
+  dimnames(V) <- list(Vnames, Vnames)
+  
+  return(V)
+}

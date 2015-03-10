@@ -1,0 +1,121 @@
+
+#=============== EM iteration Using Adaptive Gaussian Quadrature for Model I with NMRE ===============#
+#=============== Transformation model is fitted for the survival part ===============#
+
+EMiterMult1 <- function (theta.old) { # Use apply instead of matrix calculation #
+  
+  # Get Old Estimates #
+  gamma.old <- theta.old$gamma
+  phi.old <- theta.old$phi
+  alpha.old <- theta.old$alpha
+  Ysigma2.old <- (theta.old$Ysigma) ^ 2
+  Bsigma2.old <- (theta.old$Bsigma) ^ 2
+  lamb.old <- theta.old$lamb
+  
+  BTg <- lapply(B.st, function(x) as.vector(x %*% gamma.old))
+  VY <- lapply(1:n, function(i) as.matrix(Bsigma2.old * BTg[[i]] %*% t(BTg[[i]]) + Ysigma2.old * diag(1, ni[i])))
+  # VB <- lapply(1:n, function(i) as.numeric(Bsigma2.old - (Bsigma2.old ^ 2) * t(BTg[[i]]) %*% solve(VY[[i]]) %*% BTg[[i]]))
+  VB <- lapply(1:n, function(i) as.numeric(Bsigma2.old - (Bsigma2.old ^ 2) * t(BTg[[i]]) %*% solve(VY[[i]],BTg[[i]]))
+  # muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2.old * t(BTg[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - BTg[[i]])))
+  muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2.old * t(BTg[[i]]) %*% solve(VY[[i]],as.vector(Y.st[[i]] - BTg[[i]]))))
+  
+  bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2 * VB[[i]]) * t(b)))
+  bi <- do.call(rbind, bi.st) # n*nknot matrix #
+  Btime.b <- as.vector(Btime %*% gamma.old) * bi # n*nknot matrix #
+  Btime2.b <- as.vector(Btime2 %*% gamma.old) * bi[Index, ] # M*nknot matrix #
+  
+  log.lamb <- log(lamb.old[Index0])
+  log.lamb[is.na(log.lamb)] <- 0
+  log.density1 <- log.lamb + as.vector(Ztime %*% phi.old) + alpha.old * Btime.b # n*nknot matrix #
+  eta.s <- as.vector(Ztime2 %*% phi.old) + alpha.old * Btime2.b # M*nknot matrix #
+  exp.es <- exp(eta.s) # M*nknot matrix #
+  const <- matrix(0, n, nknot) # n*nknot matrix #
+  const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index) # n*nknot matrix # 
+  log.density2 <- -log(1 + rho * const) # n*GQ matrix # 
+  log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*nknot matrix #
+  
+  f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*nknot matrix #
+  deno <- as.vector(f.surv %*% wGQ) # vector of length n #
+  Integral <- f.surv / deno # n*nknot matrix #
+  
+  f.long <- sapply(1:n, function(i) dmvnorm(Y.st[[i]], as.vector(BTg[[i]]), VY[[i]]))
+  lgLik <- sum(log(f.long * deno / sqrt(pi)))
+  
+  CondExp <- (1 + d * rho) / (1 + rho * const) # conditional expectation E(xi|bi,Oi), n*nknot matrix #
+  
+  #========== Update Bsigma ==========#
+  Bsigma2.new <- mean((Integral * (bi - 1) ^ 2) %*% wGQ) 
+  
+  #========== Update Ysigma ==========#
+  post.resid <- ((Y - as.vector(B %*% gamma.old) * bi[ID, ]) ^ 2 * Integral[ID, ]) %*% wGQ # vector of length N #
+  Ysigma2.new <- sum(post.resid) / N
+  
+  #========== calculate the score and gradient of phi and alpha ==========# 
+  CondExp2 <- CondExp[nk!=0, ]
+  temp1 <- lapply(1:ncz, function(i) CondExp2 * rowsum(Ztime2[, i] * exp.es * lamb.old[Index1], Index)) 
+  # n*nknot matrices #
+  temp2 <- CondExp2 * rowsum(Btime2.b * exp.es * lamb.old[Index1], Index) # n*nknot matrix #
+  temp3 <- lapply(1:(ncz ^ 2), function(i) CondExp2 * rowsum(Ztime22[, i] * exp.es * lamb.old[Index1], Index)) 
+  # n*nknot matrices #
+  temp4 <- CondExp2 * rowsum(Btime2.b ^ 2 * exp.es * lamb.old[Index1], Index) # n*nknot matrix #
+  temp5 <- lapply(1:ncz, function(i) CondExp2 * rowsum(Btime2.b * Ztime2[, i] * exp.es * lamb.old[Index1], Index)) 
+  # n*nknot matrices #
+  Integral2 <- Integral[nk != 0, ]
+  post1 <- unlist(lapply(temp1, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncz #
+  post2 <- sum((temp2 * Integral2) %*% wGQ)
+  post3 <- unlist(lapply(temp3, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncz^2 #
+  post4 <- sum((temp4 * Integral2) %*% wGQ)
+  post5 <- unlist(lapply(temp5, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncz #
+  post.bi <- as.vector((Integral * bi) %*% wGQ) # vector of length n #
+  
+  phiScore <- colSums(d * Ztime) - post1 # vector of length ncz #
+  alphaScore <- sum(d * post.bi * as.vector(Btime %*% gamma.old)) - post2
+  pa.score <- c(phiScore, alphaScore)
+  pa.info <- matrix(0, (ncz + 1), (ncz + 1)) # (ncz+1)*(ncz+1) matrix #
+  pa.info[1:ncz, 1:ncz] <- - post3
+  pa.info[(ncz + 1), (ncz + 1)] <- - post4
+  pa.info[(ncz + 1), 1:ncz] <- - post5
+  pa.info[1:ncz, (ncz + 1)] <- - post5
+
+  #=============== Update phi and alpha ===============#
+  pa.old <- c(phi.old, alpha.old) # vector of length (ncz+1) #
+  paSVD <- svd(pa.info)
+  pa.info.inv <- paSVD$v %*% diag(1 / paSVD$d) %*% t(paSVD$u)
+  pa.new <- pa.old - pa.info.inv %*% pa.score # vector of length (ncz+1) #
+  phi.new <- pa.new[1 : ncz]
+  alpha.new <- pa.new[ncz + 1]
+  
+  #========== calculate the score of gamma ==========#
+  eta.s.n1 <- as.vector(Ztime2 %*% phi.new) + alpha.new * Btime2.b # M*nknot matrix #
+  exp.es.n1 <- exp(eta.s.n1) # M*nknot matrix #
+  temp6 <- lapply(1:ncb, function(i) CondExp2 * rowsum(alpha.new * bi[Index, ] * Btime2[, i] * 
+                                     exp.es.n1 * lamb.old[Index1], Index))
+  temp7 <- lapply(1:(ncb ^ 2), function(i) CondExp2 * rowsum(alpha.new ^ 2 * bi[Index, ] ^ 2 * 
+                                           Btime22[, i] * exp.es.n1 * lamb.old[Index1], Index))
+  temp8 <- lapply(1:ncb, function(i) (Y - as.vector(B %*% gamma.old) * bi[ID, ]) * B[, i] * bi[ID, ]) 
+  # N*nknot matrices #
+  post6 <- unlist(lapply(temp6, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncb #
+  post7 <- unlist(lapply(temp7, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncb^2 #
+  post8 <- unlist(lapply(temp8, function(x) sum((x * Integral[ID,]) %*% wGQ))) # vector of length ncb #
+  post.bi2 <- as.vector((Integral * bi ^ 2) %*% wGQ) # vector of length n #
+  
+  gammaScore <- post8 / Ysigma2.new + alpha.new * colSums(d * post.bi * Btime) - post6 # vector of length ncb #
+  gammaInfo <- - colSums(post.bi2[ID] * B2) / Ysigma2.new - post7
+  gammaInfo <- matrix(gammaInfo, nrow = ncb)
+  
+  #========== Update gamma ==========#
+  gammaSVD <- svd(gammaInfo)
+  gammaInfo.inv <- gammaSVD$v %*% diag(1 / gammaSVD$d) %*% t(gammaSVD$u)
+  gamma.new <- as.vector(gamma.old - gammaInfo.inv %*% gammaScore) # vector of length ncb #
+  
+  #========== Calculate the new lambda with new parameters ==========#
+  Btime2.bnew <- as.vector(Btime2 %*% gamma.new) * bi[Index, ] # M*nknot matrix #
+  eta.s.n2 <- as.vector(Ztime2 %*% phi.new) + alpha.new * Btime2.bnew # M*nknot matrix #
+  tempLamb <- (CondExp[Index, ] * exp(eta.s.n2) * Integral[Index, ]) %*% wGQ # vector of length M #
+  postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
+  lamb.new <- Index2 / postLamb
+  
+  result <- list(gamma = gamma.new, phi = phi.new, alpha = alpha.new, Ysigma = sqrt(Ysigma2.new), 
+                 Bsigma = sqrt(Bsigma2.new), lamb = lamb.new, lgLik = lgLik, est.bi = post.bi)
+  return(result)
+}
