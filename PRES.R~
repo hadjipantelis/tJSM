@@ -24,10 +24,14 @@ PRES <- function (model, theta, tol, iter, delta) {
     list2 <- Vec2List(para2, ncx, ncz, ncw)
     list3 <- Vec2List(para3, ncx, ncz, ncw)
     list4 <- Vec2List(para4, ncx, ncz, ncw)
-    theta.input1 <- list(beta = list1$beta, phi = list1$phi, alpha = list1$alpha, Ysigma = list1$Ysigma, BSigma = list1$BSigma, lamb = result1$lamb)
-    theta.input2 <- list(beta = list2$beta, phi = list2$phi, alpha = list2$alpha, Ysigma = list2$Ysigma, BSigma = list2$BSigma, lamb = result2$lamb)
-    theta.input3 <- list(beta = list3$beta, phi = list3$phi, alpha = list3$alpha, Ysigma = list3$Ysigma, BSigma = list3$BSigma, lamb = result3$lamb)
-    theta.input4 <- list(beta = list4$beta, phi = list4$phi, alpha = list4$alpha, Ysigma = list4$Ysigma, BSigma = list4$BSigma, lamb = result4$lamb)
+    theta.input1 <- list(beta = list1$beta, phi = list1$phi, alpha = list1$alpha, 
+                         Ysigma = list1$Ysigma, BSigma = list1$BSigma, lamb = result1$lamb)
+    theta.input2 <- list(beta = list2$beta, phi = list2$phi, alpha = list2$alpha, 
+                         Ysigma = list2$Ysigma, BSigma = list2$BSigma, lamb = result2$lamb)
+    theta.input3 <- list(beta = list3$beta, phi = list3$phi, alpha = list3$alpha, 
+                         Ysigma = list3$Ysigma, BSigma = list3$BSigma, lamb = result3$lamb)
+    theta.input4 <- list(beta = list4$beta, phi = list4$phi, alpha = list4$alpha, 
+                         Ysigma = list4$Ysigma, BSigma = list4$BSigma, lamb = result4$lamb)
     S1 <- Sfunc(model, theta.input1)
     S2 <- Sfunc(model, theta.input2)
     S3 <- Sfunc(model, theta.input3)
