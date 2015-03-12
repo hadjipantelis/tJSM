@@ -11,12 +11,13 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
   phi <- para.list$phi
   alpha <- para.list$alpha
   
-  VY <- lapply(1:n, function(i) as.matrix(Z.st[[i]] %*% BSigma %*% t(Z.st[[i]]) + Ysigma2 * diag(1, ni[i])))
+  # VY <- lapply(1:n, function(i) as.matrix(Z.st[[i]] %*% BSigma %*% t(Z.st[[i]]) + Ysigma2 * diag(1, ni[i])))
   # VB <- lapply(1:n, function(i) BSigma - BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% Z.st[[i]] %*% BSigma)
   # muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta)))
   # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b)))
 
-  VB <- lapply(1:n, function(i) BSigma - calc_yT_Minv_y( Z.st[[i]], VY[[i]])*BSigma^2)
+  VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2)) 
+  VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma, VY[[i]]))
   muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% calc_yT_Minv(Y.st[[i]] - X.st[[i]] %*% beta, VY[[i]])))
   bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * backsolve( calc_chol_Minv(VB[[i]]), t(b)) ))
 
@@ -27,9 +28,10 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
   
   eta.h <- as.vector(Wtime %*% phi) + alpha * Ztime.b # n*GQ matrix #
   # eta.s <- as.vector(Wtime2 %*% phi) + alpha * Ztime2.b # M*GQ matrix #
+  # exp.es <- exp(eta.s) # M*GQ matrix #
+
   calc_y_a( Ztime2.b,alpha); # Ztime2.b gets altered
   eta.s <- as.numeric(Wtime2 %*% phi) + Ztime2.b  
-  # exp.es <- exp(eta.s) # M*GQ matrix #
   n_ <- ncol(eta.s)
   m_ <- nrow(eta.s)
   exp.es <- matrix(calc_expM(eta.s), m_, n_)
@@ -54,12 +56,14 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
     CondExp <- (1 + d * rho) / (1 + rho * const) # conditional expectation E(xi|bi,Oi), n*GQ matrix #
     
     # tempLamb <- (CondExp[Index, ] * exp.es * Integral[Index, ]) %*% wGQ # vector of length M # 
+    # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
     # WE DO IN PLACE MULTIPLICATION / variable 'tempLamb0' is holding the results
+    
     tempLamb0 <- exp.es; tempLamb0[1] = tempLamb0[1] +0 # "touch the variable"
     calc_M1_M2_M3_Hadamard(tempLamb0, CondExp ,  Integral, as.integer(Index-1))
     tempLamb <- calc_M_y(y_i =wGQ, M_i=tempLamb0)
-    # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
     postLamb <- calc_tapply_vect_sum( tempLamb, as.integer(Index1-1)); ## Check this!
+
     lamb.new <- Index2 / postLamb[postLamb!=0]
     
     Lamb.new <- cumsum(lamb.new)

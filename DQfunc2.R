@@ -17,13 +17,14 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   plamb <- ptheta$lamb
   lamb <- theta$lamb
   
-  VY <- lapply(1:n, function(i) as.matrix(Z.st[[i]] %*% BSigma %*% t(Z.st[[i]]) + Ysigma2 * diag(1, ni[i])))
-
+  # VY <- lapply(1:n, function(i) as.matrix(Z.st[[i]] %*% BSigma %*% t(Z.st[[i]]) + Ysigma2 * diag(1, ni[i])))
   # VB <- lapply(1:n, function(i) BSigma - BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% Z.st[[i]] %*% BSigma) 
   # muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta)))  
   # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b))) 
- 
-  VB <- lapply(1:n, function(i) BSigma - calc_yT_Minv_y(  Z.st[[i]], VY[[i]])*BSigma^2) 
+  
+  VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2))
+  # VB <- lapply(1:n, function(i) BSigma - calc_yT_Minv_y(  Z.st[[i]], VY[[i]])*BSigma^2) 
+  VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma, VY[[i]]))
   muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% calc_yT_Minv(Y.st[[i]] - X.st[[i]] %*% beta, VY[[i]]))) 
   bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * backsolve(  calc_chol_Minv(VB[[i]]), t(b)) ))
 
@@ -35,9 +36,10 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   log.lamb[is.na(log.lamb)] <- 0
   log.density1 <- log.lamb + as.vector(Wtime %*% phi) + alpha*Ztime.b # n*GQ matrix #
   # eta.s <- as.vector(Wtime2 %*% phi) + alpha * Ztime2.b # M*GQ matrix #
+  # exp.es <- exp(eta.s) # M*GQ matrix #
+
   calc_y_a( Ztime2.b,alpha); # Ztime2.b gets altered because we do in-place multiplication
   eta.s <- as.numeric(Wtime2 %*% phi) + Ztime2.b  
-  # exp.es <- exp(eta.s) # M*GQ matrix #
   n_ <- ncol(eta.s)
   m_ <- nrow(eta.s)
   exp.es <- matrix(calc_expM(eta.s),m_,n_) # This faster for rectangular matrices

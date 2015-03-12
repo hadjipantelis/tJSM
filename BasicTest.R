@@ -41,11 +41,10 @@ fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 library(lineprof)
 
 # fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
-
+if(1==12){
 fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT = NULL; control = list()
 
-
-  call <- match.call()
+ 
   if (!inherits(fitLME, "lme"))
     stop("\n'fitLME'must be a fit returned by lme().")
   if (length(fitLME$group) > 1)
@@ -261,7 +260,7 @@ if(1==10){
   } else if (controlvals$SE.method == 'PRES') {
     environment(PRES) <- environment()
     if (CheckDeltaRE(theta.new, ncz, delta)) {
-      time.SE <- system.time(Vcov <- [3]
+      time.SE <- system.time(Vcov <-  PRES(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
@@ -312,7 +311,7 @@ list1 <- Vec2List(para1, ncx, ncz, ncw)
 S1 <- Sfunc(model, theta.input1)
 
 
-
+}
 
 #print('Running a lineprof with fitJT.ph2');
 #ll <- lineprof(fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime'))
