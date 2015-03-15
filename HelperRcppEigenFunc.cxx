@@ -223,6 +223,7 @@ calc_VB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(y_i 
 	return Rcpp::wrap( a - b * a * a   );  	 
 ' )
 
+if(1==12){
 print('Compliling calc_bi_st')
 calc_bi_st <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature( a_i = "numeric", y_i = "vector", M_i ="matrix"), body='
 	// Calculate $chol(M_i^{-1})$
@@ -240,13 +241,12 @@ calc_bi_st <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature( 
 
 	return Rcpp::wrap( (  1.414213562373095*M.llt().solve(B).llt().matrixLLT().triangularView<Lower>().solve(y)) )
 ' )
-
+}
 
 print('Compliling calc_MVND')
 calc_MVND <- cxxfunction( plugin = "RcppEigen",  signature( y_i1 = "vector", y_i2 = "vector", M_i ="matrix"), body='
 	// Calculate $MVND IN 2D$
  	using Eigen::Map;		 		// to map input variable to an existing array of data
-	using Eigen::Matrix2d; 				// to use MatrixXd 
 	using Eigen::MatrixXd;
 	using Eigen::VectorXd; 				// to use VectorXd
 	using Eigen::LLT; 				// to do the LLT decomposition  
@@ -259,7 +259,7 @@ calc_MVND <- cxxfunction( plugin = "RcppEigen",  signature( y_i1 = "vector", y_i
 	double p = x.size();
 	LLT<MatrixXd> LLT_of_K(K); // compute the Cholesky decomposition of K
 	if ( !LLT_of_K.info() ) { 
-		Matrix2d Rooti = LLT_of_K.matrixLLT().triangularView<Lower>().solve(Matrix2d::Identity()); 
+		MatrixXd Rooti = LLT_of_K.matrixLLT().triangularView<Lower>().solve(MatrixXd::Identity(p,p)); 
 		double quads = (Rooti * (x-mu)).array().square().sum();
 		double res   =  exp( -((p/2.0)*log(2.0*M_PI))  + Rooti.diagonal().array().log().sum() - 0.5*quads); 
 		return Rcpp::wrap( res );
