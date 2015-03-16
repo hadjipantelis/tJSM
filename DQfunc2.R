@@ -25,8 +25,10 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2))
   # VB <- lapply(1:n, function(i) BSigma - calc_yT_Minv_y(  Z.st[[i]], VY[[i]])*BSigma^2) 
   VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma, VY[[i]]))
-  muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% calc_yT_Minv(Y.st[[i]] - X.st[[i]] %*% beta, VY[[i]]))) 
-  bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * backsolve(  calc_chol_Minv(VB[[i]]), t(b)) ))
+  #   muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% calc_yT_Minv(Y.st[[i]] - X.st[[i]] %*% beta, VY[[i]]))) 
+  #   bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * backsolve(  calc_chol_Minv(VB[[i]]), t(b)) ))
+  muB <- lapply(1:n, function(i) calc_muB( BSigma,  y_i0=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
+  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) )
 
   bi <- do.call(rbind, bi.st) # (n*ncz)*GQ matrix #
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #

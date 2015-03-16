@@ -12,13 +12,15 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   alpha.old <- theta.old$alpha
   lamb.old <- theta.old$lamb
   
-  VY <- lapply(1:n, function(i) as.matrix(Z.st[[i]] %*% BSigma.old %*% t(Z.st[[i]]) + Ysigma2.old * diag(1, ni[i])))
+  # VY <- lapply(1:n, function(i) as.matrix(Z.st[[i]] %*% BSigma.old %*% t(Z.st[[i]]) + Ysigma2.old * diag(1, ni[i])))
   # VB <- lapply(1:n, function(i) BSigma.old - BSigma.old %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% Z.st[[i]] %*% BSigma.old)
-  VB <- lapply(1:n, function(i) BSigma.old - sum( forwardsolve(t(chol(VY[[i]])), Z.st[[i]])^2) * BSigma.old * BSigma.old)
-  # muB <- lapply(1:n, function(i) as.vector(BSigma.old %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta.old)))
-  muB <- lapply(1:n, function(i) as.vector(BSigma.old %*% t(Z.st[[i]]) %*% solve(VY[[i]], as.vector(Y.st[[i]] - X.st[[i]] %*% beta.old)))) 
-  # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b)))
-  bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * backsolve(chol(solve(VB[[i]])), t(b))))
+  # muB <- lapply(1:n, function(i) as.vector(BSigma.old %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta.old))) 
+  # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b))) 
+
+  VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma.old, Ysigma2.old)) 
+  VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma.old, VY[[i]]))
+  muB <- lapply(1:n, function(i) calc_muB( BSigma.old,  y_i0=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta.old, M_i1=VY[[i]], M_i2=X.st[[i]]))
+  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) )
 
   bi <- do.call(rbind, bi.st)
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
@@ -28,7 +30,10 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   log.lamb[is.na(log.lamb)] <- 0
   log.density1 <- log.lamb + as.vector(Wtime %*% phi.old) + alpha.old * Ztime.b # n*GQ matrix #
   eta.s <- as.vector(Wtime2 %*% phi.old) + alpha.old * Ztime2.b # M*GQ matrix #
-  exp.es <- exp(eta.s) # M*GQ matrix #
+  # exp.es <- exp(eta.s) # M*GQ matrix #
+  n_ <- ncol(eta.s)
+  m_ <- nrow(eta.s)
+  exp.es <- matrix(calc_expM(eta.s),m_,n_) # This faster for rectangular matrices
   const <- matrix(0, n, GQ) # n*GQ matrix #
   const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index)
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
@@ -38,7 +43,8 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #
   Integral <- f.surv / deno # n*GQ matrix f(bi|Oi) #
   
-  f.long <- sapply(1:n, function(i) dmvnorm(Y.st[[i]], as.vector(X.st[[i]] %*% beta.old), VY[[i]]))
+  # f.long <- sapply(1:n, function(i) dmvnorm(Y.st[[i]], as.vector(X.st[[i]] %*% beta.old), VY[[i]]))
+  f.long <- sapply(1:n, function(i) calc_MVND(Y.st[[i]], as.vector(X.st[[i]] %*% beta.old), VY[[i]]))
   lgLik <- sum(log(f.long * deno / (pi ^ (ncz / 2))))
   
   CondExp <- (1 + d * rho) / (1 + rho * const) # conditional expectation E(xi|bi,Oi), n*GQ matrix #
@@ -61,8 +67,8 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   
   #========== Update beta: the linear regresion coefficents of regression Yi-E(Zi*bi) on X_i ==========#
   tempX <- Y - rowSums(Z * post.bi[ID, ]) # vector of length N #
-  # beta.new <- as.vector(solve(t(X) %*% X) %*% (t(X) %*% tempX)) # vector of length ncx #
-  beta.new <- as.vector(qr.solve(X,tempX));
+beta.new <- as.vector(solve(t(X) %*% X) %*% (t(X) %*% tempX)) # vector of length ncx #
+   #  beta.new <- as.vector(qr.solve(X,tempX));
   #========== Update Ysigma ==========#
   Ymu.new <- as.vector(X %*% beta.new) + do.call(rbind, lapply(1:n, function(i) Z.st[[i]] %*% bi.st[[i]])) 
   # N*GQ matrix #
@@ -71,11 +77,20 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   
   #========== calculate the score and gradient of phi and alpha ==========#
   CondExp2 <- CondExp[nk != 0, ]
-  temp1 <- CondExp2 * rowsum(Ztime2.b * exp.es * lamb.old[Index1], Index) # n*GQ matrix #
-  temp2 <- CondExp2 * rowsum(Ztime2.b ^ 2 * exp.es * lamb.old[Index1], Index) # n*GQ matrix #
-  temp3 <- lapply(1:ncw, function(i) CondExp2 * rowsum(Wtime2[, i] * exp.es * lamb.old[Index1], Index))
-  temp4 <- lapply(1:(ncw ^ 2), function(i) CondExp2 * rowsum(Wtime22[, i] * exp.es * lamb.old[Index1], Index)) 
-  temp5 <- lapply(1:ncw, function(i) CondExp2 * rowsum(Ztime2.b * Wtime2[, i] * exp.es * lamb.old[Index1], Index))
+  # temp1 <- CondExp2 * rowsum(Ztime2.b * exp.es * lamb.old[Index1], Index) # n*GQ matrix #
+  # temp2 <- CondExp2 * rowsum(Ztime2.b ^ 2 * exp.es * lamb.old[Index1], Index) # n*GQ matrix #
+  # temp3 <- lapply(1:ncw, function(i) CondExp2 * rowsum(Wtime2[, i] * exp.es * lamb.old[Index1], Index))
+  # temp4 <- lapply(1:(ncw ^ 2), function(i) CondExp2 * rowsum(Wtime22[, i] * exp.es * lamb.old[Index1], Index)) 
+  # temp5 <- lapply(1:ncw, function(i) CondExp2 * rowsum(Ztime2.b * Wtime2[, i] * exp.es * lamb.old[Index1], Index))
+
+  temp0a <- exp.es * lamb.old[Index1]
+  temp0b <- Ztime2.b * temp0a
+  temp1 <- CondExp2 * rowsum(temp0b, Index) # n*GQ matrix #
+  temp2 <- CondExp2 * rowsum(Ztime2.b * temp0b, Index) # n*GQ matrix #
+  temp3 <- lapply(1:ncw, function(i) CondExp2 * rowsum(Wtime2[, i] * temp0a, Index))
+  temp4 <- lapply(1:(ncw ^ 2), function(i) CondExp2 * rowsum(Wtime22[, i] * temp0a, Index)) 
+  temp5 <- lapply(1:ncw, function(i) CondExp2 * rowsum(  Wtime2[, i] * temp0b, Index))
+
   Integral2 <- Integral[nk != 0,]
   post1 <- sum((temp1 * Integral2) %*% wGQ)
   post2 <- sum((temp2 * Integral2) %*% wGQ)
@@ -102,8 +117,16 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   
   #========== Calculate the new lambda with new parameters ==========#
   eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix #
-  tempLamb <- (CondExp[Index, ] * exp(eta.sn) * Integral[Index, ]) %*% wGQ # vector of length M #
-  postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
+  # tempLamb <- (CondExp[Index, ] * exp.eta.sn * Integral[Index, ]) %*% wGQ # vector of length M #
+  # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
+
+  n_ <- ncol(eta.sn)
+  m_ <- nrow(eta.sn)
+  exp.eta.es <- matrix(calc_expM(eta.sn),m_,n_) # This faster for rectangular matrices
+  calc_M1_M2_M3_Hadamard(exp.eta.es, CondExp ,  Integral, as.integer(Index-1))
+  tempLamb <- calc_M_y(y_i =wGQ, M_i=exp.eta.es)
+  postLamb <- calc_tapply_vect_sum( tempLamb, as.integer(Index1-1)); ## Check this!
+
   lamb.new <- Index2 / postLamb
   
   result <- list(beta = beta.new, Ysigma = sqrt(Ysigma2.new), BSigma = BSigma.new, phi = phi.new, 

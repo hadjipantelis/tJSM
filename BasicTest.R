@@ -31,7 +31,7 @@ source('LH1.R')
 source('LH2.R')
 source('CheckDelta.R')
 
-# source('HelperRcppEigenFunc.cxx');
+source('HelperRcppEigenFunc.cxx');
 
 load('aids.rda')
 
@@ -41,7 +41,7 @@ fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 library(lineprof)
 
 # fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
-if(1==12){
+if(1==1){
 fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT = NULL; control = list()
 
  
@@ -242,7 +242,7 @@ fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT
   } else {
     environment(Lamb2) <- environment(DQfunc2) <- environment(LH2) <- environment()
   }
-
+}
 
 PRES(model, theta.new, min(tol.P, delta)/100, iter, delta)
 
@@ -310,8 +310,7 @@ list1 <- Vec2List(para1, ncx, ncz, ncw)
  theta.input4 <- list(beta = list4$beta, phi = list4$phi, alpha = list4$alpha, Ysigma = list4$Ysigma, BSigma = list4$BSigma, lamb = result4$lamb)   
 S1 <- Sfunc(model, theta.input1)
 
-
-}
+ 
 
 #print('Running a lineprof with fitJT.ph2');
 #ll <- lineprof(fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime'))
