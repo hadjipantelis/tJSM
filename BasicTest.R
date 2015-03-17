@@ -41,8 +41,8 @@ fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 library(lineprof)
 
 # fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
-if(1==1){
-fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT = NULL; control = list()
+if(1==21){
+fitLME =fitLME; data = aids; model = 2; rho = 1; timeVarY = 'obstime';  timeVarT = NULL; control = list()
 
  
   if (!inherits(fitLME, "lme"))
@@ -214,6 +214,8 @@ fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT
                     lamb = lamb, lgLik = 0)
   err.P <- err.L <- step <- 1
   
+}
+if(123==12){
   while (step <= iter) {
     
     if (err.P < tol.P | err.L < tol.L) break
@@ -242,9 +244,9 @@ fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT
   } else {
     environment(Lamb2) <- environment(DQfunc2) <- environment(LH2) <- environment()
   }
-}
 
 PRES(model, theta.new, min(tol.P, delta)/100, iter, delta)
+}
 
 if(1==10){
   if (controlvals$SE.method == 'PFDS') {
@@ -281,8 +283,7 @@ if(1==10){
     Vcov <- time.SE <- NA
     warning("\n Standard error estimation method should be either 'PFDS', 'PRES' or 'PLFD'.")
   }
-}
-  
+
 para = List2Vec(theta.new); lamb.init <- theta.new$lamb; len <- length(para) 
 
  DS <- matrix(0, len, len);  i=1;  para1 <- para2 <- para3 <- para4 <- para 
@@ -310,6 +311,7 @@ list1 <- Vec2List(para1, ncx, ncz, ncw)
  theta.input4 <- list(beta = list4$beta, phi = list4$phi, alpha = list4$alpha, Ysigma = list4$Ysigma, BSigma = list4$BSigma, lamb = result4$lamb)   
 S1 <- Sfunc(model, theta.input1)
 
+} 
  
 
 #print('Running a lineprof with fitJT.ph2');

@@ -35,7 +35,9 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   m_ <- nrow(eta.s)
   exp.es <- matrix(calc_expM(eta.s),m_,n_) # This faster for rectangular matrices
   const <- matrix(0, n, GQ) # n*GQ matrix #
-  const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index)
+  temp0a <- exp.es * lamb.old[Index1]
+  #const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index)
+  const[nk != 0, ] <- calc_rowsum( (Index), temp0a)
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
   log.survival <- if (rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
   
@@ -83,7 +85,7 @@ beta.new <- as.vector(solve(t(X) %*% X) %*% (t(X) %*% tempX)) # vector of length
   # temp4 <- lapply(1:(ncw ^ 2), function(i) CondExp2 * rowsum(Wtime22[, i] * exp.es * lamb.old[Index1], Index)) 
   # temp5 <- lapply(1:ncw, function(i) CondExp2 * rowsum(Ztime2.b * Wtime2[, i] * exp.es * lamb.old[Index1], Index))
 
-  temp0a <- exp.es * lamb.old[Index1]
+  
   temp0b <- Ztime2.b * temp0a
   temp1 <- CondExp2 * rowsum(temp0b, Index) # n*GQ matrix #
   temp2 <- CondExp2 * rowsum(Ztime2.b * temp0b, Index) # n*GQ matrix #
