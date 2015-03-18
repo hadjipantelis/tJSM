@@ -39,7 +39,8 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   #const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index)
   const[nk != 0, ] <- calc_rowsum( (Index), temp0a)
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
-  log.survival <- if (rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
+  # log.survival <- if (rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
+  log.survival <- if (rho > 0) log.density2 / rho else - const # n*GQ matrix # 
   
   f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*GQ matrix #
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #
@@ -118,7 +119,7 @@ beta.new <- as.vector(solve(t(X) %*% X) %*% (t(X) %*% tempX)) # vector of length
   alpha.new <- pa.new[ncw + 1]
   
   #========== Calculate the new lambda with new parameters ==========#
-  eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix #
+  eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix #  ## CHECK IF YOU CAN INPLACE THIS
   # tempLamb <- (CondExp[Index, ] * exp.eta.sn * Integral[Index, ]) %*% wGQ # vector of length M #
   # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
 

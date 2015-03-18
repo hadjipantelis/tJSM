@@ -23,10 +23,7 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b))) 
   
   VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2))
-  # VB <- lapply(1:n, function(i) BSigma - calc_yT_Minv_y(  Z.st[[i]], VY[[i]])*BSigma^2) 
   VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma, VY[[i]]))
-  #   muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% calc_yT_Minv(Y.st[[i]] - X.st[[i]] %*% beta, VY[[i]]))) 
-  #   bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * backsolve(  calc_chol_Minv(VB[[i]]), t(b)) ))
   muB <- lapply(1:n, function(i) calc_muB( BSigma,  y_i0=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
   bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) )
 
@@ -47,9 +44,11 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   exp.es <- matrix(calc_expM(eta.s),m_,n_) # This faster for rectangular matrices
 
   const <- matrix(0, n, GQ) # n*GQ matrix #
-  const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index)  
+  # const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index)  
+  const[nk != 0, ] <- calc_rowsum( (Index),  exp.es * lamb[Index1])
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
-  log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix #
+  # log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix #
+  log.survival <- if(rho > 0) log.density2 / rho else - const # n*GQ matrix #
   
   f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*GQ matrix #
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #
@@ -97,8 +96,9 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   # temp2 <- as.vector((CondExp[Index, ] * Ztime2.b/alpha * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #
   temp0 <- exp.esp; temp0[1] = temp0[1] +0 # "touch the variable"
   calc_M1_M2_M3_Hadamard(temp0, CondExp ,  Integral, as.integer(Index-1))
-  temp1 <- calc_M_y(y_i =wGQ, M_i=temp0)
-  temp2 <- calc_M_y(y_i =wGQ, M_i= (temp0) * (Ztime2.b))
+  temp1 <- calc_M_y(y_i =wGQ, M_i=temp0) 
+  calc_M1_M2_Hadamard(temp0,Ztime2.b)
+  temp2 <- calc_M_y(y_i =wGQ, M_i= temp0)
 
   temp3 <- Wtime2 * temp1 # M*ncw matrix #
    

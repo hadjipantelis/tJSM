@@ -10,14 +10,16 @@ LH2 <- function (theta) {
   alpha <- theta$alpha
   lamb <- theta$lamb
   
-  VY <- lapply(1:n, function(i) as.matrix(Z.st[[i]] %*% BSigma %*% t(Z.st[[i]]) + Ysigma2 * diag(1, ni[i])))
-  #VB <- lapply(1:n, function(i) BSigma - BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% Z.st[[i]] %*% BSigma)
-  VB <- lapply(1:n, function(i) BSigma - sum( forwardsolve(t(chol(VY[[i]])), Z.st[[i]])^2)*BSigma*BSigma)
-  #muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta)))
-  muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]], as.vector(Y.st[[i]] - X.st[[i]] %*% beta))))
-
+  # VY <- lapply(1:n, function(i) as.matrix(Z.st[[i]] %*% BSigma %*% t(Z.st[[i]]) + Ysigma2 * diag(1, ni[i])))
+  # VB <- lapply(1:n, function(i) BSigma - BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% Z.st[[i]] %*% BSigma)
+  # muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta)))
   # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b)))
-  bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * backsolve(chol(solve(VB[[i]])), t(b))))
+
+  VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2)) 
+  VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma, VY[[i]]))
+  muB <- lapply(1:n, function(i) calc_muB( BSigma,  y_i0=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
+  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) )
+
   # each element is ncz*GQ matrix #
   bi <- do.call(rbind, bi.st)
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
@@ -26,17 +28,29 @@ LH2 <- function (theta) {
   log.lamb <- log(lamb[Index0])
   log.lamb[is.na(log.lamb)] <- 0
   log.density1 <- log.lamb + as.vector(Wtime %*% phi) + alpha * Ztime.b # n*GQ matrix #
-  eta.s <- as.vector(Wtime2 %*% phi) + alpha * Ztime2.b # M*GQ matrix #
-  exp.es <- exp(eta.s) # M*GQ matrix #
+
+  # eta.s <- as.vector(Wtime2 %*% phi) + alpha * Ztime2.b # M*GQ matrix #
+  # exp.es <- exp(eta.s) # M*GQ matrix #
+
+  calc_y_a( Ztime2.b,alpha); # Ztime2.b gets altered
+  eta.s <- as.numeric(Wtime2 %*% phi) + Ztime2.b  
+  n_ <- ncol(eta.s)
+  m_ <- nrow(eta.s)
+  exp.es <- matrix(calc_expM(eta.s), m_, n_)
+
   const <- matrix(0, n, GQ) # n*GQ matrix #
-  const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index)  
+  #const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index)  
+  const[nk != 0, ] <- calc_rowsum( (Index),  exp.es * lamb[Index1])
+
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
-  log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
+   # log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
+   log.survival <- if(rho > 0) log.density2 / rho else - const # n*GQ matrix # 
   
   f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*GQ matrix #
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #
   
-  f.long <- sapply(1:n, function(i) dmvnorm(Y.st[[i]], as.vector(X.st[[i]] %*% beta), VY[[i]])) 
+  # f.long <- sapply(1:n, function(i) dmvnorm(Y.st[[i]], as.vector(X.st[[i]] %*% beta), VY[[i]])) 
+  f.long <- sapply(1:n, function(i) calc_MVND(Y.st[[i]], as.vector(X.st[[i]] %*% beta), VY[[i]]))
   # vector of length n #
   return(sum(log(f.long * deno / (pi ^ (ncz / 2)))))
 }

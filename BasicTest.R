@@ -41,7 +41,7 @@ fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 library(lineprof)
 
 # fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
-if(1==21){
+if(1==1){
 fitLME =fitLME; data = aids; model = 2; rho = 1; timeVarY = 'obstime';  timeVarT = NULL; control = list()
 
  
@@ -215,7 +215,7 @@ fitLME =fitLME; data = aids; model = 2; rho = 1; timeVarY = 'obstime';  timeVarT
   err.P <- err.L <- step <- 1
   
 }
-if(123==12){
+if(2==2){
   while (step <= iter) {
     
     if (err.P < tol.P | err.L < tol.L) break
@@ -245,7 +245,11 @@ if(123==12){
     environment(Lamb2) <- environment(DQfunc2) <- environment(LH2) <- environment()
   }
 
-PRES(model, theta.new, min(tol.P, delta)/100, iter, delta)
+pres_res = PRES(model, theta.old, min(tol.P, delta)/100, iter, delta)
+pfds_res = PFDS(model, theta.old, min(tol.P, delta)/100, iter, delta)
+plfd_res = PLFD(model, theta.old, min(tol.P, delta)/100, iter, delta)
+
+
 }
 
 if(1==10){

@@ -76,17 +76,18 @@ calc_M_y <- cxxfunction(settings=settingsE, plugin = "RcppEigen", signature(y_i 
 	return Rcpp::wrap(  M * y  );  	 
 ' )
 
-print('Compliling calc_M1_M2_M3')
-calc_M1_M2_M3 <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 ="matrix", M_i2 ="matrix", M_i3 ="matrix"), body='	
+print('Compliling calc_M1_M2_Hadamard')
+calc_M1_M2_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 ="array", M_i2 ="array" ), body='	
 	// Calculate the Hadamard product $M_i1 M_i2 M_i3$
  	using Eigen::Map;		 		// to map input variable to an existing array of data
-	using Eigen::MatrixXd; 				// to use MatrixXd 
+	using Eigen::ArrayXd; 				// to use MatrixXd 
 
-	const Map<MatrixXd> M1(Rcpp::as<Map<MatrixXd> > (M_i1));	//Map vector M_i1 to MatrixXd M1
-	const Map<MatrixXd> M2(Rcpp::as<Map<MatrixXd> > (M_i2));	//Map vector M_i2 to MatrixXd M2
-	const Map<MatrixXd> M3(Rcpp::as<Map<MatrixXd> > (M_i3));	//Map vector M_i3 to MatrixXd M3
- 
-	return Rcpp::wrap( M1.cwiseProduct(M2).cwiseProduct(M3)  );  	 
+	Map<ArrayXd> M1(Rcpp::as<Map<ArrayXd> > (M_i1));	//Map vector M_i1 to MatrixXd M1
+	const Map<ArrayXd> M2(Rcpp::as<Map<ArrayXd> > (M_i2));	//Map vector M_i2 to MatrixXd M2 
+  
+		 M1 *= M2; 
+
+	// return Rcpp::wrap( M1 * M2   );  	 
 ' )
 
 print('Compliling calc_M1_M2_M3_Hadamard')
@@ -241,10 +242,8 @@ calc_bi_st <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature( 
 	const double a (Rcpp::as<double> (a_i));		// Map double a_i to double a 
 	const Map<MatrixXd> M(Rcpp::as<Map<MatrixXd> > (M_i));	// Map matrix M_i to matrixXd M
 	const Map<VectorXd> y(Rcpp::as<Map<VectorXd> > (y_i));	// Map vector y_i to vectorXd y  
-	// unsigned int p = M.cols(); 				// Get the number of columns in M
-	// MatrixXd B = MatrixXd::Identity(p, p); 			// Define an identity matrix B 
+
   	return Rcpp::wrap( a +  sqrt ( 2.*  M(0,0) ) * y.transpose().array());
-	//return Rcpp::wrap( (  1.414213562373095*M.llt().solve(B).llt().matrixLLT().triangularView<Lower>().solve(y)) )
 ' )
 
 print('Compliling calc_MVND')

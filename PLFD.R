@@ -41,8 +41,9 @@ PLFD <- function (model, theta, tol, iter, delta) {
     }
   }
   I <- I + t(I) - diag(diag(I))
-  svd_I <- svd(I)
-  V <- svd_I$v %*% diag(1 / svd_I$d) %*% t(svd_I$u) / n
+  # svd_I <- svd(I)
+  # V <- svd_I$v %*% diag(1 / svd_I$d) %*% t(svd_I$u) / n ##CHECK THIS TWICE
+  V <- solve(DS) / n;
   Valpha.name <- if (model == 1) paste("alpha:", alpha.name, sep = "") else "alpha"
   Vnames <- c(paste(rep("beta:", ncx), beta.names, sep = ""), paste(rep("phi:", ncw), phi.names, sep = ""),
               Valpha.name, "sigma.e", paste("BSigma.", 1:p, sep = ""))

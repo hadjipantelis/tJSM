@@ -46,9 +46,11 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
     log.lamb[is.na(log.lamb)] <- 0
     log.density1 <- log.lamb + eta.h # n*GQ matrix #
     const <- matrix(0, n, GQ) # n*GQ matrix 
-    const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index) 
+    # const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index) 
+    const[nk != 0, ] <- calc_rowsum( (Index),  exp.es * lamb.old[Index1])
     log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
-    log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
+    # log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
+    log.survival <- if(rho > 0)  log.density2 / rho else - const # n*GQ matrix # 
     
     f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*GQ matrix #
     deno <- as.vector(f.surv %*% wGQ) # vector of length n #
