@@ -170,15 +170,14 @@ calc_tapply_vect_sum <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  s
 
 
 print('Compliling calc_VY')
-calc_VY <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(v_i1 = "vector", a_i = "numeric", b_i = "numeric"), body='	
+calc_VY <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(v_i1 = "matrix", a_i = "matrix", b_i = "numeric"), body='	
 	// Calculate VY as $v_i * a_i * v_i^T + I * b_i$ 
  	using Eigen::Map;		 		// to map input variable to an existing array of data 
 	using Eigen::ArrayXd; 				// to use ArrayXd  
-	using Eigen::MatrixXd; 				// to use MatrixXd 
-	using Eigen::VectorXd; 				// to use VectorXd
+	using Eigen::MatrixXd; 				// to use MatrixXd  
 
-	const 	Map<VectorXd> v(Rcpp::as<Map<VectorXd> > (v_i1));	//Map array v_i1 to ArrayXd v1  
-	const double a (Rcpp::as<double> (a_i));			//Map double a_i to double a 
+	const 	Map<MatrixXd> v(Rcpp::as<Map<MatrixXd> > (v_i1));	//Map array v_i1 to ArrayXd v1  
+	const 	Map<MatrixXd> a(Rcpp::as<Map<MatrixXd> > (a_i));	//Map double a_i to double a 
 	const double b (Rcpp::as<double> (b_i));			//Map double b_i to double b 
 
 	MatrixXd M1 = v*a*v.transpose();
@@ -189,34 +188,33 @@ calc_VY <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(v_i1
 
 
 print('Compliling calc_VB')
-calc_VB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(y_i = "vector", M_i ="matrix", a_i = "numeric"), body='
+calc_VB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 = "matrix", M_i2 ="matrix", M_i3 = "matrix"), body='
 	// Calculate VB  as   a_i  -  a_i * y_i^T * M_i^(-1) * y_i * a_i
  	using Eigen::Map;		 		// to map input variable to an existing array of data
 	using Eigen::MatrixXd; 				// to use MatrixXd
 	using Eigen::VectorXd; 				// to use VectorXd
 	using Eigen::LLT; 				// to do the LLT decomposition 
 
-	const Map<MatrixXd> M(Rcpp::as<Map<MatrixXd> > (M_i));	// Map matrix M_i to matrixXd M  
-	const Map<VectorXd> y(Rcpp::as<Map<VectorXd> > (y_i));	// Map vector y_i to vectorXd y  
-	const double a (Rcpp::as<double> (a_i));		// Map double a_i to double a 
- 	LLT<MatrixXd> llt_M(M);					// Calculate the LLT decomposition 
+	const Map<MatrixXd> M1(Rcpp::as<Map<MatrixXd> > (M_i1));	// Map matrix M_i to matrixXd M  
+	const Map<MatrixXd> M2(Rcpp::as<Map<MatrixXd> > (M_i2));	// Map matrix M_i to matrixXd M  
+	const Map<MatrixXd> M3(Rcpp::as<Map<MatrixXd> > (M_i3));	// Map matrix M_i to matrixXd M  
+ 	LLT<MatrixXd> llt_M3(M3);					// Calculate the LLT decomposition 
 	
-	double b = a; 
-	b = (llt_M.solve(y).transpose() * y); 
-	return Rcpp::wrap( a - b * a * a   );  	 
+	MatrixXd b = M2.transpose() * llt_M3.solve(M2) ; //return Rcpp::wrap( b  );
+	return Rcpp::wrap( M1 - M1 * b * M1   );  
+	 
 ' )
 
 
 print('Compliling calc_muB')
-calc_muB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature( a_i = "numeric", y_i0 = "vector", y_i1 = "vector", y_i2 = "vector", M_i1 ="matrix", M_i2 ="matrix"), body='
+calc_muB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(  y_i0 = "vector", y_i1 = "vector", y_i2 = "vector", M_i0 ="matrix", M_i1 ="matrix", M_i2 ="matrix"), body='
 	//  as.vector(BSigma.old %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta.old)))
  	using Eigen::Map;		 		// to map input variable to an existing array of data
 	using Eigen::MatrixXd; 				// to use MatrixXd
 	using Eigen::VectorXd; 				// to use VectorXd
-	using Eigen::LLT; 				// to do the LLT decomposition  
-	using Eigen::Lower;
-
-	const double bsigmaold (Rcpp::as<double> (a_i));		// Map double a_i to double a 
+	using Eigen::LLT; 				// to do the LLT decomposition   
+ 
+	const Map<MatrixXd> BSold(Rcpp::as<Map<MatrixXd> > (M_i0));	// Map matrix M_i1 to matrixXd M
 	const Map<MatrixXd> VY(Rcpp::as<Map<MatrixXd> > (M_i1));	// Map matrix M_i1 to matrixXd M
 	const Map<VectorXd> Zst(Rcpp::as<Map<VectorXd> > (y_i0));	// Map vector y_i0 to vectorXd y  
 	const Map<MatrixXd> Xst(Rcpp::as<Map<MatrixXd> > (M_i2));	// Map matrix M_i2 to matrixXd M
@@ -226,24 +224,31 @@ calc_muB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature( a_
 	VectorXd yf = Yst - Xst * betaold;			
  	LLT<MatrixXd> llt_VY(VY); 					// Calculate the LLT decomposition 
 
-	return Rcpp::wrap( bsigmaold * Zst.transpose() * llt_VY.solve(yf) );  	 
+	return Rcpp::wrap( BSold * Zst.transpose() * llt_VY.solve(yf) );  	 
 ' ) 
 
 
 print('Compliling calc_bi_st')
-calc_bi_st <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature( a_i = "numeric", y_i = "vector", M_i ="matrix"), body='
+calc_bi_st <- cxxfunction( plugin = "RcppEigen",  signature(y_i0 = "vector", y_i1 = "matrix", M_i ="matrix"), body='
 	// Calculate $chol(M_i^{-1})$
  	using Eigen::Map;		 		// to map input variable to an existing array of data
 	using Eigen::MatrixXd; 				// to use MatrixXd
 	using Eigen::VectorXd; 				// to use VectorXd
 	using Eigen::LLT; 				// to do the LLT decomposition  
 	using Eigen::Lower;
+  
+	const Map<MatrixXd> M(Rcpp::as<Map<MatrixXd> > (M_i));		// Map matrix M_i to matrixXd M
+	const Map<MatrixXd> y1(Rcpp::as<Map<MatrixXd> > (y_i1));	// Map vector y_i to vectorXd y  
+	const Map<VectorXd> y0(Rcpp::as<Map<VectorXd> > (y_i0));	// Map vector y_i to vectorXd y  
+	
+	LLT<MatrixXd> llt_M(M.inverse()); 
+	MatrixXd Res = sqrt(2.) *llt_M.matrixLLT().triangularView<Lower>().transpose().solve(y1.transpose());
 
-	const double a (Rcpp::as<double> (a_i));		// Map double a_i to double a 
-	const Map<MatrixXd> M(Rcpp::as<Map<MatrixXd> > (M_i));	// Map matrix M_i to matrixXd M
-	const Map<VectorXd> y(Rcpp::as<Map<VectorXd> > (y_i));	// Map vector y_i to vectorXd y  
+ 	for (unsigned int i = 0; i != Res.cols(); ++i) {
+		Res.col(i) += y0;		
+	}
 
-  	return Rcpp::wrap( a +  sqrt ( 2.*  M(0,0) ) * y.transpose().array());
+	return Rcpp::wrap( Res  );
 ' )
 
 print('Compliling calc_MVND')

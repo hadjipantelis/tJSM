@@ -17,11 +17,18 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   # muB <- lapply(1:n, function(i) as.vector(BSigma.old %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta.old))) 
   # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b))) 
 
+  #VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma.old, Ysigma2.old))  
+  #VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma.old, VY[[i]])) 
+  #muB <- lapply(1:n, function(i) calc_muB( BSigma.old,  y_i0=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta.old, M_i1=VY[[i]], M_i2=X.st[[i]])) 
+  #bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) )
+
+
+
   VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma.old, Ysigma2.old)) 
-  VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma.old, VY[[i]]))
+  VB <-  lapply(1:n, function(i) calc_VB(M_i2 = Z.st[[i]], M_i1 = BSigma.old, M_i3 = VY[[i]]))
   muB <- lapply(1:n, function(i) calc_muB( BSigma.old,  y_i0=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta.old, M_i1=VY[[i]], M_i2=X.st[[i]]))
   bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) )
-
+ 
   bi <- do.call(rbind, bi.st)
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
   Ztime2.b <- do.call(rbind, lapply((1:n)[nk != 0], function(i) Ztime2.st[[i]] %*% bi.st[[i]])) # M*GQ matrix #

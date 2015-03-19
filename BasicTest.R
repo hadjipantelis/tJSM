@@ -31,20 +31,24 @@ source('LH1.R')
 source('LH2.R')
 source('CheckDelta.R')
 
-source('HelperRcppEigenFunc.cxx');
+ #source('HelperRcppEigenFunc.cxx');
 
-load('aids.rda')
+# load('aids.rda')
+load('liver.rda')
+data= liver
+# fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), random = ~ 1 | ID, data = aids)
+# fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 
-fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), random = ~ 1 | ID, data = aids)
-fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
-
+fitLME <- lme(proth ~ Trt * obstime, random = ~ obstime | ID, data = liver)
+fitCOX <- coxph(Surv(start, stop, event) ~ Trt, data = liver, x = TRUE)
+#fitJT.ph <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime')
 library(lineprof)
 
 # fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
 if(1==1){
-fitLME =fitLME; data = aids; model = 2; rho = 1; timeVarY = 'obstime';  timeVarT = NULL; control = list()
+fitLME =fitLME; data = aids; model = 1; rho = 0; timeVarY = 'obstime';  timeVarT = NULL; control = list()
 
- 
+ rho = 0
   if (!inherits(fitLME, "lme"))
     stop("\n'fitLME'must be a fit returned by lme().")
   if (length(fitLME$group) > 1)
@@ -88,6 +92,8 @@ fitLME =fitLME; data = aids; model = 2; rho = 1; timeVarY = 'obstime';  timeVarT
   formSurv <- formula(fitCOX)
   TermsSurv <- fitCOX$terms
   mfSurv <- model.frame(TermsSurv, data)[cumsum(ni), ]
+
+
   if (!is.null(timeVarT)) {
     if (!all(timeVarT %in% all.vars(TermsSurv)))
       stop("\n'timeVarT' does not correspond columns in the fixed-effect design matrix of 'fitCOX'.")
@@ -215,7 +221,7 @@ fitLME =fitLME; data = aids; model = 2; rho = 1; timeVarY = 'obstime';  timeVarT
   err.P <- err.L <- step <- 1
   
 }
-if(2==2){
+if(2==22){
   while (step <= iter) {
     
     if (err.P < tol.P | err.L < tol.L) break
