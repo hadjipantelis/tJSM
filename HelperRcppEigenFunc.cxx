@@ -5,8 +5,9 @@ settingsE <- getPlugin("RcppEigen")
 #//settingsE$env$PKG_CXXFLAGS <- paste('-fopenmp', settingsE$env$PKG_CXXFLAGS)
 #//settingsE$env$PKG_LIBS <- paste('-fopenmp -lgomp', settingsE$env$PKG_LIBS)
 
-
-print('Compliling calc_yT_Minv_y')
+# These functions were used mostly for testing or middlemen
+if(1==2){ 
+cat('Compliling calc_yT_Minv_y\n')
 calc_yT_Minv_y <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(y_i = "vector", M_i ="matrix"), body='
 	// Calculate $y_i^T M_i^{-1} y$	
  	using Eigen::Map;		 		// to map input variable to an existing array of data
@@ -21,7 +22,7 @@ calc_yT_Minv_y <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signatu
 	return Rcpp::wrap( llt_M.solve(y).transpose() * y );  	 
 ' )
 
-print('Compliling calc_yT_Minv')
+cat('Compliling calc_yT_Minv\n')
 calc_yT_Minv  <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(y_i = "vector", M_i ="matrix"), body='	
 	// Calculate $y_i^T M_i^{-1} $	
  	using Eigen::Map;		 		// to map input variable to an existing array of data
@@ -36,7 +37,7 @@ calc_yT_Minv  <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signatur
 	return Rcpp::wrap( llt_M.solve(y) );  	 
 ' )
 
-print('Compliling calc_chol_Minv')
+cat('Compliling calc_chol_Minv\n')
 calc_chol_Minv <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i ="matrix"), body='	
 	// Calculate $chol(M_i^{-1})$
  	using Eigen::Map;		 		// to map input variable to an existing array of data
@@ -51,67 +52,7 @@ calc_chol_Minv <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signatu
 	 
 ' )
 
-print('Compliling calc_expM')
-calc_expM <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i ="array"), body='	
-	// Calculate $exp(M_i)$ - this function returns an array
- 	using Eigen::Map;		 		// to map input variable to an existing array of data 
-	using Eigen::ArrayXd; 				// to use ArrayXd 
-
-	const Map<ArrayXd> A(Rcpp::as<Map<ArrayXd> > (M_i));	//Map vector M_i to arrayXd A  
- 
-	return Rcpp::wrap( (A.exp()) );   
-' )
-
-
-print('Compliling calc_M_y')
-calc_M_y <- cxxfunction(settings=settingsE, plugin = "RcppEigen", signature(y_i = "vector", M_i ="matrix"), body='	
-	// Calculate $M_i y_i$
- 	using Eigen::Map;		 		// to map input variable to an existing array of data
-	using Eigen::MatrixXd; 				// to use MatrixXd
-	using Eigen::VectorXd; 				// to use VectorXd
-
-	const Map<MatrixXd> M(Rcpp::as<Map<MatrixXd> > (M_i));	//Map vector M_i to MatrixXd M 
-	const Map<VectorXd> y(Rcpp::as<Map<VectorXd> > (y_i));	//Map vector y_i to vectorXd y 
-
-	return Rcpp::wrap(  M * y  );  	 
-' )
-
-print('Compliling calc_M1_M2_Hadamard')
-calc_M1_M2_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 ="array", M_i2 ="array" ), body='	
-	// Calculate the Hadamard product $M_i1 M_i2 M_i3$
- 	using Eigen::Map;		 		// to map input variable to an existing array of data
-	using Eigen::ArrayXd; 				// to use MatrixXd 
-
-	Map<ArrayXd> M1(Rcpp::as<Map<ArrayXd> > (M_i1));	//Map vector M_i1 to MatrixXd M1
-	const Map<ArrayXd> M2(Rcpp::as<Map<ArrayXd> > (M_i2));	//Map vector M_i2 to MatrixXd M2 
-  
-		 M1 *= M2; 
-
-	// return Rcpp::wrap( M1 * M2   );  	 
-' )
-
-print('Compliling calc_M1_M2_M3_Hadamard')
-calc_M1_M2_M3_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 ="matrix", M_i2 ="matrix", M_i3 ="matrix", v_i = "vector"), body='	
-	// Calculate the Hadamard product $M_i1 M_i2 M_i3$ using indeces at v_i
-	// This function does IN-PLACE multiplication
- 	using Eigen::Map;		 		// to map input variable to an existing array of data
-	using Eigen::MatrixXd; 				// to use MatrixXd 
-	using Eigen::VectorXi; 				// to use VectorXi 
-
-	Map<MatrixXd> M1(Rcpp::as<Map<MatrixXd> > (M_i1));	//Map matrix M_1 to MatrixXd M1
-	const Map<MatrixXd> M2(Rcpp::as<Map<MatrixXd> > (M_i2));//Map matrix M_2 to MatrixXd M2
-	const Map<MatrixXd> M3(Rcpp::as<Map<MatrixXd> > (M_i3));//Map matrix M_3 to MatrixXd M3
-	const Map<VectorXi> v(Rcpp::as<Map<VectorXi> > (v_i));	//Map vector v_i to VectorXi v (integer)
-	unsigned int N = v.size();
-
-	for(unsigned int i=0; i != N; ++i){
-		 M1.row(i).array()  *= M2.row(v(i)).array() *  M3.row(v(i)).array();
-	}
- 
-	//return Rcpp::wrap( M1 ); // This function returns VOID
-' )
-
-print('Compliling calc_y_M1_Hadamard')
+cat('Compliling calc_y_M1_Hadamard\n')
 calc_y_M_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 ="matrix", v_i1 = "vector", v_i2 = "vector"), body='	
 	// Calculate the Hadamard product $ M_i1 v_i1$ using indeces at v_i2
 	// This function does IN-PLACE multiplication
@@ -132,7 +73,70 @@ calc_y_M_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  sign
 	//return Rcpp::wrap( M1 ); // This function returns VOID	 
 ' )
 
-print('Compliling calc_y_a')
+
+}
+
+cat('Compliling calc_expM\n')
+calc_expM <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i ="array"), body='	
+	// Calculate $exp(M_i)$ - this function returns an array
+ 	using Eigen::Map;		 		// to map input variable to an existing array of data 
+	using Eigen::ArrayXd; 				// to use ArrayXd 
+
+	const Map<ArrayXd> A(Rcpp::as<Map<ArrayXd> > (M_i));	//Map vector M_i to arrayXd A  
+ 
+	return Rcpp::wrap( (A.exp()) );   
+' )
+
+
+cat('Compliling calc_M_y\n')
+calc_M_y <- cxxfunction(settings=settingsE, plugin = "RcppEigen", signature(y_i = "vector", M_i ="matrix"), body='	
+	// Calculate $M_i y_i$
+ 	using Eigen::Map;		 		// to map input variable to an existing array of data
+	using Eigen::MatrixXd; 				// to use MatrixXd
+	using Eigen::VectorXd; 				// to use VectorXd
+
+	const Map<MatrixXd> M(Rcpp::as<Map<MatrixXd> > (M_i));	//Map vector M_i to MatrixXd M 
+	const Map<VectorXd> y(Rcpp::as<Map<VectorXd> > (y_i));	//Map vector y_i to vectorXd y 
+
+	return Rcpp::wrap(  M * y  );  	 
+' )
+
+cat('Compliling calc_M1_M2_Hadamard\n')
+calc_M1_M2_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 ="array", M_i2 ="array" ), body='	
+	// Calculate the Hadamard product $M_i1 M_i2 M_i3$
+ 	using Eigen::Map;		 		// to map input variable to an existing array of data
+	using Eigen::ArrayXd; 				// to use MatrixXd 
+
+	Map<ArrayXd> M1(Rcpp::as<Map<ArrayXd> > (M_i1));	//Map vector M_i1 to MatrixXd M1
+	const Map<ArrayXd> M2(Rcpp::as<Map<ArrayXd> > (M_i2));	//Map vector M_i2 to MatrixXd M2 
+  
+		 M1 *= M2; 
+
+	// return Rcpp::wrap( M1 * M2   );  	 
+' )
+
+cat('Compliling calc_M1_M2_M3_Hadamard\n')
+calc_M1_M2_M3_Hadamard <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 ="matrix", M_i2 ="matrix", M_i3 ="matrix", v_i = "vector"), body='	
+	// Calculate the Hadamard product $M_i1 M_i2 M_i3$ using indeces at v_i
+	// This function does IN-PLACE multiplication
+ 	using Eigen::Map;		 		// to map input variable to an existing array of data
+	using Eigen::MatrixXd; 				// to use MatrixXd 
+	using Eigen::VectorXi; 				// to use VectorXi 
+
+	Map<MatrixXd> M1(Rcpp::as<Map<MatrixXd> > (M_i1));	//Map matrix M_1 to MatrixXd M1
+	const Map<MatrixXd> M2(Rcpp::as<Map<MatrixXd> > (M_i2));//Map matrix M_2 to MatrixXd M2
+	const Map<MatrixXd> M3(Rcpp::as<Map<MatrixXd> > (M_i3));//Map matrix M_3 to MatrixXd M3
+	const Map<VectorXi> v(Rcpp::as<Map<VectorXi> > (v_i));	//Map vector v_i to VectorXi v (integer)
+	unsigned int N = v.size();
+
+	for(unsigned int i=0; i != N; ++i){
+		 M1.row(i).array()  *= M2.row(v(i)).array() *  M3.row(v(i)).array();
+	}
+ 
+	//return Rcpp::wrap( M1 ); // This function returns VOID
+' )
+
+cat('Compliling calc_y_a\n')
 calc_y_a <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(v_i1 = "array", a_i = "numeric"), body='	
 	// Calculate the vector multiplication $a v_i1$ a_i being a scalar
 	// This function does IN-PLACE multiplication
@@ -148,7 +152,7 @@ calc_y_a <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(v_i
 ' )
 
 
-print('Compliling calc_tapply_vect_sum')
+cat('Compliling calc_tapply_vect_sum\n')
 calc_tapply_vect_sum <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(v_i1 = "array", v_i2 = "array"), body='	
 	// Calculate the equivalent of tapply(v_i1, v_i2, sum)
  	using Eigen::Map;		 		// to map input variable to an existing array of data 
@@ -169,7 +173,7 @@ calc_tapply_vect_sum <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  s
 ' )
 
 
-print('Compliling calc_VY')
+cat('Compliling calc_VY\n')
 calc_VY <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(v_i1 = "matrix", a_i = "matrix", b_i = "numeric"), body='	
 	// Calculate VY as $v_i * a_i * v_i^T + I * b_i$ 
  	using Eigen::Map;		 		// to map input variable to an existing array of data 
@@ -187,7 +191,7 @@ calc_VY <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(v_i1
 ' )
 
 
-print('Compliling calc_VB')
+cat('Compliling calc_VB\n')
 calc_VB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 = "matrix", M_i2 ="matrix", M_i3 = "matrix"), body='
 	// Calculate VB  as   a_i  -  a_i * y_i^T * M_i^(-1) * y_i * a_i
  	using Eigen::Map;		 		// to map input variable to an existing array of data
@@ -206,29 +210,31 @@ calc_VB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1
 ' )
 
 
-print('Compliling calc_muB')
-calc_muB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(  y_i0 = "vector", y_i1 = "vector", y_i2 = "vector", M_i0 ="matrix", M_i1 ="matrix", M_i2 ="matrix"), body='
+
+cat('Compliling calc_muB\n')
+calc_muB <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(  M_i3 = "matrix", y_i1 = "vector", y_i2 = "vector", M_i0 ="matrix", M_i1 ="matrix", M_i2 ="matrix"), body='
 	//  as.vector(BSigma.old %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta.old)))
  	using Eigen::Map;		 		// to map input variable to an existing array of data
 	using Eigen::MatrixXd; 				// to use MatrixXd
 	using Eigen::VectorXd; 				// to use VectorXd
 	using Eigen::LLT; 				// to do the LLT decomposition   
  
-	const Map<MatrixXd> BSold(Rcpp::as<Map<MatrixXd> > (M_i0));	// Map matrix M_i1 to matrixXd M
+	const Map<MatrixXd> BSold(Rcpp::as<Map<MatrixXd> > (M_i0));	// Map matrix M_i0 to matrixXd M
 	const Map<MatrixXd> VY(Rcpp::as<Map<MatrixXd> > (M_i1));	// Map matrix M_i1 to matrixXd M
-	const Map<VectorXd> Zst(Rcpp::as<Map<VectorXd> > (y_i0));	// Map vector y_i0 to vectorXd y  
 	const Map<MatrixXd> Xst(Rcpp::as<Map<MatrixXd> > (M_i2));	// Map matrix M_i2 to matrixXd M
+	const Map<MatrixXd> Zst(Rcpp::as<Map<MatrixXd> > (M_i3));	// Map matrix M_i3 to vectorXd M  
 	const Map<VectorXd> Yst(Rcpp::as<Map<VectorXd> > (y_i1));	// Map vector y_i1 to vectorXd y  
-	const Map<VectorXd> betaold(Rcpp::as<Map<VectorXd> > (y_i2));	// Map vector y_i3 to vectorXd y  
+	const Map<VectorXd> betaold(Rcpp::as<Map<VectorXd> > (y_i2));	// Map vector y_i2 to vectorXd y  
 
 	VectorXd yf = Yst - Xst * betaold;			
  	LLT<MatrixXd> llt_VY(VY); 					// Calculate the LLT decomposition 
-
-	return Rcpp::wrap( BSold * Zst.transpose() * llt_VY.solve(yf) );  	 
+	    	 
+ 	return Rcpp::wrap( BSold * Zst.transpose() * llt_VY.solve(yf) );  	 
 ' ) 
+ 
 
 
-print('Compliling calc_bi_st')
+cat('Compliling calc_bi_st\n')
 calc_bi_st <- cxxfunction( plugin = "RcppEigen",  signature(y_i0 = "vector", y_i1 = "matrix", M_i ="matrix"), body='
 	// Calculate $chol(M_i^{-1})$
  	using Eigen::Map;		 		// to map input variable to an existing array of data
@@ -251,7 +257,7 @@ calc_bi_st <- cxxfunction( plugin = "RcppEigen",  signature(y_i0 = "vector", y_i
 	return Rcpp::wrap( Res  );
 ' )
 
-print('Compliling calc_MVND')
+cat('Compliling calc_MVND\n')
 calc_MVND <- cxxfunction( plugin = "RcppEigen",  signature( y_i1 = "vector", y_i2 = "vector", M_i ="matrix"), body='
 	// Calculate $MVND IN 2D$
  	using Eigen::Map;		 		// to map input variable to an existing array of data
@@ -276,7 +282,7 @@ calc_MVND <- cxxfunction( plugin = "RcppEigen",  signature( y_i1 = "vector", y_i
 	}
 ' )
 
-print('Compliling calc_rowsum')
+cat('Compliling calc_rowsum\n')
 calc_rowsum <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(y_i = "vector", M_i = "Matrix"), body='
  	using Eigen::Map;		 		// to map input variable to an existing array of data
 	using Eigen::MatrixXd; 				// to use MatrixXd
@@ -304,4 +310,5 @@ calc_rowsum <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(
 	}
 	return Rcpp::wrap( Res );  	 
 ' )
+cat('Finished compiling\n')
 
