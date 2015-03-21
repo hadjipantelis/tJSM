@@ -15,11 +15,11 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
   # VB <- lapply(1:n, function(i) BSigma - BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% Z.st[[i]] %*% BSigma)
   # muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta)))
   # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b)))
-
-  VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2)) 
-  VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma, VY[[i]]))
-  muB <- lapply(1:n, function(i) calc_muB( BSigma,  y_i0=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
-  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) )
+ 
+  VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2))  
+  VB <-  lapply(1:n, function(i) calc_VB(M_i2 = Z.st[[i]], M_i1 = BSigma, M_i3 = VY[[i]]))
+  muB <- lapply(1:n, function(i) calc_muB( BSigma, M_i3=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
+  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) ) 
 
   # each element is ncz*GQ matrix #
   bi <- do.call(rbind, bi.st) # (n*ncz)*GQ mat rix #
@@ -27,9 +27,9 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
   Ztime2.b <- do.call(rbind, lapply((1:n)[nk != 0], function(i) Ztime2.st[[i]] %*% bi.st[[i]])) # M*GQ matrix #
   
   eta.h <- as.vector(Wtime %*% phi) + alpha * Ztime.b # n*GQ matrix #
+
   # eta.s <- as.vector(Wtime2 %*% phi) + alpha * Ztime2.b # M*GQ matrix #
   # exp.es <- exp(eta.s) # M*GQ matrix #
-
   calc_y_a( Ztime2.b,alpha); # Ztime2.b gets altered
   eta.s <- as.numeric(Wtime2 %*% phi) + Ztime2.b  
   n_ <- ncol(eta.s)
@@ -46,9 +46,11 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
     log.lamb[is.na(log.lamb)] <- 0
     log.density1 <- log.lamb + eta.h # n*GQ matrix #
     const <- matrix(0, n, GQ) # n*GQ matrix 
+
     # const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index) 
-    const[nk != 0, ] <- calc_rowsum( (Index),  exp.es * lamb.old[Index1])
+    const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb.old[Index1], exp.es)
     log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
+
     # log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
     log.survival <- if(rho > 0)  log.density2 / rho else - const # n*GQ matrix # 
     
@@ -59,8 +61,7 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
     
     # tempLamb <- (CondExp[Index, ] * exp.es * Integral[Index, ]) %*% wGQ # vector of length M # 
     # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
-    # WE DO IN PLACE MULTIPLICATION / variable 'tempLamb0' is holding the results
-    
+    # WE DO IN PLACE MULTIPLICATION / variable 'tempLamb0' is holding the results    
     tempLamb0 <- exp.es; tempLamb0[1] = tempLamb0[1] +0 # "touch the variable"
     calc_M1_M2_M3_Hadamard(tempLamb0, CondExp ,  Integral, as.integer(Index-1))
     tempLamb <- calc_M_y(y_i =wGQ, M_i=tempLamb0)

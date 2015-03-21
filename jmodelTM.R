@@ -167,20 +167,17 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   phi <- surv.init$phi
   alpha <- surv.init$alpha
   lamb <- surv.init$lamb
-  
-  print('GOT HERE!!!')
+   
   theta.old <- list(beta = beta, phi = phi, alpha = alpha, Ysigma = Ysigma, BSigma = BSigma,  
                     lamb = lamb, lgLik = 0)
   err.P <- err.L <- step <- 1
   
   while (step <= iter) {
-    
-  print('GOT HERE 3!!!')
+     
     if (err.P < tol.P | err.L < tol.L) break
     
     theta.new <- if (model == 1) EMiterTM1(theta.old) else EMiterTM2(theta.old)
-    
-  print('GOT HERE 4!!!')
+     
     new.P <- c(theta.new$beta, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$BSigma)
     old.P <- c(theta.old$beta, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$BSigma)
     err.P <- max(abs(new.P - old.P) / (abs(old.P) + tol.P))

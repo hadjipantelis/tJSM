@@ -16,9 +16,9 @@ LH2 <- function (theta) {
   # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b)))
 
   VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2)) 
-  VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma, VY[[i]]))
-  muB <- lapply(1:n, function(i) calc_muB( BSigma,  y_i0=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
-  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) )
+  VB <-  lapply(1:n, function(i) calc_VB(M_i2 = Z.st[[i]], M_i1 = BSigma, M_i3 = VY[[i]]))
+  muB <- lapply(1:n, function(i) calc_muB( BSigma, M_i3=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
+  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) ) 
 
   # each element is ncz*GQ matrix #
   bi <- do.call(rbind, bi.st)
@@ -39,12 +39,14 @@ LH2 <- function (theta) {
   exp.es <- matrix(calc_expM(eta.s), m_, n_)
 
   const <- matrix(0, n, GQ) # n*GQ matrix #
+
   #const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index)  
   const[nk != 0, ] <- calc_rowsum( (Index),  exp.es * lamb[Index1])
 
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
-   # log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
-   log.survival <- if(rho > 0) log.density2 / rho else - const # n*GQ matrix # 
+  
+  # log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix # 
+  log.survival <- if(rho > 0) log.density2 / rho else - const # n*GQ matrix # 
   
   f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*GQ matrix #
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #

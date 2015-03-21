@@ -17,16 +17,15 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
   plamb <- ptheta$lamb
   lamb <- theta$lamb
   
-
   # VY <- lapply(1:n, function(i) as.matrix(Z.st[[i]] %*% BSigma %*% t(Z.st[[i]]) + Ysigma2 * diag(1, ni[i])))
   # VB <- lapply(1:n, function(i) BSigma - BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% Z.st[[i]] %*% BSigma)
   # muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - X.st[[i]] %*% beta)))
   # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * solve(chol(solve(VB[[i]]))) %*% t(b)))
   
   VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2)) 
-  VB <-  lapply(1:n, function(i) calc_VB(y_i = Z.st[[i]], a_i = BSigma, VY[[i]]))
-  muB <- lapply(1:n, function(i) as.vector(BSigma %*% t(Z.st[[i]]) %*% solve(VY[[i]],Y.st[[i]] - X.st[[i]] %*% beta)))
-  bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2) * backsolve(chol(solve(VB[[i]])), t(b))))
+  VB <-  lapply(1:n, function(i) calc_VB(M_i2 = Z.st[[i]], M_i1 = BSigma, M_i3 = VY[[i]]))
+  muB <- lapply(1:n, function(i) calc_muB( BSigma, M_i3=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
+  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) ) 
 
   bi <- do.call(rbind, bi.st) # (n*ncz)*GQ matrix #
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
@@ -39,11 +38,15 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
   # exp.es <- exp(eta.s) # M*GQ matrix #
   n_ <- ncol(eta.s)
   m_ <- nrow(eta.s)
-  exp.es <- matrix(example_expM(A1),m_,n_)
+  exp.es <- matrix(calc_expM(eta.s),m_,n_)
   const <- matrix(0, n, GQ) # n*GQ matrix #
-  const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index) 
+
+  # const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index) 
+  const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb.old[Index1], exp.es)
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
-  log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix #
+  
+  # log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix #
+  log.survival <- if(rho > 0) log.density2 /rho else - const # n*GQ matrix #
   
   f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*GQ matrix #
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #
@@ -58,7 +61,8 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
              matrix(diag(post.bi), nrow = n) # n*ncz matrix #
   
   if (ncz>1) {
-    tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
+    # tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
+    tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) tcrossprod(x))))
     # (n*ncz^2)*GQ matrix #     
   }else{
     tempB <- bi ^ 2
@@ -71,21 +75,35 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
   post.resid <- ((Y - pYmu) ^ 2 * Integral[ID, ]) %*% wGQ # vector of length N #
   Q[ncx + ncw + 2] <- - N / sqrt(pYsigma2) + sum(post.resid) / (pYsigma2 ^ (3 / 2))
   
-  #tempB <- - n * solve(pBSigma) / 2 + solve(pBSigma) %*% matrix(colSums(post.bi2), ncz, ncz) %*% solve(pBSigma) / 2
+  # tempB <- - n * solve(pBSigma) / 2 + solve(pBSigma) %*% matrix(colSums(post.bi2), ncz, ncz) %*% solve(pBSigma) / 2
   pBSigmaInv = solve(pBSigma);
   tempB <- - n * pBSigmaInv / 2 + pBSigmaInv %*% matrix(colSums(post.bi2), ncz, ncz) %*% pBSigmaInv / 2
   ind <- Indexing(ncz)
   Q[(ncx + ncw + 3):len] <- as.vector(tapply(c(tempB), ind, sum))
   
   eta.sp <- as.vector(Wtime2 %*% pphi + palpha * Xtime2 %*% pbeta) + palpha * Ztime2.b # M*GQ matrix #
-  exp.esp <- exp(eta.sp) # M*GQ matrix #
+  # exp.esp <- exp(eta.sp) # M*GQ matrix #
+  n_ <- ncol(eta.sp)
+  m_ <- nrow(eta.sp)
+  exp.esp <- matrix(calc_expM(eta.sp),m_,n_)
+
   XZb2 <- as.vector(Xtime2 %*% pbeta) + Ztime2.b # M*GQ matrix #
-  temp1 <- as.vector((CondExp[Index, ] * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #
-  temp2 <- as.vector((CondExp[Index, ] * XZb2 * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #
+
+  # temp1 <- as.vector((CondExp[Index, ] * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #
+  # temp2 <- as.vector((CondExp[Index, ] * XZb2 * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #
+  temp0 <- exp.esp; temp0[1] = temp0[1] +0 # "touch the variable"
+  calc_M1_M2_M3_Hadamard(temp0, CondExp ,  Integral, as.integer(Index-1))
+  temp1 <- calc_M_y(y_i = wGQ, M_i = temp0) 
+  calc_M1_M2_Hadamard(temp0,XZb2)
+  temp2 <- calc_M_y(y_i =wGQ, M_i= temp0)
+
   temp3 <- Wtime2 * temp1 # M*ncw matrix # 
 
-  post1 <- as.vector(tapply(temp1, Index1, sum)) # vector of length n_u #
-  post2 <- as.vector(tapply(temp2, Index1, sum)) # vector of length n_u #
+
+  # post1 <- as.vector(tapply(temp1, Index1, sum)) # vector of length n_u #
+  # post2 <- as.vector(tapply(temp2, Index1, sum)) # vector of length n_u #.
+  post1 <- calc_tapply_vect_sum( temp1, as.integer(Index1-1));
+  post2 <- calc_tapply_vect_sum( temp2, as.integer(Index1-1));  
   post3 <- as.matrix(apply(temp3, 2, function(x) tapply(x, Index1, sum))) # n_u*ncw matrix #
   
   Q[(ncx + 1):(ncx + ncw)] <- colSums(d * Wtime) - colSums(Index2 * post3 / post1) # vector of length ncw #
