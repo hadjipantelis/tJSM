@@ -42,7 +42,7 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
   const <- matrix(0, n, GQ) # n*GQ matrix #
 
   # const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index) 
-  const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb.old[Index1], exp.es)
+  const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb[Index1], exp.es)
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
   
   # log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*GQ matrix #

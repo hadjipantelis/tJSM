@@ -125,7 +125,7 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
   #temp6 <- lapply(1:ncx, function(i) CondExp2 * rowsum(alpha.new * Xtime2[, i] * exp.es.n1 * lamb.old[Index1], Index))
   #temp7 <- lapply(1:(ncx ^ 2), function(i) CondExp2 * rowsum(alpha.new^2 * Xtime22[, i] * exp.es.n1 * lamb.old[Index1], Index))
   temp0c <- alpha.new * exp.es.n1 * lamb.old[Index1]; 
-  temp6a <- lapply(1:(ncx), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Xtime2[, i], M_i2 = CondExp2, temp0c))
+  temp6 <- lapply(1:(ncx), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Xtime2[, i], M_i2 = CondExp2, temp0c))
   temp0d <- alpha.new*temp0c 
   temp7 <- lapply(1:(ncx^2), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Xtime22[, i], M_i2 = CondExp2, temp0d))
 
