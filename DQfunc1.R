@@ -102,15 +102,19 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
 
   # post1 <- as.vector(tapply(temp1, Index1, sum)) # vector of length n_u #
   # post2 <- as.vector(tapply(temp2, Index1, sum)) # vector of length n_u #.
+  # post3 <- as.matrix(apply(temp3, 2, function(x) tapply(x, Index1, sum))) # n_u*ncw matrix #
+
   post1 <- calc_tapply_vect_sum( temp1, as.integer(Index1-1));
   post2 <- calc_tapply_vect_sum( temp2, as.integer(Index1-1));  
-  post3 <- as.matrix(apply(temp3, 2, function(x) tapply(x, Index1, sum))) # n_u*ncw matrix #
+  post3 <- as.matrix(apply(temp3, 2, function(x) calc_tapply_vect_sum( x, as.integer(Index1-1))))
   
   Q[(ncx + 1):(ncx + ncw)] <- colSums(d * Wtime) - colSums(Index2 * post3 / post1) # vector of length ncw #
   Q[ncx + ncw + 1] <- sum(d * Xtime %*% pbeta) + sum(d * rowSums(Ztime * post.bi)) - sum(Index2 * post2 / post1)
   
   temp4 <- Xtime2 * temp1 # M*ncx matrix #
-  post4 <- palpha * as.matrix(apply(temp4, 2, function(x) tapply(x, Index1, sum))) # n_u*ncx matrix #
+
+  # post4 <- palpha * as.matrix(apply(temp4, 2, function(x) tapply(x, Index1, sum))) # n_u*ncx matrix #
+  post4 <- palpha * as.matrix(apply(temp4, 2, function(x)  calc_tapply_vect_sum( x, as.integer(Index1-1)) )) # n_u*ncx matrix #
   pResid <- as.vector(Y - X %*% pbeta) - rowSums(Z * post.bi[ID, ]) # vector of length N #
   Q[1:ncx] <- colSums(X * pResid) / pYsigma2 + palpha * colSums(d * Xtime) - colSums(Index2 * post4 / post1) 
   

@@ -33,20 +33,20 @@ source('CheckDelta.R')
 
  source('HelperRcppEigenFunc.cxx');
 
-# load('aids.rda')
- load('liver.rda')
+ load('aids.rda')
+# load('liver.rda')
 data= liver
-#fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), random = ~ 1 | ID, data = aids)
-#fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
+fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), random = ~ 1 | ID, data = aids)
+fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 
- fitLME <- lme(proth ~ Trt * obstime, random = ~ obstime | ID, data = liver)
- fitCOX <- coxph(Surv(start, stop, event) ~ Trt, data = liver, x = TRUE)
+# fitLME <- lme(proth ~ Trt * obstime, random = ~ obstime | ID, data = liver)
+# fitCOX <- coxph(Surv(start, stop, event) ~ Trt, data = liver, x = TRUE)
 #fitJT.ph <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime')
 library(lineprof)
 
 # fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
 if(1==1){
-fitLME =fitLME; data = liver; model = 1; rho = 1; timeVarY = 'obstime';  timeVarT = NULL; control = list()
+fitLME =fitLME; data = aids; model = 2; rho = 1; timeVarY = 'obstime';  timeVarT = NULL; control = list()
 
   if (!inherits(fitLME, "lme"))
     stop("\n'fitLME'must be a fit returned by lme().")

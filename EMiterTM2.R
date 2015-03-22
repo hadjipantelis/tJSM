@@ -92,12 +92,13 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   # temp4 <- lapply(1:(ncw ^ 2), function(i) CondExp2 * rowsum(Wtime22[, i] * exp.es * lamb.old[Index1], Index)) 
   # temp5 <- lapply(1:ncw, function(i) CondExp2 * rowsum(Ztime2.b * Wtime2[, i] * exp.es * lamb.old[Index1], Index))
 
-  temp0b <- Ztime2.b * temp0a
-  temp1 <- CondExp2 * rowsum(temp0b, Index) # n*GQ matrix #
-  temp2 <- CondExp2 * rowsum(Ztime2.b * temp0b, Index) # n*GQ matrix #
-  temp3 <- lapply(1:ncw, function(i) CondExp2 * rowsum(Wtime2[, i] * temp0a, Index))
-  temp4 <- lapply(1:(ncw ^ 2), function(i) CondExp2 * rowsum(Wtime22[, i] * temp0a, Index)) 
-  temp5 <- lapply(1:ncw, function(i) CondExp2 * rowsum(  Wtime2[, i] * temp0b, Index))
+  temp0b <- Ztime2.b * temp0a 
+
+  temp1 <- CondExp2 * calc_rowsum( (Index), temp0b)
+  temp2 <- calc_mult_rowsum2(y_i = Index, M_i2 = CondExp2, M_i1 = temp0b,      Ztime2.b)
+  temp3 <- lapply(1:(ncw), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime2[, i], M_i2 = CondExp2, temp0a))
+  temp4 <- lapply(1:(ncw^2), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime22[, i], M_i2 = CondExp2, temp0a)) 
+  temp5 <- lapply(1:(ncw), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime2[, i], M_i2 = CondExp2, Ztime2.b *temp0a)) 
 
   Integral2 <- Integral[nk != 0,]
   post1 <- sum((temp1 * Integral2) %*% wGQ)
