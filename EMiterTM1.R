@@ -66,6 +66,7 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
      
      # tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
      tempB <- do.call(rbind, lapply(1:n, function(i) apply((bi.st[[i]]), 2, function(x) tcrossprod(x) )))
+  tempB <-  fast_rbind_lapply( bi.st )
     # (n*ncz^2)*GQ matrix #      
   } else {
     tempB <- bi^2
