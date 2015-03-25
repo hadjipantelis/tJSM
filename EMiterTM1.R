@@ -65,7 +65,7 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
   if (ncz > 1) {
      
      # tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
-     tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) tcrossprod(x) )))
+     tempB <- do.call(rbind, lapply(1:n, function(i) apply((bi.st[[i]]), 2, function(x) tcrossprod(x) )))
     # (n*ncz^2)*GQ matrix #      
   } else {
     tempB <- bi^2
@@ -122,8 +122,8 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
   alpha.new <- pa.new[ncw + 1]
   
   #========== calculate the score of beta ==========#
-  eta.s.n1 <- as.vector(Wtime2 %*% phi.new + alpha.new * Xtime2 %*% beta.old) + 
-              alpha.new * Ztime2.b # M*GQ matrix #
+  newZtime2.b = alpha.new * Ztime2.b
+  eta.s.n1 <- as.vector(Wtime2 %*% phi.new + alpha.new * Xtime2 %*% beta.old) + newZtime2.b # M*GQ matrix #
   # exp.es.n1 <- exp(eta.s.n1) # M*GQ matrix #
   n_ <- ncol(eta.s.n1)
   m_ <- nrow(eta.s.n1)
@@ -150,8 +150,8 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
   beta.new <- as.vector(beta.old - betaInfo.inv %*% betaScore) # vector of length ncx #
   
   #========== Calculate the new lambda with new parameters ==========#
-  eta.s.n2 <- as.vector(Wtime2 %*% phi.new + alpha.new * Xtime2 %*% beta.new) + 
-              alpha.new * Ztime2.b # M*GQ matrix #
+  eta.s.n2 <- as.vector(Wtime2 %*% phi.new + alpha.new * Xtime2 %*% beta.new) + newZtime2.b
+              # alpha.new * Ztime2.b # M*GQ matrix #
 
   # tempLamb <- (CondExp[Index, ] * exp(eta.s.n2) * Integral[Index, ]) %*% wGQ # vector of length M #
   # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u # 

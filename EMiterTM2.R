@@ -63,7 +63,9 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   
   #========== Update BSigma ==========#
   if (ncz>1) {
-    tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
+  # tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
+  # tempB <- do.call(rbind, lapply(1:n, function(i) apply((bi.st[[i]]), 2, function(x) tcrossprod(x) )))
+  tempB <-  fast_rbind_lapply( bi.st )
     # (n*ncz^2)*GQ matrix #      
   } else {
     tempB <- bi ^ 2
@@ -124,8 +126,10 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   phi.new <- pa.new[1:ncw]
   alpha.new <- pa.new[ncw + 1]
   
-  #========== Calculate the new lambda with new parameters ==========#
-  eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix #  ## CHECK IF YOU CAN INPLACE THIS
+  #========== Calculate the new lambda with new parameters ==========# 
+
+  # calc_y_a( Ztime2.b,alpha.new); # Ztime2.b gets altered
+  eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix #
 
   # tempLamb <- (CondExp[Index, ] * exp.eta.sn * Integral[Index, ]) %*% wGQ # vector of length M #
   # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #

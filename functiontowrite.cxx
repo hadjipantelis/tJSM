@@ -14,9 +14,6 @@ calc_tcrossprod <- cxxfunction( plugin = "RcppEigen",  signature( M_i0 ="matrix"
 	MatrixXd Res(MatrixXd(m,m).setZero().selfadjointView<Lower>().rankUpdate(A));
  	return Rcpp::wrap(Res);  	 
 ' ) 
-
-
-
 cat('Compliling calc_mult_rowsum\n')
 calc_mult_rowsum <- cxxfunction(settings=settingsE, plugin="RcppEigen", signature(y_i="vector", y_i2 = "vector", M_i1="Matrix", M_i2="Array"), body='
 	//CondExp2 * calc_rowsum( y_i = Index , Xtime22[, i] * temp0d))
@@ -87,10 +84,7 @@ calc_mult0_rowsum <- cxxfunction(settings=settingsE, plugin="RcppEigen", signatu
  
 
 	return Rcpp::wrap( Res );  	 
-' )
-}
-
-
+' )  
 
 cat('Compliling calc_mult_rowsum2\n')
 calc_mult_rowsum2 <- cxxfunction(settings=settingsE, plugin="RcppEigen", signature(y_i="vector", M_i3 = "matrix", M_i1="Matrix", M_i2="Array"), body='
@@ -128,7 +122,55 @@ calc_mult_rowsum2 <- cxxfunction(settings=settingsE, plugin="RcppEigen", signatu
 
 	return Rcpp::wrap( Res );  	 
 ' )
+}
 
+# // tempB <- do.call(rbind, lapply(1:n, function(i) apply((bi.st[[i]]), 2, function(x) tcrossprod(x) )))
+ src <- '
+using Eigen::MatrixXd; 				// to use MatrixXd
+using Eigen::VectorXd; 				// to use MatrixXd
+using Eigen::Map;
 
+Rcpp::List const input(data); 
+
+const unsigned int l = input.size();
+
+Rcpp::NumericMatrix xx = input[1];
+
+const unsigned int nr = xx.nrow();
+const unsigned int nc = xx.ncol();
+
+MatrixXd U(nr*nr*l, nc);
+MatrixXd u1 =  MatrixXd::Zero( nr, nc );	
+MatrixXd u2 =  MatrixXd::Zero( nr, nr );	
+
+for (unsigned int i = 0; i != l; ++i){  
+  u1 =  input[i];
+  for (unsigned int j = 0; j != nc; ++j){
+    u2 = u1.col(j) *  u1.col(j).adjoint();
+    U.block( i*nr*nr, j, nr*nr, 1) = VectorXd::Map(u2.data(), u2.rows()*u2.cols()); 
+   //U.block( i*nr, j, nr*nr, 1) = VectorXd::Map(u2.data(), u2.rows()*u2.cols()); 
+   // std::cout << u2 << std::endl;
+ }  
+} 
+	return Rcpp::wrap( U );  	
+'
+
+cpp_testy <- cxxfunction(signature(data = "list"),  src, plugin = "RcppEigen")
+if(1==3){
+l = length(L);
+ nr = nrow(L[[1]])
+ nc = ncol(L[[1]])
+
+U  = matrix(rep(0,nr*nr*l*nc), ncol=nc)
+u1 = matrix(rep(0, nr * nc),  nr, nc );
+u2 = matrix(rep(0, nr * nr),  nr, nr );
+	
+for (i in 1:l){
+  u1 = L[[i]];
+  for (j in 1:nc){
+    u2  = u1[,j] %*% t( u1[,j] )
+    U[  ( (1+ (i-1)* nr * nr): ((i)*nr*nr)), j] =  u2
+}}
+}
 
 

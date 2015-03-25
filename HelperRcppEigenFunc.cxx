@@ -424,5 +424,42 @@ calc_mult0_rowsum <- cxxfunction(settings=settingsE, plugin="RcppEigen", signatu
 	return Rcpp::wrap( Res );  	 
 ' )
 
+
+ src <- '
+using Eigen::MatrixXd; 				// to use MatrixXd
+using Eigen::VectorXd; 				// to use MatrixXd
+using Eigen::Map;
+
+Rcpp::List const input(data); 
+
+const unsigned int l = input.size();
+
+Rcpp::NumericMatrix xx = input[1];
+
+const unsigned int nr = xx.nrow();
+const unsigned int nc = xx.ncol();
+
+MatrixXd U(nr*nr*l, nc);
+MatrixXd u1 =  MatrixXd::Zero( nr, nc );	
+MatrixXd u2 =  MatrixXd::Zero( nr, nr );	
+
+for (unsigned int i = 0; i != l; ++i){  
+  u1 =  input[i];
+  for (unsigned int j = 0; j != nc; ++j){
+    u2 = u1.col(j) *  u1.col(j).adjoint();
+    U.block( i*nr*nr, j, nr*nr, 1) = VectorXd::Map(u2.data(), u2.rows()*u2.cols()); 
+   //U.block( i*nr, j, nr*nr, 1) = VectorXd::Map(u2.data(), u2.rows()*u2.cols()); 
+   // std::cout << u2 << std::endl;
+ }  
+} 
+	return Rcpp::wrap( U );  	
+'
+
+fast_rbind_lapply <- cxxfunction(signature(data = "list"),  src, plugin = "RcppEigen")
+
+
 cat('Finished compiling\n')
+
+
+
 
