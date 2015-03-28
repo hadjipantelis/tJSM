@@ -32,14 +32,16 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   eta.s <- as.vector(Wtime2 %*% phi.old) + alpha.old * Ztime2.b # M*GQ matrix #
 
   # exp.es <- exp(eta.s) # M*GQ matrix #
-  n_ <- ncol(eta.s)
-  m_ <- nrow(eta.s)
-  exp.es <- matrix(calc_expM(eta.s),m_,n_) # This faster for rectangular matrices
+  # n_ <- ncol(eta.s)
+  # m_ <- nrow(eta.s)
+  # exp.es <- matrix(calc_expM(eta.s),m_,n_) # This faster for rectangular matrices
 
   const <- matrix(0, n, GQ) # n*GQ matrix #
 
-  #const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index)
-  temp0a <- exp.es * lamb.old[Index1]
+  # const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index)
+  # temp0a <- exp.es * lamb.old[Index1]
+  calc_expM2(eta.s)
+  temp0a <- eta.s * lamb.old[Index1];
   const[nk != 0, ] <- calc_rowsum( (Index), temp0a)
 
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
@@ -100,7 +102,8 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   temp2 <- calc_mult_rowsum2(y_i = Index, M_i2 = CondExp2, M_i1 = temp0b,      Ztime2.b)
   temp3 <- lapply(1:(ncw), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime2[, i], M_i2 = CondExp2, temp0a))
   temp4 <- lapply(1:(ncw^2), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime22[, i], M_i2 = CondExp2, temp0a)) 
-  temp5 <- lapply(1:(ncw), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime2[, i], M_i2 = CondExp2, Ztime2.b *temp0a)) 
+  temp0c <- Ztime2.b *temp0a
+  temp5 <- lapply(1:(ncw), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime2[, i], M_i2 = CondExp2,temp0c)) 
 
   Integral2 <- Integral[nk != 0,]
   post1 <- sum((temp1 * Integral2) %*% wGQ)
@@ -133,11 +136,14 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
 
   # tempLamb <- (CondExp[Index, ] * exp.eta.sn * Integral[Index, ]) %*% wGQ # vector of length M #
   # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
-  n_ <- ncol(eta.sn)
-  m_ <- nrow(eta.sn)
-  exp.eta.es <- matrix(calc_expM(eta.sn),m_,n_) # This faster for rectangular matrices
-  calc_M1_M2_M3_Hadamard(exp.eta.es, CondExp ,  Integral, as.integer(Index-1))
-  tempLamb <- calc_M_y(y_i =wGQ, M_i=exp.eta.es)
+  # n_ <- ncol(eta.sn)
+  # m_ <- nrow(eta.sn)
+  # exp.eta.es <- matrix(calc_expM(eta.sn),m_,n_) # This faster for rectangular matrices
+  # calc_M1_M2_M3_Hadamard(exp.eta.es, CondExp ,  Integral, as.integer(Index-1))
+  calc_expM2(eta.sn);
+  calc_M1_M2_M3_Hadamard(eta.sn, CondExp ,  Integral, as.integer(Index-1))
+  #tempLamb <- calc_M_y(y_i =wGQ, M_i=exp.eta.es)
+  tempLamb <- calc_M_y(y_i =wGQ, M_i=eta.sn)
   postLamb <- calc_tapply_vect_sum( tempLamb, as.integer(Index1-1)); ## Check this!
 
   lamb.new <- Index2 / postLamb

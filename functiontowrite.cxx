@@ -124,6 +124,7 @@ calc_mult_rowsum2 <- cxxfunction(settings=settingsE, plugin="RcppEigen", signatu
 ' )
 }
 
+if(1==3){
 # // tempB <- do.call(rbind, lapply(1:n, function(i) apply((bi.st[[i]]), 2, function(x) tcrossprod(x) )))
  src <- '
 using Eigen::MatrixXd; 				// to use MatrixXd
@@ -156,21 +157,57 @@ for (unsigned int i = 0; i != l; ++i){
 '
 
 cpp_testy <- cxxfunction(signature(data = "list"),  src, plugin = "RcppEigen")
-if(1==3){
-l = length(L);
- nr = nrow(L[[1]])
- nc = ncol(L[[1]])
 
-U  = matrix(rep(0,nr*nr*l*nc), ncol=nc)
-u1 = matrix(rep(0, nr * nc),  nr, nc );
-u2 = matrix(rep(0, nr * nr),  nr, nr );
-	
-for (i in 1:l){
-  u1 = L[[i]];
-  for (j in 1:nc){
-    u2  = u1[,j] %*% t( u1[,j] )
-    U[  ( (1+ (i-1)* nr * nr): ((i)*nr*nr)), j] =  u2
-}}
 }
+ 
+
+cat('Compliling calc_M_M\n')
+calc_M_M <- cxxfunction(settings=settingsE, plugin = "RcppEigen", signature(M_i1 = "matrix", M_i2 ="matrix"), body='	
+	// Calculate $M_i y_i$
+ 	using Eigen::Map;		 		// to map input variable to an existing array of data
+	using Eigen::MatrixXd; 				// to use MatrixXd 
+
+	const Map<MatrixXd> M1(Rcpp::as<Map<MatrixXd> > (M_i1));	//Map vector M_i to MatrixXd M 
+	const Map<MatrixXd> M2(Rcpp::as<Map<MatrixXd> > (M_i2));	//Map vector y_i to vectorXd y 
+
+	return Rcpp::wrap(  M1 * M2  );  	 
+' )
+
+cat('Compliling calc_exp2M\n')
+calc_expM2 <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i ="array"), body='	
+	// Calculate $exp(M_i)$ - this function returns an array
+ 	using Eigen::Map;		 		// to map input variable to an existing array of data 
+	using Eigen::ArrayXd; 				// to use ArrayXd 
+
+	Map<ArrayXd> A(Rcpp::as<Map<ArrayXd> > (M_i));	//Map vector M_i to arrayXd A  
+ 	A = (A.exp());
+	//return Rcpp::wrap(  );   
+' )
+
+
+
+
+cat('Compliling calc_etan\n')
+calc_etan <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i1 = "matrix", M_i2 ="array", a_i1 = "numeric", y_i = "vector"), body='	
+	// Calculate $exp(M_i)$ - this function returns an array
+ 	using Eigen::Map;		 		// to map input variable to an existing array of data 
+	using Eigen::ArrayXXd; 				// to use ArrayXd 
+	using Eigen::MatrixXd; 				// to use ArrayXd 
+
+  // eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix #
+	const double a1 (Rcpp::as<double> (a_i1));		//Map double a_i to double a 
+	const Map<MatrixXd> M1(Rcpp::as<Map<MatrixXd> > (M_i1));//Map vector M_i to MatrixXd M 
+		Map<ArrayXXd> M2(Rcpp::as<Map<ArrayXXd> > (M_i2));//Map vector y_i to vectorXd y 
+	const Map<MatrixXd> y(Rcpp::as<Map<MatrixXd> > (y_i));	//Map vector y_i to vectorXd y 
+  
+	MatrixXd U = M1 * y;
+	M2*= a1;
+
+	for (unsigned int k=0; k!= M2.rows(); ++k){
+
+	M2.row(k)  += U(k);
+}  
+' )
+
 
 

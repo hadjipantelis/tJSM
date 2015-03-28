@@ -158,7 +158,7 @@ calc_tapply_vect_sum <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  s
  	using Eigen::Map;		 		// to map input variable to an existing array of data 
 	using Eigen::ArrayXd; 				// to use ArrayXd 
 	using Eigen::ArrayXi; 				// to use ArrayXi (integers)  
-
+  // eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix #
 	const 	Map<ArrayXd> v1(Rcpp::as<Map<ArrayXd> > (v_i1));		//Map array v_i1 to ArrayXd v1 
 	const 	Map<ArrayXi> v2(Rcpp::as<Map<ArrayXi> > (v_i2));		//Map array v_i2 to ArrayXi v2 
 	unsigned int N = v2.size();
@@ -455,7 +455,20 @@ for (unsigned int i = 0; i != l; ++i){
 	return Rcpp::wrap( U );  	
 '
 
+cat('Compliling fast_rbind_lapply\n')
 fast_rbind_lapply <- cxxfunction(signature(data = "list"),  src, plugin = "RcppEigen")
+
+
+cat('Compliling calc_exp2M\n')
+calc_expM2 <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i ="array"), body='	
+	// Calculate $exp(M_i)$ - this function returns an array
+ 	using Eigen::Map;		 		// to map input variable to an existing array of data 
+	using Eigen::ArrayXd; 				// to use ArrayXd 
+
+	Map<ArrayXd> A(Rcpp::as<Map<ArrayXd> > (M_i));	//Map vector M_i to arrayXd A  
+ 	A = (A.exp());
+	//return Rcpp::wrap(  );   
+' )
 
 
 cat('Finished compiling\n')

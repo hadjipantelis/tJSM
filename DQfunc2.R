@@ -88,11 +88,15 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   
   # eta.sp <- as.vector(Wtime2 %*% pphi) + palpha * Ztime2.b # M*GQ matrix #
   calc_y_a( Ztime2.b,palpha/ alpha) # Ztime2.b gets altered because we do in-place multiplication - Ztime2.b *= (palpha/ alpha)
-  eta.sp <- as.numeric(Wtime2 %*% pphi) +  Ztime2.b # M*GQ matrix #
+  # eta.sp <- as.numeric(Wtime2 %*% pphi) +  Ztime2.b # M*GQ matrix #
   # exp.esp <- exp(eta.sp) # M*GQ matrix #
-  n_ <- ncol(eta.sp)
-  m_ <- nrow(eta.sp)
-  exp.esp <- matrix(calc_expM(eta.sp),m_,n_)
+  # n_ <- ncol(eta.sp)
+  # m_ <- nrow(eta.sp)
+  # exp.esp <- matrix(calc_expM(eta.sp),m_,n_)
+
+
+exp.esp <-as.numeric(Wtime2 %*% pphi) +  Ztime2.b # M*GQ matrix #
+  calc_expM2(exp.esp)
 
 
   # temp1 <- as.vector((CondExp[Index, ] * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #

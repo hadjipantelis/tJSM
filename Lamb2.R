@@ -31,10 +31,15 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
   # eta.s <- as.vector(Wtime2 %*% phi) + alpha * Ztime2.b # M*GQ matrix #
   # exp.es <- exp(eta.s) # M*GQ matrix #
   calc_y_a( Ztime2.b,alpha); # Ztime2.b gets altered
-  eta.s <- as.numeric(Wtime2 %*% phi) + Ztime2.b  
-  n_ <- ncol(eta.s)
-  m_ <- nrow(eta.s)
-  exp.es <- matrix(calc_expM(eta.s), m_, n_)
+  # eta.s <- as.numeric(Wtime2 %*% phi) + Ztime2.b  
+  #n_ <- ncol(eta.s)
+  #m_ <- nrow(eta.s)
+  #exp.es <- matrix(calc_expM(eta.s), m_, n_)
+
+
+exp.es<-  as.numeric(Wtime2 %*% phi) + Ztime2.b  
+  calc_expM2(exp.es)
+
 
   lamb.old <- lamb.init
   err <- 1

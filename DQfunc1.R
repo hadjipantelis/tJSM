@@ -81,11 +81,15 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
   ind <- Indexing(ncz)
   Q[(ncx + ncw + 3):len] <- as.vector(tapply(c(tempB), ind, sum))
   
-  eta.sp <- as.vector(Wtime2 %*% pphi + palpha * Xtime2 %*% pbeta) + palpha * Ztime2.b # M*GQ matrix #
+  #eta.sp <- as.vector(Wtime2 %*% pphi + palpha * Xtime2 %*% pbeta) + palpha * Ztime2.b # M*GQ matrix #
   # exp.esp <- exp(eta.sp) # M*GQ matrix #
-  n_ <- ncol(eta.sp)
-  m_ <- nrow(eta.sp)
-  exp.esp <- matrix(calc_expM(eta.sp),m_,n_)
+  #n_ <- ncol(eta.sp)
+  #m_ <- nrow(eta.sp)
+  #exp.esp <- matrix(calc_expM(eta.sp),m_,n_)
+
+exp.esp <- as.vector(Wtime2 %*% pphi + palpha * Xtime2 %*% pbeta) + palpha * Ztime2.b # M*GQ matrix #
+  calc_expM2(exp.esp)
+
 
   XZb2 <- as.vector(Xtime2 %*% pbeta) + Ztime2.b # M*GQ matrix #
 

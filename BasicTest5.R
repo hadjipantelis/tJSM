@@ -84,7 +84,7 @@ fitJTdlm1r1n <- jmodelTM(fitLME, fitCOX, liver, model = 1, rho=1,timeVarY = 'obs
 fitJTdlm2r0n <- jmodelTM(fitLME, fitCOX, liver, model = 2, rho=0,timeVarY = 'obstime') 
 fitJTdlm1r0n <- jmodelTM(fitLME, fitCOX, liver, model = 1, rho=0,timeVarY = 'obstime')  
 
-NewTimings_Liver <- microbenchmark( jmodelTM(fitLME, fitCOX, liver, model = 2, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, liver, model = 1, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, liver, model = 2, rho=0,timeVarY = 'obstime'),  jmodelTM(fitLME, fitCOX, liver, model = 1, rho=0,timeVarY = 'obstime'), times=25 )
+NewTimings_Liver <- microbenchmark( jmodelTM(fitLME, fitCOX, liver, model = 2, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, liver, model = 1, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, liver, model = 2, rho=0,timeVarY = 'obstime'),  jmodelTM(fitLME, fitCOX, liver, model = 1, rho=0,timeVarY = 'obstime'), times=35 )
 
 source('../Final_Version_IV-test/EMiterTM1.R')
 source('../Final_Version_IV-test/EMiterTM2.R')
@@ -95,6 +95,7 @@ source('../Final_Version_IV-test/DQfunc2.R')
 source('../Final_Version_IV-test/LH1.R')
 source('../Final_Version_IV-test/LH2.R')
 if (1==2){
+
 fitJTdlm2r1o <- jmodelTM(fitLME, fitCOX, liver, model = 2, rho=1,timeVarY = 'obstime') 
 fitJTdlm1r1o <- jmodelTM(fitLME, fitCOX, liver, model = 1, rho=1,timeVarY = 'obstime') 
 fitJTdlm2r0o <- jmodelTM(fitLME, fitCOX, liver, model = 2, rho=0,timeVarY = 'obstime') 
@@ -102,7 +103,7 @@ fitJTdlm1r0o <- jmodelTM(fitLME, fitCOX, liver, model = 1, rho=0,timeVarY = 'obs
 
 OldTimings_Liver <- microbenchmark( jmodelTM(fitLME, fitCOX, liver, model = 2, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, liver, model = 1, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, liver, model = 2, rho=0,timeVarY = 'obstime'),  jmodelTM(fitLME, fitCOX, liver, model = 1, rho=0,timeVarY = 'obstime'), times=25 )
 }
-save.image('Fourth_modelwide_benchmarks.RData.Pantelis')
+save.image('Fifth_modelwide_benchmarks.RData.Pantelis')
 
 }
 
