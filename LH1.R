@@ -23,8 +23,10 @@ LH1 <- function (theta) {
   # each element is ncz*GQ matrix #
   bi <- do.call(rbind, bi.st)
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
-  Ztime2.b <- do.call(rbind, lapply((1:n)[nk != 0], function(i) Ztime2.st[[i]] %*% bi.st[[i]])) # M*GQ matrix #
-  
+   
+  # Ztime2.b <- do.call(rbind, lapply((1:n)[nk != 0], function(i) Ztime2.st[[i]] %*% bi.st[[i]])) # M*GQ matrix #
+  Ztime2.b <-fast_lapply_length(Ztime2.st, bi.st, (1:n)[nk !=      0] - 1)# M*GQ matrix # 
+
   log.lamb <- log(lamb[Index0])
   log.lamb[is.na(log.lamb)] <- 0
   log.density1 <- log.lamb + as.vector(Wtime %*% phi + alpha * Xtime %*% beta) + alpha * Ztime.b # n*GQ matrix #
@@ -32,17 +34,8 @@ LH1 <- function (theta) {
   # eta.s <- as.vector(Wtime2 %*% phi + alpha * Xtime2 %*% beta) + alpha * Ztime2.b # M*GQ matrix #
   # exp.es <- exp(eta.s) # M*GQ matrix #
   calc_y_a( Ztime2.b,alpha); # Ztime2.b gets altered
-  #eta.s <- as.numeric(Wtime2 %*% phi + alpha * Xtime2 %*% beta ) + Ztime2.b  
-  #n_ <- ncol(eta.s)
-  #m_ <- nrow(eta.s)
-  #exp.es <- matrix(calc_expM(eta.s), m_, n_)
-
-
-
-
-exp.es<- as.numeric(Wtime2 %*% phi + alpha * Xtime2 %*% beta) + Ztime2.b  
+  exp.es<- as.numeric(Wtime2 %*% phi + alpha * Xtime2 %*% beta) + Ztime2.b  
   calc_expM2(exp.es)
-
 
   const <- matrix(0, n, GQ) # n*GQ matrix #
   # const[nk != 0,] <- rowsum(lamb[Index1] * exp.es, Index)  

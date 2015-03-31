@@ -24,7 +24,7 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
  
   bi <- do.call(rbind, bi.st)
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
-  Ztime2.b <- do.call(rbind, lapply((1:n)[nk != 0], function(i) Ztime2.st[[i]] %*% bi.st[[i]])) # M*GQ matrix #
+  Ztime2.b <-fast_lapply_length(Ztime2.st, bi.st, (1:n)[nk !=      0] - 1)# M*GQ matrix #
   
   log.lamb <- log(lamb.old[Index0])
   log.lamb[is.na(log.lamb)] <- 0
@@ -32,15 +32,10 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   eta.s <- as.vector(Wtime2 %*% phi.old) + alpha.old * Ztime2.b # M*GQ matrix #
 
   # exp.es <- exp(eta.s) # M*GQ matrix #
-  # n_ <- ncol(eta.s)
-  # m_ <- nrow(eta.s)
-  # exp.es <- matrix(calc_expM(eta.s),m_,n_) # This faster for rectangular matrices
-
+  calc_expM2(eta.s)
   const <- matrix(0, n, GQ) # n*GQ matrix #
 
   # const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index)
-  # temp0a <- exp.es * lamb.old[Index1]
-  calc_expM2(eta.s)
   temp0a <- eta.s * lamb.old[Index1];
   const[nk != 0, ] <- calc_rowsum( (Index), temp0a)
 
@@ -55,6 +50,7 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   
   # f.long <- sapply(1:n, function(i) dmvnorm(Y.st[[i]], as.vector(X.st[[i]] %*% beta.old), VY[[i]]))
   f.long <- sapply(1:n, function(i) calc_MVND(Y.st[[i]], as.vector(X.st[[i]] %*% beta.old), VY[[i]]))
+
   lgLik <- sum(log(f.long * deno / (pi ^ (ncz / 2))))
   
   CondExp <- (1 + d * rho) / (1 + rho * const) # conditional expectation E(xi|bi,Oi), n*GQ matrix #
@@ -66,7 +62,6 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   #========== Update BSigma ==========#
   if (ncz>1) {
   # tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
-  # tempB <- do.call(rbind, lapply(1:n, function(i) apply((bi.st[[i]]), 2, function(x) tcrossprod(x) )))
   tempB <-  fast_rbind_lapply( bi.st )
     # (n*ncz^2)*GQ matrix #      
   } else {
@@ -79,6 +74,7 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   
   #========== Update beta: the linear regresion coefficents of regression Yi-E(Zi*bi) on X_i ==========#
   tempX <- Y - rowSums(Z * post.bi[ID, ]) # vector of length N #
+
   # beta.new <- as.vector(solve(t(X) %*% X) %*% (t(X) %*% tempX)) # vector of length ncx #
   beta.new <- as.vector(qr.solve(X,tempX));
   #========== Update Ysigma ==========#
@@ -131,18 +127,12 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   
   #========== Calculate the new lambda with new parameters ==========# 
 
-  # calc_y_a( Ztime2.b,alpha.new); # Ztime2.b gets altered
   eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix #
 
   # tempLamb <- (CondExp[Index, ] * exp.eta.sn * Integral[Index, ]) %*% wGQ # vector of length M #
   # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
-  # n_ <- ncol(eta.sn)
-  # m_ <- nrow(eta.sn)
-  # exp.eta.es <- matrix(calc_expM(eta.sn),m_,n_) # This faster for rectangular matrices
-  # calc_M1_M2_M3_Hadamard(exp.eta.es, CondExp ,  Integral, as.integer(Index-1))
   calc_expM2(eta.sn);
   calc_M1_M2_M3_Hadamard(eta.sn, CondExp ,  Integral, as.integer(Index-1))
-  #tempLamb <- calc_M_y(y_i =wGQ, M_i=exp.eta.es)
   tempLamb <- calc_M_y(y_i =wGQ, M_i=eta.sn)
   postLamb <- calc_tapply_vect_sum( tempLamb, as.integer(Index1-1)); ## Check this!
 

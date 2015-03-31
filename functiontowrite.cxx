@@ -50,78 +50,6 @@ calc_mult_rowsum <- cxxfunction(settings=settingsE, plugin="RcppEigen", signatur
 
 	return Rcpp::wrap( Res );  	 
 ' )
-
-cat('Compliling calc_mult0_rowsum\n')
-calc_mult0_rowsum <- cxxfunction(settings=settingsE, plugin="RcppEigen", signature(y_i="vector", y_i2 = "vector", M_i1="Matrix" ), body='
-	//  calc_rowsum( y_i = Index , Xtime22[, i] * temp0d))
- 	using Eigen::Map;		 		// to map input variable to an existing array of data
-	using Eigen::MatrixXd; 				// to use MatrixXd
-	using Eigen::VectorXi; 				// to use VectorXd
-	using Eigen::VectorXd; 				// to use VectorXd
-	using Eigen::ArrayXd;
-	//#include <iostream>
-
-	const Map<VectorXi> y1(Rcpp::as<Map<VectorXi> > (y_i));		// Map vector y_i1 to vectorXd y1  
-	const Map<MatrixXd> M(Rcpp::as<Map<MatrixXd> > (M_i1));		// Map matrix M_i1 to vectorXd M   
-	const Map<VectorXd> y2(Rcpp::as<Map<VectorXd> > (y_i2));	// Map vector y_i1 to vectorXd y1  
-	
-	const unsigned int l = y1.size();
-	const unsigned int m = M.cols(); 	
-
-	MatrixXd Res = MatrixXd::Zero(y1.maxCoeff() ,m);	
-
-	for (unsigned int i = 0; i < m; ++i){
-	unsigned int k = 0;
-		for(unsigned int j = 0; j != l; ++j){
- 			Res(k,i) = Res(k,i) + M(j,i) * y2(j); 
-			if (j  < M.rows() ) {
-				if( y1[j] != y1[j+1] ){ 
-					k++;
-				} 
-			}
-		}
-	}
- 
-
-	return Rcpp::wrap( Res );  	 
-' )  
-
-cat('Compliling calc_mult_rowsum2\n')
-calc_mult_rowsum2 <- cxxfunction(settings=settingsE, plugin="RcppEigen", signature(y_i="vector", M_i3 = "matrix", M_i1="Matrix", M_i2="Array"), body='
-	//CondExp2 * calc_rowsum( y_i = Index , Xtime22 * temp0d))
- 	using Eigen::Map;		 		// to map input variable to an existing array of data
-	using Eigen::MatrixXd; 				// to use MatrixXd
-	using Eigen::VectorXi; 				// to use VectorXd
-	using Eigen::VectorXd; 				// to use VectorXd
-	using Eigen::ArrayXd;
-	//#include <iostream>
-
-	const Map<VectorXi> y1(Rcpp::as<Map<VectorXi> > (y_i));		// Map vector y_i1 to vectorXd y1  
-	const Map<MatrixXd> M(Rcpp::as<Map<MatrixXd> > (M_i1));		// Map matrix M_i1 to vectorXd M  
-	const Map<ArrayXd> A(Rcpp::as<Map<ArrayXd> > (M_i2));		// Map matrix M_i2 to vectorXd M  
-	const Map<MatrixXd> M3(Rcpp::as<Map<MatrixXd> > (M_i3));	// Map vector y_i1 to vectorXd y1  
-	
-	const unsigned int l = y1.size();
-	const unsigned int m = M.cols(); 	
-
-	MatrixXd Res = MatrixXd::Zero(y1.maxCoeff() ,m);	
-
-	for (unsigned int i = 0; i < m; ++i){
-	unsigned int k = 0;
-		for(unsigned int j = 0; j != l; ++j){
- 			Res(k,i) = Res(k,i) + M(j,i) * M3(j,i); 
-			if (j  < M.rows() ) {
-				if( y1[j] != y1[j+1] ){ 
-					k++;
-				} 
-			}
-		}
-	}
-
-	Res.array() *= A;
-
-	return Rcpp::wrap( Res );  	 
-' )
 }
 
 if(1==3){
@@ -158,8 +86,6 @@ for (unsigned int i = 0; i != l; ++i){
 
 cpp_testy <- cxxfunction(signature(data = "list"),  src, plugin = "RcppEigen")
 
-}
- 
 
 cat('Compliling calc_M_M\n')
 calc_M_M <- cxxfunction(settings=settingsE, plugin = "RcppEigen", signature(M_i1 = "matrix", M_i2 ="matrix"), body='	
@@ -172,18 +98,6 @@ calc_M_M <- cxxfunction(settings=settingsE, plugin = "RcppEigen", signature(M_i1
 
 	return Rcpp::wrap(  M1 * M2  );  	 
 ' )
-
-cat('Compliling calc_exp2M\n')
-calc_expM2 <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_i ="array"), body='	
-	// Calculate $exp(M_i)$ - this function returns an array
- 	using Eigen::Map;		 		// to map input variable to an existing array of data 
-	using Eigen::ArrayXd; 				// to use ArrayXd 
-
-	Map<ArrayXd> A(Rcpp::as<Map<ArrayXd> > (M_i));	//Map vector M_i to arrayXd A  
- 	A = (A.exp());
-	//return Rcpp::wrap(  );   
-' )
-
 
 
 
@@ -209,5 +123,48 @@ calc_etan <- cxxfunction(settings=settingsE, plugin = "RcppEigen",  signature(M_
 }  
 ' )
 
+}
+ 
 
+ src <- '
+using Eigen::MatrixXd; 				// to use MatrixXd
+using Eigen::VectorXd; 				// to use MatrixXd
+using Eigen::Map;
+
+Rcpp::List const input1(data1); 
+Rcpp::List const input2(data2); 
+Rcpp::NumericVector const Ind(indeces);
+
+const unsigned int l = Ind.size();
+unsigned int s = 0; 
+
+for (unsigned int i = 0; i != l; ++i){  
+  Rcpp::NumericMatrix xx = input1[ Ind(i) ];
+  s += xx.nrow();
+}
+
+Rcpp::NumericMatrix xx = input2[1];
+
+const unsigned int nc = xx.ncol();
+MatrixXd U( s , nc );
+ 
+unsigned int j = 0;
+for (unsigned int i = 0; i != l; ++i){  
+	//const Map<MatrixXd> M1(Rcpp::as<Map<MatrixXd> > (input1[ Ind(i) ]));
+	//const Map<MatrixXd> M2(Rcpp::as<Map<MatrixXd> > (input2[ Ind(i) ]));
+	
+	const MatrixXd M1 = (input1[ Ind(i) ]);
+	const MatrixXd M2 = (input2[ Ind(i) ]);
+	
+	// std::cout << "M1.rows()" << M1.rows() << std::endl;
+	// std::cout << "j = " <<j << std::endl;
+	 U.block( j, 0, M1.rows() , nc ) =   M1 * M2;
+ 	j += M1.rows();
+}
+	// std::cout << "j = " <<j << std::endl;
+	return Rcpp::wrap( U );  	
+'
+
+cat('Compliling fast_lapply_length \n')
+fast_lapply_length <- cxxfunction(signature(data1 = "list", data2 = "list", indeces = "vector"),  src, plugin = "RcppEigen")
 

@@ -27,8 +27,9 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) ) 
 
   bi <- do.call(rbind, bi.st) # (n*ncz)*GQ matrix #
-  Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
-  Ztime2.b <- do.call(rbind, lapply((1:n)[nk != 0], function(i) Ztime2.st[[i]] %*% bi.st[[i]])) # M*GQ matrix #
+  Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix # 
+
+  Ztime2.b <-fast_lapply_length(Ztime2.st, bi.st, (1:n)[nk !=      0] - 1)# M*GQ matrix # 
   
   log.lamb <- log(lamb[Index0])
   log.lamb[is.na(log.lamb)] <- 0
@@ -36,11 +37,10 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
 
   # eta.s <- as.vector(Wtime2 %*% phi) + alpha * Ztime2.b # M*GQ matrix #
   # exp.es <- exp(eta.s) # M*GQ matrix #
+
   calc_y_a( Ztime2.b,alpha); # Ztime2.b gets altered because we do in-place multiplication - Ztime2.b *= alpha
-  eta.s <- as.numeric(Wtime2 %*% phi) + Ztime2.b  
-  n_ <- ncol(eta.s)
-  m_ <- nrow(eta.s)
-  exp.es <- matrix(calc_expM(eta.s),m_,n_) # This faster for rectangular matrices
+  exp.es <- as.numeric(Wtime2 %*% phi) + Ztime2.b  
+  calc_expM2(exp.es)
 
   const <- matrix(0, n, GQ) # n*GQ matrix #
 
@@ -63,10 +63,10 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   post.bi <- if(ncz > 1) t(sapply(1:n, function(i) post.bi[i, ((i - 1) * ncz + 1):(i * ncz)])) else 
              matrix(diag(post.bi), nrow = n) # n*ncz matrix #
   
-  if (ncz>1) {
-    
-   #   tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
-   tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) tcrossprod(x))))
+  if (ncz>1) {    
+   # tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
+   # tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) tcrossprod(x)))) 
+    tempB <-  fast_rbind_lapply( bi.st )
     # (n*ncz^2)*GQ matrix #     
   } else {
     tempB <- bi ^ 2
@@ -90,12 +90,8 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   calc_y_a( Ztime2.b,palpha/ alpha) # Ztime2.b gets altered because we do in-place multiplication - Ztime2.b *= (palpha/ alpha)
   # eta.sp <- as.numeric(Wtime2 %*% pphi) +  Ztime2.b # M*GQ matrix #
   # exp.esp <- exp(eta.sp) # M*GQ matrix #
-  # n_ <- ncol(eta.sp)
-  # m_ <- nrow(eta.sp)
-  # exp.esp <- matrix(calc_expM(eta.sp),m_,n_)
-
-
-exp.esp <-as.numeric(Wtime2 %*% pphi) +  Ztime2.b # M*GQ matrix #
+  
+  exp.esp <-as.numeric(Wtime2 %*% pphi) +  Ztime2.b # M*GQ matrix #
   calc_expM2(exp.esp)
 
 
@@ -113,10 +109,11 @@ exp.esp <-as.numeric(Wtime2 %*% pphi) +  Ztime2.b # M*GQ matrix #
    
   # post1 <- as.vector(tapply(temp1, Index1, sum)) # vector of length n_u #
   # post2 <- as.vector(tapply(temp2, Index1, sum)) # vector of length n_u #.
+  # post3 <- as.matrix(apply(temp3, 2, function(x) tapply(x, Index1, sum))) # n_u*ncw matrix #
   post1 <- calc_tapply_vect_sum( temp1, as.integer(Index1-1));
   post2 <- calc_tapply_vect_sum( temp2, as.integer(Index1-1));  
-  # post3 <- as.matrix(apply(temp3, 2, function(x) tapply(x, Index1, sum))) # n_u*ncw matrix #
   post3 <- as.matrix(apply(temp3, 2, function(x) calc_tapply_vect_sum( x, as.integer(Index1-1))))
+
   Q[(ncx + 1):(ncx + ncw)] <- colSums(d * Wtime) - colSums(Index2 * post3 / post1) # vector of length ncw #
   Q[ncx + ncw + 1] <- sum(d * rowSums(Ztime * post.bi)) - sum(Index2 * post2 / post1)
   

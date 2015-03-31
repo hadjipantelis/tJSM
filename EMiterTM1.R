@@ -24,7 +24,7 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
   
   bi <- do.call(rbind, bi.st)
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
-  Ztime2.b <- do.call(rbind, lapply((1:n)[nk != 0], function(i) Ztime2.st[[i]] %*% bi.st[[i]])) # M*GQ matrix #
+  Ztime2.b <-fast_lapply_length(Ztime2.st, bi.st, (1:n)[nk !=      0] - 1)# M*GQ matrix # 
     
   log.lamb <- log(lamb.old[Index0])
   log.lamb[is.na(log.lamb)] <- 0
@@ -32,11 +32,6 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
   eta.s <- as.vector(Wtime2 %*% phi.old + alpha.old * Xtime2 %*% beta.old) + alpha.old * Ztime2.b
   
   # exp.es <- exp(eta.s) # M*GQ matrix #
-  # n_ <- ncol(eta.s)
-  # m_ <- nrow(eta.s)
-  # exp.es <- matrix(calc_expM(eta.s),m_,n_)
-
-
   const <- matrix(0, n, GQ) # n*GQ matrix #
   
   # temp0a <- exp.es * lamb.old[Index1];
@@ -55,6 +50,7 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
    
   #f.long <- sapply(1:n, function(i) dmvnorm(Y.st[[i]], as.vector(X.st[[i]] %*% beta.old), VY[[i]]))
   f.long <- sapply(1:n, function(i) calc_MVND(Y.st[[i]], as.vector(X.st[[i]] %*% beta.old), VY[[i]]))
+
   lgLik <- sum(log(f.long * deno / (pi ^ (ncz / 2))))
   
   CondExp <- (1 + d * rho) / (1 + rho * const) # conditional expectation E(xi|bi,Oi), n*GQ matrix #
@@ -127,9 +123,6 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
   newZtime2.b = alpha.new * Ztime2.b
   eta.s.n1 <- as.vector(Wtime2 %*% phi.new + alpha.new * Xtime2 %*% beta.old) + newZtime2.b # M*GQ matrix #
   # exp.es.n1 <- exp(eta.s.n1) # M*GQ matrix #
-  # n_ <- ncol(eta.s.n1)
-  # m_ <- nrow(eta.s.n1)
-  # exp.es.n1 <- matrix(calc_expM(eta.s.n1),m_,n_)
 
   #temp6 <- lapply(1:ncx, function(i) CondExp2 * rowsum(alpha.new * Xtime2[, i] * exp.es.n1 * lamb.old[Index1], Index))
   #temp7 <- lapply(1:(ncx ^ 2), function(i) CondExp2 * rowsum(alpha.new^2 * Xtime22[, i] * exp.es.n1 * lamb.old[Index1], Index))
@@ -159,15 +152,9 @@ EMiterTM1 <- function (theta.old) { # Use apply instead of matrix calculation #
 
   # tempLamb <- (CondExp[Index, ] * exp(eta.s.n2) * Integral[Index, ]) %*% wGQ # vector of length M #
   # postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u # 
-  # n_ <- ncol(eta.s.n2)
-  # m_ <- nrow(eta.s.n2)
-  # exp.eta.sn2 <- matrix(calc_expM(eta.s.n2),m_,n_) # This faster for rectangular matrices
-  
   calc_expM2(eta.s.n2)
-
-  #calc_M1_M2_M3_Hadamard(exp.eta.sn2, CondExp ,  Integral, as.integer(Index-1))
-calc_M1_M2_M3_Hadamard(eta.s.n2, CondExp ,  Integral, as.integer(Index-1))
-  tempLamb <- calc_M_y(y_i =wGQ, M_i=exp.eta.sn2)
+  calc_M1_M2_M3_Hadamard(eta.s.n2, CondExp ,  Integral, as.integer(Index-1))
+  tempLamb <- calc_M_y(y_i =wGQ, M_i=eta.s.n2)
   postLamb <- calc_tapply_vect_sum( tempLamb, as.integer(Index1-1)); ## Check this!
 
   lamb.new <- Index2 / postLamb

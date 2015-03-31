@@ -29,16 +29,17 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
 
   bi <- do.call(rbind, bi.st) # (n*ncz)*GQ matrix #
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
-  Ztime2.b <- do.call(rbind, lapply((1:n)[nk != 0], function(i) Ztime2.st[[i]] %*% bi.st[[i]])) # M*GQ matrix #
-  
+  # Ztime2.b <- do.call(rbind, lapply((1:n)[nk != 0], function(i) Ztime2.st[[i]] %*% bi.st[[i]])) # M*GQ matrix #
+    Ztime2.b <-fast_lapply_length(Ztime2.st, bi.st, (1:n)[nk !=      0] - 1)# M*GQ matrix # 
   log.lamb <- log(lamb[Index0])
   log.lamb[is.na(log.lamb)] <- 0
   log.density1 <- log.lamb + as.vector(Wtime %*% phi + alpha * Xtime %*% beta) + alpha * Ztime.b # n*GQ matrix #
-  eta.s <- as.vector(Wtime2 %*% phi + alpha * Xtime2 %*% beta) + alpha * Ztime2.b # M*GQ matrix #
+  # eta.s <- as.vector(Wtime2 %*% phi + alpha * Xtime2 %*% beta) + alpha * Ztime2.b # M*GQ matrix #
   # exp.es <- exp(eta.s) # M*GQ matrix #
-  n_ <- ncol(eta.s)
-  m_ <- nrow(eta.s)
-  exp.es <- matrix(calc_expM(eta.s),m_,n_)
+
+  exp.es <- as.vector(Wtime2 %*% phi + alpha * Xtime2 %*% beta) + alpha * Ztime2.b  
+  calc_expM2(exp.es)
+
   const <- matrix(0, n, GQ) # n*GQ matrix #
 
   # const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index) 
@@ -62,7 +63,8 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
   
   if (ncz>1) {
     # tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))
-    tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) tcrossprod(x))))
+    # tempB <- do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) tcrossprod(x))))
+    tempB <-  fast_rbind_lapply( bi.st )
     # (n*ncz^2)*GQ matrix #     
   }else{
     tempB <- bi ^ 2
@@ -83,11 +85,7 @@ DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
   
   #eta.sp <- as.vector(Wtime2 %*% pphi + palpha * Xtime2 %*% pbeta) + palpha * Ztime2.b # M*GQ matrix #
   # exp.esp <- exp(eta.sp) # M*GQ matrix #
-  #n_ <- ncol(eta.sp)
-  #m_ <- nrow(eta.sp)
-  #exp.esp <- matrix(calc_expM(eta.sp),m_,n_)
-
-exp.esp <- as.vector(Wtime2 %*% pphi + palpha * Xtime2 %*% pbeta) + palpha * Ztime2.b # M*GQ matrix #
+  exp.esp <- as.vector(Wtime2 %*% pphi + palpha * Xtime2 %*% pbeta) + palpha * Ztime2.b # M*GQ matrix #
   calc_expM2(exp.esp)
 
 
@@ -107,7 +105,6 @@ exp.esp <- as.vector(Wtime2 %*% pphi + palpha * Xtime2 %*% pbeta) + palpha * Zti
   # post1 <- as.vector(tapply(temp1, Index1, sum)) # vector of length n_u #
   # post2 <- as.vector(tapply(temp2, Index1, sum)) # vector of length n_u #.
   # post3 <- as.matrix(apply(temp3, 2, function(x) tapply(x, Index1, sum))) # n_u*ncw matrix #
-
   post1 <- calc_tapply_vect_sum( temp1, as.integer(Index1-1));
   post2 <- calc_tapply_vect_sum( temp2, as.integer(Index1-1));  
   post3 <- as.matrix(apply(temp3, 2, function(x) calc_tapply_vect_sum( x, as.integer(Index1-1))))

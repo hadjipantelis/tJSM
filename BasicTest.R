@@ -46,7 +46,7 @@ library(lineprof)
 
 # fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
 if(1==1){
-fitLME =fitLME; data = liver; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT = NULL; control = list()
+fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT = NULL; control = list()
 
   if (!inherits(fitLME, "lme"))
     stop("\n'fitLME'must be a fit returned by lme().")

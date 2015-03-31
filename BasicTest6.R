@@ -33,7 +33,7 @@ source('CheckDelta.R')
 
 source('HelperRcppEigenFunc.cxx');
 
-if(1==2){
+if(1==1){
 
 load('aids.rda')
 fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), random = ~ 1 | ID, data = aids)
@@ -60,12 +60,12 @@ fitJTdam1r1o <- jmodelTM(fitLME, fitCOX, aids, model = 1, rho=1,timeVarY = 'obst
 fitJTdam2r0o <- jmodelTM(fitLME, fitCOX, aids, model = 2, rho=0,timeVarY = 'obstime') 
 fitJTdam1r0o <- jmodelTM(fitLME, fitCOX, aids, model = 1, rho=0,timeVarY = 'obstime') 
 
-OldTimings <- microbenchmark( jmodelTM(fitLME, fitCOX, aids, model = 2, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, aids, model = 1, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, aids, model = 2, rho=0,timeVarY = 'obstime'),  jmodelTM(fitLME, fitCOX, aids, model = 1, rho=0,timeVarY = 'obstime') , times=66)
+# OldTimings <- microbenchmark( jmodelTM(fitLME, fitCOX, aids, model = 2, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, aids, model = 1, rho=1,timeVarY = 'obstime'), jmodelTM(fitLME, fitCOX, aids, model = 2, rho=0,timeVarY = 'obstime'),  jmodelTM(fitLME, fitCOX, aids, model = 1, rho=0,timeVarY = 'obstime') , times=66)
 
-save.image('Second_modelwide_benchmarks.RData.Pantelis')
+save.image('Sixth_modelwide_benchmarks.RData.Pantelis')
 }
 
-if (1==1){ # This is to be done
+if (1==12){ # This is to be done
 
 load("liver.rda")
 liver.unq <- liver[!duplicated(liver$ID), ]
