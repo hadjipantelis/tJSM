@@ -26,8 +26,7 @@ PFDSMult <- function (model, theta, tol, iter, delta) {
   
   #========== make the DS matrix symmetric ==========#
   DS <- (DS + t(DS)) / 2
-  svd_DS <- svd(DS)
-  V <- - svd_DS$v %*% diag(1 / svd_DS$d) %*% t(svd_DS$u)
+  V <- -solve(DS);
   Valpha.name <- if (model == 1) paste("alpha:", alpha.name, sep = "") else "alpha"
   Vnames <- c(paste("gamma.", 1:ncb, sep = ""), paste(rep("phi:", ncz), phi.names, sep = ""), Valpha.name, 
               "sigma.e", "sigma.b")

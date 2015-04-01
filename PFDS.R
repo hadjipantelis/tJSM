@@ -24,9 +24,7 @@ PFDS <- function (model, theta, tol, iter, delta) {
   }
   
   #========== make the DS matrix symmetric ==========#
-  DS <- (DS + t(DS)) / 2
-  # svd_DS <- svd(DS)
-  # V <- - svd_DS$v %*% diag(1/svd_DS$d) %*% t(svd_DS$u)
+  DS <- (DS + t(DS)) / 2 
   V <- -solve(DS);
   Valpha.name <- if (model == 1) paste("alpha:", alpha.name, sep = "") else "alpha"
   Vnames <- c(paste(rep("beta:", ncx), beta.names, sep = ""), paste(rep("phi:", ncw), phi.names, sep = ""),

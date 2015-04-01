@@ -40,9 +40,8 @@ PLFDMult <- function (model, theta, tol, iter, delta) {
       I[i, j] <- - (PLs[i,j] - pls[i] - pls[j] + pl) / (delta ^ 2)
     }
   }
-  I <- I + t(I) - diag(diag(I))
-  svd_I <- svd(I)
-  V <- svd_I$v %*% diag(1 / svd_I$d) %*% t(svd_I$u) / n
+  I <- I + t(I) - diag(diag(I)) 
+  V <- -solve(DS);
   Valpha.name <- if (model == 1) paste("alpha:", alpha.name, sep = "") else "alpha"
   Vnames <- c(paste("gamma.", 1:ncb, sep = ""), paste(rep("phi:", ncz), phi.names, sep = ""), Valpha.name, 
               "sigma.e", "sigma.b")

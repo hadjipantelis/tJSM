@@ -18,7 +18,8 @@ LHMult1 <- function (theta) {
   # VB <- lapply(1:n, function(i) as.numeric(Bsigma2 - (Bsigma2 ^ 2) * t(BTg[[i]]) %*% solve(VY[[i]]) %*% BTg[[i]])) 
   VB <-  lapply(1:n, function(i) calc_VB(M_i2 = BTg[[i]], M_i1 = BSigma2, M_i3 = VY[[i]]))
 
-  # muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2 * t(BTg[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - BTg[[i]]))) 
+  #
+  muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2 * t(BTg[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - BTg[[i]]))) 
 
   bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2 * VB[[i]]) * t(b)))
 
@@ -33,16 +34,11 @@ LHMult1 <- function (theta) {
   # eta.s <- as.vector(Ztime2 %*% phi) + alpha * Btime2.b # M*nknot matrix #
   # exp.es <- exp(eta.s) # M*nknot matrix #
   calc_y_a( Ztime2,phi); # Ztime2.b gets altered
-  eta.s <- alpha * Btime2.b + Ztime2 
-  n_ <- ncol(eta.s)
-  m_ <- nrow(eta.s)
-  exp.es <- matrix(calc_expM(eta.s), m_, n_)
-
+  exp.es <- alpha * Btime2.b + Ztime2 
+  calc_expM2(exp.es)
 
   const <- matrix(0, n, nknot) # n*nknot matrix #
-#  const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index) # n*nknot matrix # 
   const[nk != 0, ] <- calc_rowsum( (Index),  exp.es * lamb[Index1])
-
 
   log.density2 <- - log(1 + rho * const) # n*nknot matrix # 
   log.survival <- if(rho > 0) log.density2 / rho else - const # n*nknot matrix #
@@ -50,7 +46,6 @@ LHMult1 <- function (theta) {
   f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*nknot matrix #
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #
    
-  # f.long <- sapply(1:n, function(i) dmvnorm(Y.st[[i]], as.vector(BTg[[i]]), VY[[i]])) # vector of length n #
   f.long <- sapply(1:n, function(i) calc_MVND(Y.st[[i]], as.vector(BTg[[i]]), VY[[i]]))
   return(sum(log(f.long * deno / sqrt(pi))))
 }
