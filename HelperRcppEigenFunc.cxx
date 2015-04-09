@@ -406,8 +406,7 @@ calc_mult0_rowsum <- cxxfunction(settings=settingsE, plugin="RcppEigen", signatu
     using Eigen::Map;       // to map input variable to an existing array of data
   using Eigen::MatrixXd;       // to use MatrixXd
   using Eigen::VectorXi;       // to use VectorXd
-  using Eigen::VectorXd;       // to use VectorXd
-  using Eigen::ArrayXd;
+  using Eigen::VectorXd;       // to use VectorXd 
   //#include <iostream>
 
   const Map<VectorXi> y1(Rcpp::as<Map<VectorXi> > (y_i));    // Map vector y_i1 to vectorXd y1  

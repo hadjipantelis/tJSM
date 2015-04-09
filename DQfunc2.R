@@ -17,10 +17,10 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
   plamb <- ptheta$lamb
   lamb <- theta$lamb
   
-  VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2))
-  VB <-  lapply(1:n, function(i) calc_VB(M_i2 = Z.st[[i]], M_i1 = BSigma, M_i3 = VY[[i]]))
-  muB <- lapply(1:n, function(i) calc_muB( BSigma, M_i3=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
-  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) ) 
+  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = BSigma, b = Ysigma2 ))  
+  VB <-  lapply(1:n, function(i) calc_VB( BSigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
+  muB <- lapply(1:n, function(i) calc_muB( BSold=BSigma , Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta ,VY= VY[[i]], Xst=X.st[[i]]))
+  bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]],v1= b ,M = VB[[i]]) ) 
 
   bi <- do.call(rbind, bi.st) # (n*ncz)*GQ matrix #
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix # 
@@ -78,10 +78,10 @@ DQfunc2 <- function (ptheta, theta) { # ptheta means "theta prime"
 
   temp0 <- exp.esp; temp0[1] = temp0[1] +0 # "touch the variable"
   calc_M1_M2_M3_Hadamard(temp0, CondExp ,  Integral, as.integer(Index-1))
-  temp1 <- calc_M_y(y_i = wGQ, M_i = temp0) 
-  calc_y_a( Ztime2.b,1/palpha) # Ztime2.b gets altered because we do in-place multiplication - Ztime2.b *= (1/ alpha)
+  temp1 <- calc_M_y(v = wGQ, M = temp0)
+  calc_y_a( Ztime2.b, a = 1/palpha) # Ztime2.b gets altered because we do in-place multiplication - Ztime2.b *= (1/ alpha)
   calc_M1_M2_Hadamard(temp0,Ztime2.b)
-  temp2 <- calc_M_y(y_i =wGQ, M_i= temp0)
+  temp2 <- calc_M_y(v =wGQ, M= temp0)
 
   temp3 <- Wtime2 * temp1 # M*ncw matrix #
    

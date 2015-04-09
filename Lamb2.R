@@ -11,10 +11,10 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
   phi <- para.list$phi
   alpha <- para.list$alpha
   
-  VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2))  
-  VB <-  lapply(1:n, function(i) calc_VB(M_i2 = Z.st[[i]], M_i1 = BSigma, M_i3 = VY[[i]]))
-  muB <- lapply(1:n, function(i) calc_muB( BSigma, M_i3=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
-  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) ) 
+  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = BSigma, b = Ysigma2 ))  
+  VB <-  lapply(1:n, function(i) calc_VB( BSigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
+  muB <- lapply(1:n, function(i) calc_muB( BSold=BSigma , Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta ,VY= VY[[i]], Xst=X.st[[i]]))
+  bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]],v1= b ,M = VB[[i]]) ) 
 
   # each element is ncz*GQ matrix #
   bi <- do.call(rbind, bi.st) # (n*ncz)*GQ mat rix #
@@ -47,8 +47,8 @@ Lamb2 <- function (para, lamb.init, tol, iter) {
     # WE DO IN PLACE MULTIPLICATION / variable 'tempLamb0' is holding the results    
     tempLamb0 <- exp.es; tempLamb0[1] = tempLamb0[1] +0 # "touch the variable"
     calc_M1_M2_M3_Hadamard(tempLamb0, CondExp ,  Integral, as.integer(Index-1))
-    tempLamb <- calc_M_y(y_i =wGQ, M_i=tempLamb0)
-    postLamb <- calc_tapply_vect_sum( tempLamb, as.integer(Index1-1)); ## Check this!
+    tempLamb <- calc_M_y(v =wGQ, M =tempLamb0)
+    postLamb <- calc_tapply_vect_sum( v1= tempLamb, v2= as.integer(Index1-1)); ## Check this!
     lamb.new <- Index2 / postLamb[postLamb!=0]
     
     Lamb.new <- cumsum(lamb.new)

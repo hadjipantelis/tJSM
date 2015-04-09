@@ -12,10 +12,10 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   alpha.old <- theta.old$alpha
   lamb.old <- theta.old$lamb
   
-  VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma.old, Ysigma2.old)) 
-  VB <-  lapply(1:n, function(i) calc_VB(M_i2 = Z.st[[i]], M_i1 = BSigma.old, M_i3 = VY[[i]]))
-  muB <- lapply(1:n, function(i) calc_muB( BSigma.old, M_i3=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta.old, M_i1=VY[[i]], M_i2=X.st[[i]]))
-  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) )
+  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = BSigma.old, b = Ysigma2.old))  
+  VB <-  lapply(1:n, function(i) calc_VB( BSigma.old,M2 =  Z.st[[i]], M3 = VY[[i]])) 
+  muB <- lapply(1:n, function(i) calc_muB( BSold=BSigma.old, Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta.old,VY= VY[[i]], Xst=X.st[[i]]))
+  bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]],v1= b ,M = VB[[i]]) ) 
  
   bi <- do.call(rbind, bi.st)
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
@@ -73,12 +73,12 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
  
   temp0b <- Ztime2.b * temp0a 
 
-  temp1 <- CondExp2 * calc_rowsum( (Index), temp0b)
-  temp2 <- calc_mult_rowsum2(y_i = Index, M_i2 = CondExp2, M_i1 = temp0b,      Ztime2.b)
-  temp3 <- lapply(1:(ncw), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime2[, i], M_i2 = CondExp2, temp0a))
-  temp4 <- lapply(1:(ncw^2), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime22[, i], M_i2 = CondExp2, temp0a)) 
+  temp1 <- CondExp2 * calc_rowsum( (Index), temp0b) 
+  temp2 <- calc_mult_rowsum2(v= Index, A=CondExp2, M=temp0b,L=Ztime2.b)
+  temp3 <- lapply(1:(ncw), function(i) calc_mult_rowsum(v= Index, u = Wtime2[, i], A= CondExp2,  M=temp0a))
+  temp4 <- lapply(1:(ncw^2), function(i) calc_mult_rowsum(v= Index, u = Wtime22[, i], A= CondExp2, M= temp0a)) 
   temp0c <- Ztime2.b *temp0a
-  temp5 <- lapply(1:(ncw), function(i) calc_mult_rowsum(y_i = Index, y_i2 = Wtime2[, i], M_i2 = CondExp2,temp0c)) 
+  temp5 <- lapply(1:(ncw), function(i) calc_mult_rowsum(v= Index, u = Wtime2[, i], A=CondExp2, M=temp0c)) 
 
   Integral2 <- Integral[nk != 0,]
   post1 <- sum((temp1 * Integral2) %*% wGQ)
@@ -109,8 +109,8 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix # 
   calc_expM2(eta.sn);
   calc_M1_M2_M3_Hadamard(eta.sn, CondExp ,  Integral, as.integer(Index-1))
-  tempLamb <- calc_M_y(y_i =wGQ, M_i=eta.sn)
-  postLamb <- calc_tapply_vect_sum( tempLamb, as.integer(Index1-1)); ## Check this!
+  tempLamb <- calc_M_y(v =wGQ, M=eta.sn)
+  postLamb <- calc_tapply_vect_sum(  v1= tempLamb, v2=  as.integer(Index1-1)); ## Check this!
 
   lamb.new <- Index2 / postLamb
   

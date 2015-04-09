@@ -1,11 +1,77 @@
-source('BasicTest.R')
-source('BasicTest.R')
-shine(ll)
-shine(ll)
-data = aids
-model = 1; rho = 0
-model = 2; rho = 0
-timeVarY = 'obstime'; timeVarT = NULL
+library(statmod)
+library(mvtnorm)
+library(nlme)
+library(survival)
+library(microbenchmark)
+
+source('logLik.jmodelTM.R')
+source('vcov.jmodelTM.R')
+source('AIC.jmodelTM.R')
+source('BIC.jmodelTM.R')
+source('jmodelTM.R')
+source('print.jmodelTM.R')
+source('summary.jmodelTM.R')
+source('print.summary.jmodelTM.R')
+source('InitValTM1.R')
+source('InitValTM2.R')
+source('EMiterTM1.R')
+source('EMiterTM2.R')
+source('Lamb1.R')
+source('Lamb2.R')
+source('DQfunc1.R')
+source('DQfunc2.R')
+source('Sfunc.R')
+source('PFDS.R')
+source('PLFD.R')
+source('PRES.R')
+source('Indexing.R')
+source('Vec2List.R')
+source('List2Vec.R')
+source('LH1.R')
+source('LH2.R')
+source('CheckDelta.R')
+
+# source('HelperRcppEigenFunc.cxx');
+for (i in 1:length(cppToCompile)){
+  print( paste0('Compiling: ',cppToCompile[i]) )
+  sourceCpp( paste0('src/',cppToCompile[i]) )
+}
+
+
+
+ load('aids.rda')
+# load('liver.rda')
+fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), random = ~ 1 | ID, data = aids)
+fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
+
+# fitLME <- lme(proth ~ Trt * obstime, random = ~ obstime | ID, data = liver)
+# fitCOX <- coxph(Surv(start, stop, event) ~ Trt, data = liver, x = TRUE)
+#fitJT.ph <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime')
+library(lineprof)
+
+# fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
+if(1==1){
+fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT = NULL; control = list()
+
+  if (!inherits(fitLME, "lme"))
+    stop("\n'fitLME'must be a fit returned by lme().")
+  if (length(fitLME$group) > 1)
+    stop("\n nested random-effects are not allowed in lme().")
+  if (!is.null(fitLME$modelStruct$corStruct))
+    warning("\n correlation structure in 'fitLME' is ignored.")
+  if (!is.null(fitLME$modelStruct$varStruct))
+    warning("\n heteroscedasticity structure in 'fitLME' is ignored.")
+  
+  if (!inherits(fitCOX, "coxph"))
+    stop("\n'fitCOX' must be a fit returned by coxph().")
+  if (is.null(fitCOX$x))
+    stop("\n must specify argument 'x=TRUE' when using coxph().")
+
+  if (rho < 0) {
+    rho <- 0 # fit Cox model if not specified #
+    warning("\n rho<0 is not valid, Cox model is fitted instead!")
+  }
+  
   ID <- as.vector(unclass(fitLME$groups[[1]])) 
   ni <- as.vector(tapply(ID, ID, length))           
   bBLUP <- data.matrix(ranef(fitLME)) 
@@ -30,6 +96,8 @@ timeVarY = 'obstime'; timeVarT = NULL
   formSurv <- formula(fitCOX)
   TermsSurv <- fitCOX$terms
   mfSurv <- model.frame(TermsSurv, data)[cumsum(ni), ]
+
+
   if (!is.null(timeVarT)) {
     if (!all(timeVarT %in% all.vars(TermsSurv)))
       stop("\n'timeVarT' does not correspond columns in the fixed-effect design matrix of 'fitCOX'.")
@@ -45,7 +113,7 @@ timeVarY = 'obstime'; timeVarT = NULL
   mfLongX <- model.frame(TermsLongX, data = mydata) 
   X <- as.matrix(model.matrix(formLongX, mfLongX))
   alpha.name <- rownames(attr(TermsLongX, "factors"))[attr(TermsLongX, "response")]
-    
+  
   formLongZ <- formula(fitLME$modelStruct$reStruct[[1]]) 
   mfLongZ <- model.frame(terms(formLongZ), data = mydata)
   TermsLongZ <- attr(mfLongZ, "terms") 
@@ -103,26 +171,10 @@ timeVarY = 'obstime'; timeVarT = NULL
   ncz2 <- ncz ^ 2
   p <- ncz * (ncz + 1) / 2
   
-  mfSurv2 <- mfSurv[Index, ]
-  if (!is.null(timeVarT)){
-    mfSurv2[timeVarT] <- times
-  }
-  Wtime2 <- as.matrix(model.matrix(formSurv, mfSurv2))
-  if (attr(TermsSurv, 'intercept')) Wtime2 <- as.matrix(Wtime2[, - 1]) # excluding intercept #
-  
-  n <- nLong
-  N <- length(Y)
-  ni <- as.vector(tapply(ID, ID, length))
-  nu <- length(U)
-  ncz <- ncol(Z)
-  ncx <- ncol(X)
-  ncw <- ncol(W)
-  ncz2 <- ncz ^ 2
-  p <- ncz * (ncz + 1) / 2
-  
- controlvals <- list(tol.P = 10 ^ (-4), tol.L = 10 ^ (-8), max.iter = 200, SE.method = 'PRES', delta = 10 ^ (- 5), 
+  controlvals <- list(tol.P = 10 ^ (-4), tol.L = 10 ^ (-8), max.iter = 200, SE.method = 'PRES', delta = 10 ^ (- 5), 
                       nknot = if (ncz == 1) 12 else if (ncz == 2) 10 else 8)
- namec <- names(control)
+  control <- c(control)
+  namec <- names(control)
   if (length(uname <- namec[!namec %in% names(controlvals)]) > 0) 
     warning("\n unknown names in 'control': ", paste(uname, collapse = ", "))
   controlvals[namec] <- control
@@ -140,7 +192,7 @@ timeVarY = 'obstime'; timeVarT = NULL
   wGQ <- apply(wGQ, 1, prod)
   GQ <- nrow(b)
   
-Z.st <- lapply(split(Z, ID), function(x) matrix(x, ncol = ncz))
+  Z.st <- lapply(split(Z, ID), function(x) matrix(x, ncol = ncz))
   Y.st <- split(Y, ID)
   X.st <- lapply(split(X, ID), function(x) matrix(x, ncol = ncx))
   Ztime2.st <- vector('list', n)
@@ -155,7 +207,7 @@ Z.st <- lapply(split(Z, ID), function(x) matrix(x, ncol = ncz))
   } else {
     environment(InitValTM2) <- environment(EMiterTM2) <- environment()
   }
-   
+    
   BSigma <- lapply(lapply(fitLME$modelStruct$reStruct, as.matrix), 
                    function(x) x * fitLME$sigma ^ 2)[[1]]
   # the estimated variance-covariance matrix for the random effects  #
@@ -171,7 +223,9 @@ Z.st <- lapply(split(Z, ID), function(x) matrix(x, ncol = ncz))
   theta.old <- list(beta = beta, phi = phi, alpha = alpha, Ysigma = Ysigma, BSigma = BSigma,  
                     lamb = lamb, lgLik = 0)
   err.P <- err.L <- step <- 1
-(err.P < tol.P | err.L < tol.L)
+  
+}
+if(2==22){
   while (step <= iter) {
     
     if (err.P < tol.P | err.L < tol.L) break
@@ -192,6 +246,7 @@ Z.st <- lapply(split(Z, ID), function(x) matrix(x, ncol = ncz))
   }
   converge <- as.numeric(err.P < tol.P | err.L < tol.L)
   
+  
   delta <- controlvals$delta
   environment(Sfunc) <- environment()
   if (model == 1) {
@@ -199,27 +254,80 @@ Z.st <- lapply(split(Z, ID), function(x) matrix(x, ncol = ncz))
   } else {
     environment(Lamb2) <- environment(DQfunc2) <- environment(LH2) <- environment()
   }
-controlvals$SE.method == 'PFDS'
-(controlvals$SE.method == 'PRES') 
-(CheckDeltaRE(theta.new, ncz, delta))
-model=model; theta=theta.new; tol = min(tol.P, delta)/100;
-Lamb2(para1, lamb.init, tol, iter)
-  para <- List2Vec(theta)
-  lamb.init <- theta$lamb
-  len <- length(para)
-   DS <- matrix(0, len, len)
-   para1 <- para2 <- para3 <- para4 <- para
-    para1[i] <- para[i] - 2 * delta
-    para2[i] <- para[i] - delta
-    para3[i] <- para[i] + delta
-    para4[i] <- para[i] + 2 * delta
-    Lamb2(para1, lamb.init, tol, iter)
-Rprof( Lamb2(para1, lamb.init, tol, iter) )
-system.time(testvar= Lamb2(para1, lamb.init, tol, iter) )
-system.time(testvar<- Lamb2(para1, lamb.init, tol, iter) )
-system.time(testvar<- Lamb2(para1, lamb.init, tol, iter) )
-system.time(testvar<- Lamb2(para1, lamb.init, tol, iter) )
-microbenchmark( Lamb2(para1, lamb.init, tol, iter)
-)
-microbenchmark( Lamb2(para1, lamb.init, tol, iter) , times= 15)
-savehistory('toy.Rhist')
+
+pres_res = PRES(model, theta.old, min(tol.P, delta)/100, iter, delta)
+pfds_res = PFDS(model, theta.old, min(tol.P, delta)/100, iter, delta)
+plfd_res  = PLFD(model, theta.old, min(tol.P, delta)/100, iter, delta)
+
+
+}
+
+if(1==10){
+  if (controlvals$SE.method == 'PFDS') {
+    environment(PFDS) <- environment()
+    if (CheckDeltaFD(theta.new, ncz, delta)) {
+      time.SE <- system.time(Vcov <- PFDS(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
+      if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
+        warning("NA's present in StdErr estimation due to numerical error!\n")
+    } else {
+      Vcov <- time.SE <- NA
+      warning("\n 'delta' is too large, use smaller 'delta'!")
+    }
+  } else if (controlvals$SE.method == 'PRES') {
+    environment(PRES) <- environment()
+    if (CheckDeltaRE(theta.new, ncz, delta)) {
+      time.SE <- system.time(Vcov <-  PRES(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
+      if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
+        warning("NA's present in StdErr estimation due to numerical error!\n")
+    } else {
+      Vcov <- time.SE <- NA
+      warning("\n 'delta' is too large, use smaller 'delta'!")
+    }
+  } else if (controlvals$SE.method == 'PLFD') {
+    environment(PLFD) <- environment()
+    if (CheckDeltaFD(theta.new, ncz, delta)) {
+      time.SE <- system.time(Vcov <- PLFD(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
+      if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
+        warning("NA's present in StdErr estimation due to numerical error!\n")
+    } else {
+      Vcov <- time.SE <- NA
+      warning("\n 'delta' is too large, use smaller 'delta'!")
+    }
+  } else {
+    Vcov <- time.SE <- NA
+    warning("\n Standard error estimation method should be either 'PFDS', 'PRES' or 'PLFD'.")
+  }
+
+para = List2Vec(theta.new); lamb.init <- theta.new$lamb; len <- length(para) 
+
+ DS <- matrix(0, len, len);  i=1;  para1 <- para2 <- para3 <- para4 <- para 
+ para1[i] <- para[i] - 2 * delta 
+ para2[i] <- para[i] - delta 
+ para3[i] <- para[i] + delta 
+ para4[i] <- para[i] + 2 * delta 
+
+ list1 <- Vec2List(para1, ncx, ncz, ncw) 
+ list2 <- Vec2List(para2, ncx, ncz, ncw) 
+ list3 <- Vec2List(para3, ncx, ncz, ncw) 
+ list4 <- Vec2List(para4, ncx, ncz, ncw) 
+tol =  min(tol.P, delta)/100 ;
+ result1 <- if (model == 1) Lamb1(para1, lamb.init, tol, iter) else Lamb2(para1, lamb.init, tol, iter) 
+ result2 <- if (model == 1) Lamb1(para2, lamb.init, tol, iter) else Lamb2(para2, lamb.init, tol, iter) 
+ result3 <- if (model == 1) Lamb1(para3, lamb.init, tol, iter) else Lamb2(para3, lamb.init, tol, iter) 
+ result4 <- if (model == 1) Lamb1(para4, lamb.init, tol, iter) else Lamb2(para4, lamb.init, tol, iter) 
+list1 <- Vec2List(para1, ncx, ncz, ncw) 
+ list2 <- Vec2List(para2, ncx, ncz, ncw) 
+ list3 <- Vec2List(para3, ncx, ncz, ncw) 
+ list4 <- Vec2List(para4, ncx, ncz, ncw) 
+ theta.input1 <- list(beta = list1$beta, phi = list1$phi, alpha = list1$alpha, Ysigma = list1$Ysigma, BSigma = list1$BSigma, lamb = result1$lamb) 
+ theta.input2 <- list(beta = list2$beta, phi = list2$phi, alpha = list2$alpha, Ysigma = list2$Ysigma, BSigma = list2$BSigma, lamb = result2$lamb) 
+ theta.input3 <- list(beta = list3$beta, phi = list3$phi, alpha = list3$alpha, Ysigma = list3$Ysigma, BSigma = list3$BSigma, lamb = result3$lamb) 
+ theta.input4 <- list(beta = list4$beta, phi = list4$phi, alpha = list4$alpha, Ysigma = list4$Ysigma, BSigma = list4$BSigma, lamb = result4$lamb)   
+S1 <- Sfunc(model, theta.input1)
+
+} 
+ 
+
+#print('Running a lineprof with fitJT.ph2');
+#ll <- lineprof(fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime'))
+
