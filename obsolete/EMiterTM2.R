@@ -12,25 +12,27 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   alpha.old <- theta.old$alpha
   lamb.old <- theta.old$lamb
   
-  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = BSigma.old, b = Ysigma2.old))  
+  VY <- lapply(1:n, function(i) calc_VY( M = Z.st[[i]], A = BSigma.old, b = Ysigma2.old))  
   VB <-  lapply(1:n, function(i) calc_VB( BSigma.old,M2 =  Z.st[[i]], M3 = VY[[i]])) 
   muB <- lapply(1:n, function(i) calc_muB( BSold=BSigma.old, Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta.old,VY= VY[[i]], Xst=X.st[[i]]))
   bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]],v1= b ,M = VB[[i]]) ) 
  
   bi <- do.call(rbind, bi.st)
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
-  Ztime2.b <-fast_lapply_length(Ztime2.st, bi.st, (1:n)[nk !=      0] - 1)# M*GQ matrix #
+  Ztime2.b <-fast_lapply_length(Ztime2.st, bi.st, (1:n)[nk != 0] - 1)# M*GQ matrix #
   
   log.lamb <- log(lamb.old[Index0])
   log.lamb[is.na(log.lamb)] <- 0
   log.density1 <- log.lamb + as.vector(Wtime %*% phi.old) + alpha.old * Ztime.b # n*GQ matrix #
+  # eta.s <- as.vector(Wtime2 %*% phi.old + alpha.old * Ztime2.b) # M*GQ matrix #
   eta.s <- as.vector(Wtime2 %*% phi.old) + alpha.old * Ztime2.b # M*GQ matrix #
 
-  calc_expM2(eta.s)
   const <- matrix(0, n, GQ) # n*GQ matrix #
-  temp0a <- eta.s * lamb.old[Index1];
-  const[nk != 0, ] <- calc_rowsum( (Index), temp0a)
 
+  calc_expM2(eta.s)
+  temp0a <- eta.s * lamb.old[Index1];
+
+  const[nk != 0, ] <- calc_rowsum( (Index), temp0a)
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
   log.survival <- if (rho > 0) log.density2 / rho else - const # n*GQ matrix # 
   
@@ -45,9 +47,11 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   CondExp <- (1 + d * rho) / (1 + rho * const) # conditional expectation E(xi|bi,Oi), n*GQ matrix #
   
   post.bi <- Integral %*% (t(bi) * wGQ) # n*(n*ncz) matrix #
-  post.bi <- if(ncz > 1) t(sapply(1:n, function(i) post.bi[i, ((i - 1) * ncz + 1) : (i * ncz)])) else 
+  post.bi <- if(ncz > 1) {
+		t(sapply(1:n, function(i) post.bi[i, ((i - 1) * ncz + 1) : (i * ncz)])) 
+		} else { 
              matrix(diag(post.bi), nrow = n) # n*ncz matrix Ehat(bi) #
-  
+	}  
   #========== Update BSigma ==========#
   if (ncz>1) {
   tempB <-  fast_rbind_lapply( bi.st )    # (n*ncz^2)*GQ matrix #      
@@ -55,8 +59,11 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
     tempB <- bi ^ 2
   }
   post.bi2 <- Integral %*% (t(tempB) * wGQ) # n*(n*ncz^2) matrix #
-  post.bi2 <- if(ncz > 1) t(sapply(1:n, function(i) post.bi2[i, ((i - 1) * ncz2 + 1) : (i * ncz2)])) else 
+  post.bi2 <- if(ncz > 1) {
+		t(sapply(1:n, function(i) post.bi2[i, ((i - 1) * ncz2 + 1) : (i * ncz2)])) 
+	} else { 
               matrix(diag(post.bi2), nrow = n) # n*(ncz^2) matrix Ehat(bibi^T) #
+  }
   BSigma.new <- if (ncz > 1) matrix(colMeans(post.bi2), ncz, ncz) else mean(post.bi2) # ncz*ncz matrix #
   
   #========== Update beta: the linear regresion coefficents of regression Yi-E(Zi*bi) on X_i ==========#
@@ -105,7 +112,6 @@ EMiterTM2 <- function (theta.old) { # Use apply instead of matrix calculation #
   alpha.new <- pa.new[ncw + 1]
   
   #========== Calculate the new lambda with new parameters ==========# 
-
   eta.sn <- as.vector(Wtime2 %*% phi.new) + alpha.new * Ztime2.b # M*GQ matrix # 
   calc_expM2(eta.sn);
   calc_M1_M2_M3_Hadamard(eta.sn, CondExp ,  Integral, as.integer(Index-1))

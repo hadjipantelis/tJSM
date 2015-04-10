@@ -3,6 +3,9 @@ library(mvtnorm)
 library(nlme)
 library(survival)
 library(microbenchmark)
+library(lineprof)
+library(Rcpp)
+library(RcppEigen)
 
 source('logLik.jmodelTM.R')
 source('vcov.jmodelTM.R')
@@ -32,6 +35,7 @@ source('LH2.R')
 source('CheckDelta.R')
 
 # source('HelperRcppEigenFunc.cxx');
+cppToCompile <- list.files('src/')
 for (i in 1:length(cppToCompile)){
   print( paste0('Compiling: ',cppToCompile[i]) )
   sourceCpp( paste0('src/',cppToCompile[i]) )
@@ -46,12 +50,11 @@ fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 
 # fitLME <- lme(proth ~ Trt * obstime, random = ~ obstime | ID, data = liver)
 # fitCOX <- coxph(Surv(start, stop, event) ~ Trt, data = liver, x = TRUE)
-#fitJT.ph <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime')
-library(lineprof)
+#fitJT.ph <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime') 
 
 # fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
 if(1==1){
-fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT = NULL; control = list()
+fitLME =fitLME; data = aids; model = 2; rho = 1; timeVarY = 'obstime';  timeVarT = NULL; control = list()
 
   if (!inherits(fitLME, "lme"))
     stop("\n'fitLME'must be a fit returned by lme().")
@@ -202,6 +205,7 @@ fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT
   X2 <- if(ncx > 1) t(apply(X, 1, function(x) x %o% x)) else X ^ 2
   X2.sum <- matrix(colSums(X2), nrow = ncx)  
   
+  environment(InitValTMgeneric)) <- environment()
   if (model == 1) {
     environment(InitValTM1) <- environment(EMiterTM1) <- environment()
   } else {
@@ -215,7 +219,9 @@ fitLME =fitLME; data = aids; model = 2; rho = 0; timeVarY = 'obstime';  timeVarT
   beta.names <- names(fixef(fitLME))
   Ysigma <- fitLME$sigma
   
-  surv.init <- if (model == 1) InitValTM1(beta) else InitValTM2(beta)
+  # surv.init <- if (model == 1) InitValTM1(beta) else InitValTM2(beta)
+  surv.init2 <- InitValTMgeneric(beta=beta, model= model);
+
   phi <- surv.init$phi
   alpha <- surv.init$alpha
   lamb <- surv.init$lamb

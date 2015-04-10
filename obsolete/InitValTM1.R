@@ -1,18 +1,18 @@
 
-#=============== Initial Value Calculation for Transformation Model II ===============#
+#=============== Initial Value Calculation for Transformation Model I ===============#
 
-InitValTM2 <- function (beta) {
+InitValTM1 <- function (beta) {
   
-  rand <- rowSums(Z * bBLUP[ID, ]) # vector of length N #
-  rand.time <- rowSums(Ztime * bBLUP) # vector of length n #
-  rand.time2 <- rowSums(Ztime2 * bBLUP[Index, ]) # vector of length M #
+  fixed <- as.vector(X %*% beta) + rowSums(Z * bBLUP[ID, ]) # vector of length N #
+  fixed.time <- as.vector(Xtime %*% beta) + rowSums(Ztime * bBLUP) # vector of length n #
+  fixed.time2 <- as.vector(Xtime2 %*% beta) + rowSums(Ztime2 * bBLUP[Index, ]) # vector of length M #
   
   #========== first fit the Cox model ==========#
-  data.init <- data.frame(start = start, stop = stop, event = event, W = W, rand = rand)
-  fit <- coxph(Surv(start, stop, event) ~ W + rand, data = data.init) 
-  phi.old <- fit$coefficients[1:ncw]
+  data.init <- data.frame(start = start, stop = stop, event = event, W = W, fixed = fixed)
+  fit <- coxph(Surv(start, stop, event) ~ W + fixed, data = data.init) 
+  phi.old <- fit$coefficients[1 : ncw]
   alpha.old <- fit$coefficients[ncw + 1]
-  temp <- as.vector(exp(Wtime2 %*% phi.old + alpha.old * rand.time2)) # M*1 vector #
+  temp <- as.vector(exp(Wtime2 %*% phi.old + alpha.old * fixed.time2)) # M*1 vector #
   lamb.old <- Index2 / as.vector(tapply(temp, Index1, sum)) # vector of length n_u #
   
   if (rho == 0) {
@@ -21,42 +21,39 @@ InitValTM2 <- function (beta) {
     lamb.new <- lamb.old
   } else {
     for (it in 1:iter) {
-      exp.es <- exp(as.vector(Wtime2 %*% phi.old + alpha.old * rand.time2))
+      exp.es <- exp(as.vector(Wtime2 %*% phi.old + alpha.old * fixed.time2))
       const <- rep(0, n)
       const[nk != 0] <- as.vector(tapply(lamb.old[Index1] * exp.es, Index, sum)) # vector of length n #
       CondExp <- (1 + d * rho) / (1 + rho * const) # conditional expectation E(xi|Oi), vector of length n #
       CondExp2 <- CondExp[nk != 0]
-      temp1 <- sum(CondExp2 * as.vector(tapply(rand.time2 * exp.es * lamb.old[Index1], Index, sum))) # scalar #
-      temp2 <- sum(CondExp2 * as.vector(tapply(rand.time2^2 * exp.es * lamb.old[Index1], Index, sum))) # scalar #
-      temp3 <- lapply(1:ncw, function(i) CondExp2 * as.vector(tapply(Wtime2[, i] * exp.es * lamb.old[Index1], 
-                                         Index, sum)))
+      temp1 <- sum(CondExp2 * as.vector(tapply(fixed.time2 * exp.es * lamb.old[Index1], Index, sum))) # scalar #
+      temp2 <- sum(CondExp2 * as.vector(tapply(fixed.time2 ^ 2 * exp.es * lamb.old[Index1], Index, sum))) # scalar #
+      temp3 <- lapply(1:ncw, function(i) CondExp2 * as.vector(tapply(Wtime2[, i] * exp.es * lamb.old[Index1], Index, sum)))
       temp3 <- sapply(temp3, sum) # vector of length ncw #
-      temp4 <- lapply(1:(ncw^2), function(i) CondExp2 * as.vector(tapply(Wtime22[, i] * exp.es * lamb.old[Index1], 
-                                             Index, sum)))
+      temp4 <- lapply(1:(ncw ^ 2), function(i) CondExp2 * as.vector(tapply(Wtime22[, i] * exp.es * lamb.old[Index1],  Index, sum)))
       temp4 <- sapply(temp4, sum) # vector of length ncw^2 #
-      temp5 <- lapply(1:ncw, function(i) CondExp2 * as.vector(tapply(Wtime2[, i] * rand.time2 * exp.es * 
-                                         lamb.old[Index1], Index, sum)))
+      temp5 <- lapply(1:ncw, function(i) CondExp2 * as.vector(tapply(Wtime2[, i] * fixed.time2 * exp.es * lamb.old[Index1], Index, sum)))
       temp5 <- sapply(temp5, sum) # vector of length ncw #
       
       phiScore <- colSums(d * Wtime) - temp3 # vector of length ncw #
-      alphaScore <- sum(d * rand.time) - temp1
+      alphaScore <- sum(d * fixed.time) - temp1
       pa.score <- c(phiScore, alphaScore)
       pa.info <- matrix(0, (ncw + 1), (ncw + 1)) # (ncw+1)*(ncw+1) matrix #
-      pa.info[1:ncw, 1:ncw] <- - temp4
-      pa.info[(ncw + 1), 1:ncw] <- - temp5
-      pa.info[1:ncw, (ncw + 1)] <- - temp5
-      pa.info[(ncw + 1), (ncw + 1)] <- - temp2
+      pa.info[1:ncw, 1:ncw] <- -temp4
+      pa.info[(ncw + 1), 1:ncw] <- -temp5
+      pa.info[1:ncw, (ncw + 1)] <- -temp5
+      pa.info[(ncw + 1), (ncw + 1)] <- -temp2
       
       #=============== Update phi and alpha ===============#
       pa.old <- c(phi.old, alpha.old) # vector of length (ncw+1) #
       paSVD <- svd(pa.info)
       pa.info.inv <- paSVD$v %*% diag(1/paSVD$d) %*% t(paSVD$u)
       pa.new <- pa.old - pa.info.inv %*% pa.score # vector of length (ncw+1) #
-      phi.new <- pa.new[1:ncw]
+      phi.new <- pa.new[1 : ncw]
       alpha.new <- pa.new[ncw + 1]
       
       #========== Calculate the new lambda with new parameters ==========#
-      exp.esn <- exp(as.vector(Wtime2 %*% phi.new + alpha.new * rand.time2))
+      exp.esn <- exp(as.vector(Wtime2 %*% phi.new + alpha.new * fixed.time2))
       tempLamb <- as.vector(tapply(CondExp[Index] * exp.esn, Index1, sum)) # vector of length M #
       lamb.new <- Index2 / tempLamb
       
@@ -70,7 +67,7 @@ InitValTM2 <- function (beta) {
       }
     }
   }
-  
+    
   result <- list(phi = phi.new, alpha = alpha.new, lamb = lamb.new)
   return(result)
 }
