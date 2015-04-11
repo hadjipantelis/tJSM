@@ -16,10 +16,10 @@ PRES <- function (model, theta, tol, iter, delta) {
     para2[i] <- para[i] - delta
     para3[i] <- para[i] + delta
     para4[i] <- para[i] + 2 * delta
-    result1 <- if (model == 1) Lamb1(para1, lamb.init, tol, iter) else Lamb2(para1, lamb.init, tol, iter)
-    result2 <- if (model == 1) Lamb1(para2, lamb.init, tol, iter) else Lamb2(para2, lamb.init, tol, iter)
-    result3 <- if (model == 1) Lamb1(para3, lamb.init, tol, iter) else Lamb2(para3, lamb.init, tol, iter)
-    result4 <- if (model == 1) Lamb1(para4, lamb.init, tol, iter) else Lamb2(para4, lamb.init, tol, iter)
+    result1 <- LambGeneric(para1, lamb.init, tol, iter)
+    result2 <- LambGeneric(para2, lamb.init, tol, iter)
+    result3 <- LambGeneric(para3, lamb.init, tol, iter)
+    result4 <- LambGeneric(para4, lamb.init, tol, iter)
     list1 <- Vec2List(para1, ncx, ncz, ncw)
     list2 <- Vec2List(para2, ncx, ncz, ncw)
     list3 <- Vec2List(para3, ncx, ncz, ncw)

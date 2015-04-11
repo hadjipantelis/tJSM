@@ -3,7 +3,7 @@
 #=============== Transformation model is fitted for the survival part ===============#
 
 DQfunc1 <- function (ptheta, theta) { # ptheta means "theta prime"
-
+  ## This might have significant (e-14) numerical difference with the original code. Something odd is happening with VB/muB.
   pbeta <- ptheta$beta
   beta <- theta$beta
   pYsigma2 <- (ptheta$Ysigma) ^ 2

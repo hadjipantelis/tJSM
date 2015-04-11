@@ -15,7 +15,7 @@ PFDS <- function (model, theta, tol, iter, delta) {
   for (i in 1:len) {
     para1 <- para
     para1[i] <- para[i] + delta
-    result <- if (model == 1) Lamb1(para1, lamb.init, tol, iter) else Lamb2(para1, lamb.init, tol, iter)
+    result <- LambGeneric(para1, lamb.init, tol, iter)
     para1.list <- Vec2List(para1, ncx, ncz, ncw)
     theta.input1 <- list(beta = para1.list$beta, phi = para1.list$phi, alpha = para1.list$alpha, 
                          Ysigma = para1.list$Ysigma, BSigma = para1.list$BSigma, lamb = result$lamb)

@@ -9,18 +9,11 @@ LH2 <- function (theta) {
   phi <- theta$phi
   alpha <- theta$alpha
   lamb <- theta$lamb
-   
-  # VY <- lapply(1:n, function(i) calc_VY(Z.st[[i]], BSigma, Ysigma2)) 
-  # VB <-  lapply(1:n, function(i) calc_VB(M_i2 = Z.st[[i]], M_i1 = BSigma, M_i3 = VY[[i]]))
-  # muB <- lapply(1:n, function(i) calc_muB( BSigma, M_i3=Z.st[[i]], y_i1=Y.st[[i]],  y_i2=beta, M_i1=VY[[i]], M_i2=X.st[[i]]))
-  # bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) ) 
-
 
   VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = BSigma, b = Ysigma2 ))  
   VB <-  lapply(1:n, function(i) calc_VB( BSigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
   muB <- lapply(1:n, function(i) calc_muB( BSold=BSigma , Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta ,VY= VY[[i]], Xst=X.st[[i]]))
   bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]],v1= b ,M = VB[[i]]) ) 
-
 
   # each element is ncz*GQ matrix #
   bi <- do.call(rbind, bi.st)

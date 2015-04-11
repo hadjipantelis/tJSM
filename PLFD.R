@@ -3,7 +3,7 @@
 
 PLFD <- function (model, theta, tol, iter, delta) {
   
-  pl <- if (model == 1) LH1(theta) / n else LH2(theta) / n
+  pl <- LHGeneric(theta) / n
   
   para <- List2Vec(theta)
   lamb.init <- theta$lamb
@@ -15,11 +15,11 @@ PLFD <- function (model, theta, tol, iter, delta) {
       para1 <- para
       para1[i] <- para[i] + delta
       para1[j] <- para1[j] + delta
-      result <- if (model == 1) Lamb1(para1, lamb.init, tol, iter) else Lamb2(para1, lamb.init, tol, iter)
+      result <- LambGeneric(para1, lamb.init, tol, iter)
       para1.list <- Vec2List(para1, ncx, ncz, ncw)
       theta.input1 <- list(beta = para1.list$beta, phi = para1.list$phi, alpha = para1.list$alpha, 
                            Ysigma = para1.list$Ysigma, BSigma = para1.list$BSigma, lamb = result$lamb)
-      PLs[i, j] <- if (model == 1) LH1(theta.input1) / n else LH2(theta.input1) / n
+      PLs[i, j] <- LHGeneric(theta.input1) / n
     }
   }
   
@@ -27,11 +27,11 @@ PLFD <- function (model, theta, tol, iter, delta) {
   for (i in 1:len) {
     para1 <- para
     para1[i] <- para[i] + delta
-    result <- if (model == 1) Lamb1(para1, lamb.init, tol, iter) else Lamb2(para1, lamb.init, tol, iter)
+    result <- LambGeneric(para1, lamb.init, tol, iter)
     para1.list <- Vec2List(para1, ncx, ncz, ncw)
     theta.input1 <- list(beta = para1.list$beta, phi = para1.list$phi, alpha = para1.list$alpha, 
                          Ysigma = para1.list$Ysigma, BSigma = para1.list$BSigma, lamb = result$lamb)
-    pls[i] <- if (model == 1) LH1(theta.input1) / n else LH2(theta.input1) / n
+    pls[i] <- LHGeneric(theta.input1) / n
   }
   
   I <- matrix(0, len, len)
