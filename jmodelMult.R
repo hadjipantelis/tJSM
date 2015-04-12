@@ -123,9 +123,9 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   
   Y.st <- split(Y, ID)
   B.st <- lapply(split(B, ID), function(x) matrix(x, ncol = ncb))
-  Ztime22 <- if(ncz > 1) t(apply(Ztime2, 1, function(x) x %o% x)) else Ztime2 ^ 2
-  Btime22 <- if(ncb > 1) t(apply(Btime2, 1, function(x) x %o% x)) else Btime2 ^ 2
-  B2 <- if(ncb > 1) t(apply(B, 1, function(x) x %o% x)) else B ^ 2
+  Ztime22 <- if(ncz > 1) t(apply(Ztime2, 1, function(x) tcrossprod(x))) else Ztime2 ^ 2
+  Btime22 <- if(ncb > 1) t(apply(Btime2, 1, function(x) tcrossprod(x))) else Btime2 ^ 2
+  B2 <- if(ncb > 1) t(apply(B, 1, function(x) tcrossprod(x))) else B ^ 2
   
   if (model == 1) {
     environment(InitValMult1) <- environment(EMiterMult1) <- environment()

@@ -2,7 +2,7 @@
 #=============== EM iteration Using Adaptive Gaussian Quadrature for Model I&II ===============#
 #=============== Transformation model is fitted for the survival part ===============#
 
-EMiterTMgeneric <- function (theta.old,model) { # Use apply instead of matrix calculation #
+EMiterTMGeneric <- function (theta.old,model) { # Use apply instead of matrix calculation #
   
   # Get Old Estimates #
   beta.old <- theta.old$beta
@@ -53,7 +53,8 @@ EMiterTMgeneric <- function (theta.old,model) { # Use apply instead of matrix ca
   
   CondExp <- (1 + d * rho) / (1 + rho * const) # conditional expectation E(xi|bi,Oi), n*GQ matrix #
   
-  post.bi <- Integral %*% (t(bi) * wGQ) # n*(n*ncz) matrix #
+  # post.bi <- Integral %*% (t(bi) * wGQ) # n*(n*ncz) matrix #
+  post.bi <- calc_M1timesM2v(Integral, bi, wGQ)
   post.bi <- if(ncz > 1) {
 		t(sapply(1:n, function(i) post.bi[i, ((i - 1) * ncz + 1) : (i * ncz)])) 
 		} else { 
@@ -61,7 +62,7 @@ EMiterTMgeneric <- function (theta.old,model) { # Use apply instead of matrix ca
 	}  
   #========== Update BSigma ==========#
   if (ncz>1) {
-  tempB <-  fast_rbind_lapply( bi.st )    # (n*ncz^2)*GQ matrix #      
+    tempB <-  fast_rbind_lapply( bi.st )    # (n*ncz^2)*GQ matrix #      
   } else {
     tempB <- bi ^ 2
   }

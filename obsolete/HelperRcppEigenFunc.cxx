@@ -521,5 +521,22 @@ fast_lapply_length <- cxxfunction(signature(data1 = "list", data2 = "list", inde
 cat('Finished compiling\n')
 
 
+cat('Compliling calc_M1timesM2v\n')
+calc_M1timesM2v <- cxxfunction( plugin = "RcppEigen",  signature(M_1 = "Matrix", M_2 = "Matrix", a_i = "array"), body=' 
+  using Eigen::Map;       // to map input variable to an existing array of data
+  using Eigen::MatrixXd;       // to use MatrixXd
+  using Eigen::ArrayXd;       // to use VectorXd 
+  const Map<ArrayXd> a(Rcpp::as<Map<ArrayXd> > (a_i));  // Map vector y_i1 to vectorXd y1  
+  const Map<MatrixXd> M1(Rcpp::as<Map<MatrixXd> > (M_1));    // Map matrix M_i to vectorXd M  
+  const Map<MatrixXd> M2(Rcpp::as<Map<MatrixXd> > (M_2));    // Map matrix M_i to vectorXd M  
+  const unsigned int m = M2.rows();
+  MatrixXd Intermediate =  M2;
+  for (unsigned int i = 0; i < m; ++i){
+    Intermediate.row(i) = M2.row(i).transpose().array() * a;  
+ }  
+return Rcpp::wrap( M1 * Intermediate.transpose() );
+' )
+
+
 
 

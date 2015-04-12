@@ -145,16 +145,18 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   X.st <- lapply(split(X, ID), function(x) matrix(x, ncol = ncx))
   Ztime2.st <- vector('list', n)
   for (i in (1:n)[nk != 0]) { Ztime2.st[[i]] <- matrix(Ztime2[Index == i, ], ncol = ncz) }
-  Wtime22 <- if (ncw > 1) t(apply(Wtime2, 1, function(x) x %o% x)) else Wtime2 ^ 2
-  Xtime22 <- if (ncx > 1) t(apply(Xtime2, 1, function(x) x %o% x)) else Xtime2 ^ 2
-  X2 <- if(ncx > 1) t(apply(X, 1, function(x) x %o% x)) else X ^ 2
+  Wtime22 <- if (ncw > 1) t(apply(Wtime2, 1, function(x) tcrossprod(x))) else Wtime2 ^ 2
+  Xtime22 <- if (ncx > 1) t(apply(Xtime2, 1, function(x) tcrossprod(x))) else Xtime2 ^ 2
+  X2 <- if(ncx > 1) t(apply(X, 1, function(x) tcrossprod(x))) else X ^ 2
   X2.sum <- matrix(colSums(X2), nrow = ncx)  
   
-  if (model == 1) {
-    environment(InitValTM1) <- environment(EMiterTM1) <- environment()
-  } else {
-    environment(InitValTM2) <- environment(EMiterTM2) <- environment()
-  }
+  #if (model == 1) {
+  #  environment(InitValTM1) <- environment(EMiterTM1) <- environment()
+  #} else {
+  #  environment(InitValTM2) <- environment(EMiterTM2) <- environment()
+  #}
+  environment(InitValTMGeneric) <- environment(EMiterTMGeneric) <- environment()
+
     
   BSigma <- lapply(lapply(fitLME$modelStruct$reStruct, as.matrix), 
                    function(x) x * fitLME$sigma ^ 2)[[1]]
@@ -163,7 +165,8 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   beta.names <- names(fixef(fitLME))
   Ysigma <- fitLME$sigma
   
-  surv.init <- if (model == 1) InitValTM1(beta) else InitValTM2(beta)
+  #surv.init <- if (model == 1) InitValTM1(beta) else InitValTM2(beta)
+  surv.init <- InitValTMGeneric(beta,model)
   phi <- surv.init$phi
   alpha <- surv.init$alpha
   lamb <- surv.init$lamb
@@ -176,8 +179,8 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
      
     if (err.P < tol.P | err.L < tol.L) break
     
-    theta.new <- if (model == 1) EMiterTM1(theta.old) else EMiterTM2(theta.old)
-     
+    # theta.new <- if (model == 1) EMiterTM1(theta.old) else EMiterTM2(theta.old)
+    theta.new  <-   EMiterTMGeneric(theta.old,model)
     new.P <- c(theta.new$beta, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$BSigma)
     old.P <- c(theta.old$beta, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$BSigma)
     err.P <- max(abs(new.P - old.P) / (abs(old.P) + tol.P))
@@ -195,11 +198,13 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   
   delta <- controlvals$delta
   environment(Sfunc) <- environment()
-  if (model == 1) {
-    environment(Lamb1) <- environment(DQfunc1) <- environment(LH1) <- environment()
-  } else {
-    environment(Lamb2) <- environment(DQfunc2) <- environment(LH2) <- environment()
-  }
+  #if (model == 1) {
+  #  environment(Lamb1) <- environment(DQfunc1) <- environment(LH1) <- environment()
+  #} else {
+  #  environment(Lamb2) <- environment(DQfunc2) <- environment(LH2) <- environment()
+  #}
+  environment(LambGeneric) <- environment(DQfuncGeneric) <- environment(LHGeneric) <- environment()
+
   if (controlvals$SE.method == 'PFDS') {
     environment(PFDS) <- environment()
     if (CheckDeltaFD(theta.new, ncz, delta)) {

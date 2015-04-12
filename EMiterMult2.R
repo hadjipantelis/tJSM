@@ -13,7 +13,7 @@ EMiterMult2 <- function (theta.old) { # Use apply instead of matrix calculation 
   lamb.old <- theta.old$lamb
   
   BTg <- lapply(B.st, function(x) as.vector(x %*% gamma.old))
-   #  VY <- lapply(1:n, function(i) as.matrix(Bsigma2.old * BTg[[i]] %*% t(BTg[[i]]) + Ysigma2.old * diag(1,ni[i])))
+  #  VY <- lapply(1:n, function(i) as.matrix(Bsigma2.old * BTg[[i]] %*% t(BTg[[i]]) + Ysigma2.old * diag(1,ni[i])))
 
   #  VB <- lapply(1:n, function(i) as.numeric(Bsigma2.old - (Bsigma2.old ^ 2) * t(BTg[[i]]) %*% solve(VY[[i]]) %*% BTg[[i]])) 
   # 
