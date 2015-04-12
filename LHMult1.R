@@ -12,27 +12,19 @@ LHMult1 <- function (theta) {
   lamb <- theta$lamb
   
   BTg <- lapply(B.st, function(x) as.vector(x %*% gamma))
-  # VY <- lapply(1:n, function(i) as.matrix(Bsigma2 * BTg[[i]] %*% t(BTg[[i]]) + Ysigma2 * diag(1, ni[i])))
   VY <- lapply(1:n, function(i) calc_VY(BTg[[i]], BSigma2, Ysigma2)) 
-
-  # VB <- lapply(1:n, function(i) as.numeric(Bsigma2 - (Bsigma2 ^ 2) * t(BTg[[i]]) %*% solve(VY[[i]]) %*% BTg[[i]])) 
   VB <-  lapply(1:n, function(i) calc_VB(M_i2 = BTg[[i]], M_i1 = BSigma2, M_i3 = VY[[i]]))
-
-  #
   muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2 * t(BTg[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - BTg[[i]]))) 
-
   bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2 * VB[[i]]) * t(b)))
 
   bi <- do.call(rbind, bi.st) # n*nknot matrix #
   Btime.b <- as.vector(Btime %*% gamma) * bi # n*nknot matrix #
   Btime2.b <- as.vector(Btime2 %*% gamma) * bi[Index, ] # M*nknot matrix #
   
+  
   log.lamb <- log(lamb[Index0])
   log.lamb[is.na(log.lamb)] <- 0
   log.density1 <- log.lamb + as.vector(Ztime %*% phi) + alpha * Btime.b # n*nknot matrix #
-  ##  For reference purposes only check alpha * Btime.b 
-  # eta.s <- as.vector(Ztime2 %*% phi) + alpha * Btime2.b # M*nknot matrix #
-  # exp.es <- exp(eta.s) # M*nknot matrix #
   calc_y_a( Ztime2,phi); # Ztime2.b gets altered
   exp.es <- alpha * Btime2.b + Ztime2 
   calc_expM2(exp.es)
