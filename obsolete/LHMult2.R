@@ -13,9 +13,9 @@ LHMult2 <- function (theta) {
   
   BTg <- lapply(B.st, function(x) as.vector(x %*% gamma))
   VY <- lapply(1:n, function(i) calc_VY(BTg[[i]], BSigma2, Ysigma2)) 
-  VB <-  lapply(1:n, function(i) calc_VB(M_i2 = BTg[[i]], M_i1 = BSigma2, M_i3 = VY[[i]]))
-  muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2 * t(BTg[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - BTg[[i]])))
-  bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2 * VB[[i]]) * t(b)))
+  VB <-  lapply(1:n, function(i) calc_VB(M2 = BTg[[i]], M1 = BSigma2, M3 = VY[[i]]))
+  muB <-lapply(1:n, function(i) calc_muBMult(  Bsigma2,VY[[i]],BTg[[i]],Y.st[[i]] )+1 )
+  bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]],v1= b ,M = VB[[i]]) ) 
 
   bi <- do.call(rbind, bi.st) # n*nknot matrix #
   
@@ -30,7 +30,7 @@ LHMult2 <- function (theta) {
   const[nk != 0, ] <- calc_rowsum( (Index),  exp.es * lamb[Index1])
 
   log.density2 <- - log(1 + rho * const) # n*nknot matrix # 
-  log.survival <- if(rho > 0) log.density2 / rho else - const # n*nknot matrix # 
+  log.survival <- if(rho > 0) log.density2 / rho else - const # n*nknot matrix #
   
   f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*nknot matrix #
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #

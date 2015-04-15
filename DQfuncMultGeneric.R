@@ -1,7 +1,7 @@
 
 #=============== The DQ Function for Model I of Multiplicative Joint Model ===============#
 
-DQfuncMult1 <- function (ptheta, theta) { # ptheta means "theta prime"
+DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
   
   pgamma <- ptheta$gamma
   pphi <- ptheta$phi
@@ -17,13 +17,11 @@ DQfuncMult1 <- function (ptheta, theta) { # ptheta means "theta prime"
   lamb <- theta$lamb
   
   BTg <- lapply(B.st, function(x) as.vector(x %*% gamma))
-  VY <- lapply(1:n, function(i) as.matrix(Bsigma2 * BTg[[i]] %*% t(BTg[[i]]) + Ysigma2 * diag(1, ni[i])))
-  #VB <- lapply(1:n, function(i) as.numeric(Bsigma2 - (Bsigma2 ^ 2) * t(BTg[[i]]) %*% solve(VY[[i]]) %*% BTg[[i]]))
-  VB <- lapply(1:n, function(i) as.numeric(Bsigma2 - (Bsigma2 ^ 2) * sum( forwardsolve(t(chol(VY[[i]])), BTg[[i]])^2)))
-  #muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2 * t(BTg[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - BTg[[i]])))
-  muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2 * t(BTg[[i]]) %*% solve(VY[[i]], as.vector(Y.st[[i]] - BTg[[i]]))))
+  VY <- lapply(1:n, function(i) calc_VY(BTg[[i]], Bsigma2, Ysigma2)) 
+  VB <-  lapply(1:n, function(i) calc_VB(M1 = Bsigma2,M2 =  BTg[[i]],  VY[[i]]))
+  muB <-lapply(1:n, function(i) calc_muBMult(  Bsigma2,VY[[i]],BTg[[i]],Y.st[[i]] )+1 )
+  bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]],v1= b ,M = VB[[i]]) ) 
 
-  bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2 * VB[[i]]) * t(b)))
   bi <- do.call(rbind, bi.st) # n*nknot matrix #
   Btime.b <- as.vector(Btime %*% gamma) * bi # n*nknot matrix #
   Btime2.b <- as.vector(Btime2 %*% gamma) * bi[Index, ] # M*nknot matrix #
@@ -34,7 +32,8 @@ DQfuncMult1 <- function (ptheta, theta) { # ptheta means "theta prime"
   eta.s <- as.vector(Ztime2 %*% phi) + alpha * Btime2.b # M*nknot matrix #
   exp.es <- exp(eta.s) # M*nknot matrix #
   const <- matrix(0, n, nknot) # n*nknot matrix #
-  const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index) # n*nknot matrix # 
+  #const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index) # n*nknot matrix # 
+  const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb[Index1], exp.es)
   log.density2 <- - log(1 + rho * const) # n*nknot matrix # 
   log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*nknot matrix #
   
@@ -63,8 +62,8 @@ DQfuncMult1 <- function (ptheta, theta) { # ptheta means "theta prime"
   
   post1 <- as.vector(tapply(temp1, Index1, sum)) # vector of length n_u #
   post2 <- as.vector(tapply(temp2, Index1, sum)) # vector of length n_u #
-  post3 <- as.matrix(apply(temp3, 2, function(x) tapply(x, Index1, sum))) # n_u*ncb matrix #
-  post4 <- as.matrix(apply(temp4, 2, function(x) tapply(x, Index1, sum))) # n_u*ncz matrix #
+  post3 <- as.matrix(apply(temp3, 2, function(x) calc_tapply_vect_sum(x,  as.integer(Index1-1)))) # n_u*ncb matrix #
+  post4 <- as.matrix(apply(temp4, 2, function(x) calc_tapply_vect_sum(x,  as.integer(Index1-1)))) # n_u*ncz matrix #
   post5 <- unlist(lapply(temp5, function(x) sum((x * Integral[ID, ]) %*% wGQ))) # vector of length ncb #
   post.bi <- as.vector((Integral * bi) %*% wGQ) # vector of length n #
   

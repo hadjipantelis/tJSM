@@ -15,11 +15,11 @@ PLFDMult <- function (model, theta, tol, iter, delta) {
       para1 <- para
       para1[i] <- para[i] + delta
       para1[j] <- para1[j] + delta
-      result <- if(model == 1) LambMult1(para1, lamb.init, tol, iter) else LambMult2(para1, lamb.init, tol, iter)
+      result <- LambMultGeneric(para1, lamb.init, tol, iter)
       para1.list <- Vec2ListMult(para1, ncz, ncb)
       theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
                            Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
-      PLs[i, j] <- if(model == 1) LHMult1(theta.input1) / n else LHMult2(theta.input1) / n
+      PLs[i, j] <- LambMultGeneric(theta.input1)/n
     }
   }
   
@@ -27,11 +27,11 @@ PLFDMult <- function (model, theta, tol, iter, delta) {
   for (i in 1:len) {
     para1 <- para
     para1[i] <- para[i] + delta
-    result <- if(model == 1) LambMult1(para1, lamb.init, tol, iter) else LambMult2(para1, lamb.init, tol, iter)
+    result <- LambMultGeneric(para1, lamb.init, tol, iter)  
     para1.list <- Vec2ListMult(para1, ncz, ncb)
     theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
                          Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
-    pls[i] <- if(model == 1) LHMult1(theta.input1) / n else LHMult2(theta.input1) / n
+    pls[i] <- LambMultGeneric(theta.input1) / n  
   }
   
   I <- matrix(0, len, len)

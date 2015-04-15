@@ -19,7 +19,7 @@ DQfuncMult2 <- function (ptheta, theta) { # ptheta means "theta prime"
   BTg <- lapply(B.st, function(x) as.vector(x %*% gamma))
   VY <- lapply(1:n, function(i) as.matrix(Bsigma2 * BTg[[i]] %*% t(BTg[[i]]) + Ysigma2 * diag(1, ni[i])))
   #VB <- lapply(1:n, function(i) as.numeric(Bsigma2 - (Bsigma2 ^ 2) * t(BTg[[i]]) %*% solve(VY[[i]]) %*% BTg[[i]]))
-  VB <- lapply(1:n, function(i) as.numeric(Bsigma2 - (Bsigma2 ^ 2) * sum( forwardsolve(t(chol(VY[[i]])), BTg[[i]])^2))) 
+  VB <- lapply(1:n, function(i) as.numeric(Bsigma2 - (Bsigma2 ^ 2) * sum( forwardsolve(t(chol(VY[[i]])), BTg[[i]])^2)))
   #muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2 * t(BTg[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - BTg[[i]])))
   muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2 * t(BTg[[i]]) %*% solve(VY[[i]], as.vector(Y.st[[i]] - BTg[[i]]))))
 
@@ -53,17 +53,17 @@ DQfuncMult2 <- function (ptheta, theta) { # ptheta means "theta prime"
   
   temp1 <- as.vector((CondExp[Index, ] * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #
   temp2 <- as.vector((CondExp[Index, ] * bi[Index, ] * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #
-  temp3 <- Ztime2 * temp1 # M*ncz matrix #
-  temp4 <- lapply(1:ncb, function(i) (Y - as.vector(B %*% pgamma) * bi[ID, ]) * B[, i] * bi[ID, ]) # N*nknot matrices #
+  temp4 <- Ztime2 * temp1 # M*ncz matrix #
+  temp5 <- lapply(1:ncb, function(i) (Y - as.vector(B %*% pgamma) * bi[ID, ]) * B[, i] * bi[ID, ]) # N*nknot matrices #
   
   post1 <- as.vector(tapply(temp1, Index1, sum)) # vector of length n_u #
   post2 <- as.vector(tapply(temp2, Index1, sum)) # vector of length n_u #
-  post3 <- as.matrix(apply(temp3, 2, function(x) tapply(x, Index1, sum))) # n_u*ncz matrix #
-  post4 <- unlist(lapply(temp4, function(x) sum((x * Integral[ID, ]) %*% wGQ))) # vector of length ncb #
+  post4 <- as.matrix(apply(temp4, 2, function(x) tapply(x, Index1, sum))) # n_u*ncz matrix #
+  post5 <- unlist(lapply(temp5, function(x) sum((x * Integral[ID, ]) %*% wGQ))) # vector of length ncb #
   post.bi <- as.vector((Integral * bi) %*% wGQ) # vector of length n #
   
-  Q[1 : ncb] <- post4 / pYsigma2
-  Q[(ncb + 1) : (ncb + ncz)] <- colSums(d * Ztime) - colSums(Index2 * post3 / post1) # vector of length ncz #
+  Q[1 : ncb] <- post5 / pYsigma2
+  Q[(ncb + 1) : (ncb + ncz)] <- colSums(d * Ztime) - colSums(Index2 * post4 / post1) # vector of length ncz #
   Q[ncb + ncz + 1] <- sum(d * post.bi) - sum(Index2 * post2 / post1)
   
   return(Q)

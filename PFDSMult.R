@@ -16,7 +16,7 @@ PFDSMult <- function (model, theta, tol, iter, delta) {
   for (i in 1:len) {
     para1 <- para
     para1[i] <- para[i] + delta
-    result <- if(model == 1) LambMult1(para1, lamb.init, tol, iter) else LambMult2(para1, lamb.init, tol, iter)
+    result <-   LambMultGeneric(para1, lamb.init, tol, iter)
     para1.list <- Vec2ListMult(para1, ncz, ncb)
     theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
                          Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)

@@ -4,8 +4,8 @@
 InitValMultGeneric <- function (gamma) {
   
   BTg <- lapply(B.st, function(x) as.vector(x %*% gamma))
-  G <- unlist(lapply(1:n, function(i) as.vector(Y.st[[i]] - BTg[[i]]) %x% as.vector(Y.st[[i]] - BTg[[i]])))
-  tempCov1 <- unlist(lapply(BTg, function(x) x %x% x))
+  G <- unlist(lapply(1:n, function(i)  as.vector(   tcrossprod(Y.st[[i]] -  BTg[[i]]))))
+  tempCov1 <- unlist(lapply(BTg, function(x) tcrossprod(x) ))
   tempCov2 <- unlist(lapply(1:n, function(i) c(diag(1, ni[i]))))
   tempCov <- cbind(tempCov1, tempCov2)
   sigmas <- solve(t(tempCov) %*% tempCov) %*% t(tempCov) %*% G
@@ -35,7 +35,7 @@ InitValMultGeneric <- function (gamma) {
   phi.old <- fit$coefficients[1 : ncz]
   alpha.old <- fit$coefficients[ncz + 1]
   temp <- as.vector(exp(Ztime2 %*% phi.old + alpha.old * fixedOrRand.time2)) # M*1 vector #
-  lamb.old <- Index2 / as.vector(tapply(temp, Index1, sum)) # vector of length n_u #
+  lamb.old <- Index2 / calc_tapply_vect_sum( temp,  as.integer(Index1-1))
 
   if (rho == 0) {
     phi.new <- phi.old

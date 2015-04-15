@@ -12,8 +12,7 @@ source('vcov.jmodelMult.R')
 source('AIC.jmodelMult.R')
 source('BIC.jmodelMult.R')
 source('jmodelMult.R')
-source('InitValMult1.R')
-source('InitValMult2.R')
+source('InitValMultGeneric.R') 
 source('EMiterMult1.R')
 source('EMiterMult2.R')
 source('DQfuncMult1.R')
@@ -24,6 +23,7 @@ source('LambMult1.R')
 source('LambMult2.R')
 source('LHMult1.R')
 source('LHMult2.R')
+source('LHMultGeneric.R')
 source('List2VecMult.R')
 source('Vec2ListMult.R')
 source('PFDSMult.R')
@@ -36,7 +36,9 @@ source('summary.jmodelMult.R')
 load("aids.rda")
 
 model <- 1
-control <- list(tol.P = 10 ^ (- 4), tol.L = 10 ^ (- 8), max.iter = 200, nknot = 8)
+control <- list(tol.P = 10 ^ (- 4), tol.L = 10 ^ (- 8), max.iter = 100, nknot = 5)
+
+
 
 fitLME <- lme(sqrt(CD4) ~ bs(obstime, 4), random =~ 1 | ID, data = aids)
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)

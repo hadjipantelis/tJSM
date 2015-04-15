@@ -128,9 +128,9 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   B2 <- if(ncb > 1) t(apply(B, 1, function(x) tcrossprod(x))) else B ^ 2
   
   if (model == 1) {
-    environment(InitValMult1) <- environment(EMiterMult1) <- environment()
+    environment(InitValMultGeneric) <- environment(EMiterMult1) <- environment()
   } else {
-    environment(InitValMult2) <- environment(EMiterMult2) <- environment()
+    environment(InitValMultGeneric) <- environment(EMiterMult2) <- environment()
   }
   
   tempResp <- strsplit(toString(formLongX), ", ")[[1]][c(2, 1)]
@@ -143,7 +143,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   fitLM <- eval(parse(text = tempForm3))
   gamma <- as.vector(fitLM$coefficients)
   
-  surv.init <- if (model == 1) InitValMult1(gamma) else InitValMult2(gamma)
+  surv.init <-  InitValMultGeneric(gamma)  
   phi <- surv.init$phi
   alpha <- surv.init$alpha
   lamb <- surv.init$lamb
@@ -177,9 +177,9 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   delta <- controlvals$delta
   environment(SfuncMult) <- environment()  
   if (model == 1) {
-    environment(LambMult1) <- environment(DQfuncMult1) <- environment(LHMult1) <- environment()
+    environment(LambMult1) <- environment(DQfuncMult1) <- environment(LHMultGeneric) <- environment()
   } else {
-    environment(LambMult2) <- environment(DQfuncMult2) <- environment(LHMult2) <- environment()
+    environment(LambMult2) <- environment(DQfuncMult2) <- environment(LHMultGeneric) <- environment()
   }
   if (controlvals$SE.method == 'PFDS') {
     environment(PFDSMult) <- environment()

@@ -3,50 +3,50 @@
 #========== Multipicative Joint Modeling ==========#
 
 PRESMult <- function (model, theta, tol, iter, delta) {     
-  
-  para <- List2VecMult(theta)
-  lamb.init <- theta$lamb
-  len <- length(para)
-  
-  #===== Calculate the derivative of the score vector using forward difference =====#
-  DS <- matrix(0, len, len)
-  
-  for (i in 1:len) {
-    para1 <- para2 <- para3 <- para4 <- para
-    para1[i] <- para[i] - 2 * delta
-    para2[i] <- para[i] - delta
-    para3[i] <- para[i] + delta
-    para4[i] <- para[i] + 2 * delta
-    result1 <- if(model == 1) LambMult1(para1, lamb.init, tol, iter) else LambMult2(para1, lamb.init, tol, iter)
-    result2 <- if(model == 1) LambMult1(para2, lamb.init, tol, iter) else LambMult2(para2, lamb.init, tol, iter)
-    result3 <- if(model == 1) LambMult1(para3, lamb.init, tol, iter) else LambMult2(para3, lamb.init, tol, iter)
-    result4 <- if(model == 1) LambMult1(para4, lamb.init, tol, iter) else LambMult2(para4, lamb.init, tol, iter)
-    list1 <- Vec2ListMult(para1, ncz, ncb)
-    list2 <- Vec2ListMult(para2, ncz, ncb)
-    list3 <- Vec2ListMult(para3, ncz, ncb)
-    list4 <- Vec2ListMult(para4, ncz, ncb)
-    theta.input1 <- list(gamma = list1$gamma, phi = list1$phi, alpha = list1$alpha, 
-                         Ysigma = list1$Ysigma, Bsigma = list1$Bsigma, lamb = result1$lamb)
-    theta.input2 <- list(gamma = list2$gamma, phi = list2$phi, alpha = list2$alpha, 
-                         Ysigma = list2$Ysigma, Bsigma = list2$Bsigma, lamb = result2$lamb)
-    theta.input3 <- list(gamma = list3$gamma, phi = list3$phi, alpha = list3$alpha, 
-                         Ysigma = list3$Ysigma, Bsigma = list3$Bsigma, lamb = result3$lamb)
-    theta.input4 <- list(gamma = list4$gamma, phi = list4$phi, alpha = list4$alpha, 
-                         Ysigma = list4$Ysigma, Bsigma = list4$Bsigma, lamb = result4$lamb)
-    S1 <- SfuncMult(model, theta.input1)
-    S2 <- SfuncMult(model, theta.input2)
-    S3 <- SfuncMult(model, theta.input3)
-    S4 <- SfuncMult(model, theta.input4)
-    DS[i, ] <- (S1 - 8 * S2 + 8 * S3 - S4) / (12 * delta)
-  }
-  
-  #========== make the DS matrix symmetric ==========#
-  DS <- (DS + t(DS)) / 2 
-  V <- -solve(DS);
-  Valpha.name <- if (model == 1) paste("alpha:", alpha.name, sep = "") else "alpha"
-  Vnames <- c(paste("gamma.", 1:ncb, sep = ""), paste(rep("phi:", ncz), phi.names, sep = ""), Valpha.name, 
-              "sigma.e", "sigma.b")
-  dimnames(V) <- list(Vnames, Vnames)
-  
-  return(V)
+
+para <- List2VecMult(theta)
+lamb.init <- theta$lamb
+len <- length(para)
+
+#===== Calculate the derivative of the score vector using forward difference =====#
+DS <- matrix(0, len, len)
+
+for (i in 1:len) {
+  para1 <- para2 <- para3 <- para4 <- para
+  para1[i] <- para[i] - 2 * delta
+  para2[i] <- para[i] - delta
+  para3[i] <- para[i] + delta
+  para4[i] <- para[i] + 2 * delta
+  result1 <- LambMultGeneric(para1, lamb.init, tol, iter)
+  result2 <- LambMultGeneric(para2, lamb.init, tol, iter)
+  result3 <- LambMultGeneric(para3, lamb.init, tol, iter)
+  result4 <- LambMultGeneric(para4, lamb.init, tol, iter)
+  list1 <- Vec2ListMult(para1, ncz, ncb)
+  list2 <- Vec2ListMult(para2, ncz, ncb)
+  list3 <- Vec2ListMult(para3, ncz, ncb)
+  list4 <- Vec2ListMult(para4, ncz, ncb)
+  theta.input1 <- list(gamma = list1$gamma, phi = list1$phi, alpha = list1$alpha, 
+                       Ysigma = list1$Ysigma, Bsigma = list1$Bsigma, lamb = result1$lamb)
+  theta.input2 <- list(gamma = list2$gamma, phi = list2$phi, alpha = list2$alpha, 
+                       Ysigma = list2$Ysigma, Bsigma = list2$Bsigma, lamb = result2$lamb)
+  theta.input3 <- list(gamma = list3$gamma, phi = list3$phi, alpha = list3$alpha, 
+                       Ysigma = list3$Ysigma, Bsigma = list3$Bsigma, lamb = result3$lamb)
+  theta.input4 <- list(gamma = list4$gamma, phi = list4$phi, alpha = list4$alpha, 
+                       Ysigma = list4$Ysigma, Bsigma = list4$Bsigma, lamb = result4$lamb)
+  S1 <- SfuncMult(model, theta.input1)
+  S2 <- SfuncMult(model, theta.input2)
+  S3 <- SfuncMult(model, theta.input3)
+  S4 <- SfuncMult(model, theta.input4)
+  DS[i, ] <- (S1 - 8 * S2 + 8 * S3 - S4) / (12 * delta)
+}
+
+#========== make the DS matrix symmetric ==========#
+DS <- (DS + t(DS)) / 2 
+V <- -solve(DS);
+Valpha.name <- if (model == 1) paste("alpha:", alpha.name, sep = "") else "alpha"
+Vnames <- c(paste("gamma.", 1:ncb, sep = ""), paste(rep("phi:", ncz), phi.names, sep = ""), Valpha.name, 
+            "sigma.e", "sigma.b")
+dimnames(V) <- list(Vnames, Vnames)
+
+return(V)
 }
