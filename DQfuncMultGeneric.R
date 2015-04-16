@@ -32,7 +32,6 @@ DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
   eta.s <- as.vector(Ztime2 %*% phi) + alpha * Btime2.b # M*nknot matrix #
   exp.es <- exp(eta.s) # M*nknot matrix #
   const <- matrix(0, n, nknot) # n*nknot matrix #
-  #const[nk != 0, ] <- rowsum(lamb[Index1] * exp.es, Index) # n*nknot matrix # 
   const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb[Index1], exp.es)
   log.density2 <- - log(1 + rho * const) # n*nknot matrix # 
   log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*nknot matrix #
@@ -51,17 +50,19 @@ DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
   
   pBtime2.b <- as.vector(Btime2 %*% pgamma) * bi[Index, ] # M*nknot matrix #
   eta.sp <- as.vector(Ztime2 %*% pphi) + palpha * pBtime2.b # M*nknot matrix #
-  exp.esp <- exp(eta.sp) # M*nknot matrix #
+  temp0 <- exp(eta.sp) # M*nknot matrix #
 
-  temp1 <- as.vector((CondExp[Index, ] * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #
-  temp2 <- as.vector((CondExp[Index, ] * pBtime2.b * exp.esp * Integral[Index, ]) %*% wGQ) # vector of length M #
-  temp3 <- lapply(1:ncb, function(i) as.vector((CondExp[Index, ] * palpha * bi[Index, ] * Btime2[, i] * exp.esp * Integral[Index, ]) %*% wGQ)) 
-  temp3 <- do.call(cbind, temp3) # M*ncb matrix #
+
+  calc_M1_M2_M3_Hadamard(temp0, CondExp, Integral,as.integer(Index-1))
+  temp1 <- as.vector( temp0 %*% wGQ) # vector of length M #
+  temp2 <- as.vector((pBtime2.b * temp0) %*% wGQ) # vector of length M # 
+  calc_M1_a_M2_Hadamard( temp0, bi, palpha, as.integer(Index-1))
+  temp3 <- calc_M1_M2_Hadamard_y2(temp0,Btime2,wGQ, ncb)
   temp4 <- Ztime2 * temp1 # M*ncz matrix #
   temp5 <- lapply(1:ncb, function(i) (Y - as.vector(B %*% pgamma) * bi[ID, ]) * B[, i] * bi[ID, ]) # N*nknot matrices #
   
-  post1 <- as.vector(tapply(temp1, Index1, sum)) # vector of length n_u #
-  post2 <- as.vector(tapply(temp2, Index1, sum)) # vector of length n_u #
+  post1 <- calc_tapply_vect_sum(temp1,  as.integer(Index1-1))
+  post2 <- calc_tapply_vect_sum(temp2,  as.integer(Index1-1))
   post3 <- as.matrix(apply(temp3, 2, function(x) calc_tapply_vect_sum(x,  as.integer(Index1-1)))) # n_u*ncb matrix #
   post4 <- as.matrix(apply(temp4, 2, function(x) calc_tapply_vect_sum(x,  as.integer(Index1-1)))) # n_u*ncz matrix #
   post5 <- unlist(lapply(temp5, function(x) sum((x * Integral[ID, ]) %*% wGQ))) # vector of length ncb #
