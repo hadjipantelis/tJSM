@@ -23,16 +23,27 @@ DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
   bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]],v1= b ,M = VB[[i]]) ) 
 
   bi <- do.call(rbind, bi.st) # n*nknot matrix #
-  Btime.b <- as.vector(Btime %*% gamma) * bi # n*nknot matrix #
-  Btime2.b <- as.vector(Btime2 %*% gamma) * bi[Index, ] # M*nknot matrix #
+  if( model==1) { 
+    Btime.b <- as.vector(Btime %*% gamma) * bi # n*nknot matrix #
+    Btime2.b <- as.vector(Btime2 %*% gamma) * bi[Index, ] # M*nknot matrix #
+  }
   
   log.lamb <- log(lamb[Index0])
   log.lamb[is.na(log.lamb)] <- 0
-  log.density1 <- log.lamb + as.vector(Ztime %*% phi) + alpha * Btime.b # n*nknot matrix #
-  eta.s <- as.vector(Ztime2 %*% phi) + alpha * Btime2.b # M*nknot matrix #
-  exp.es <- exp(eta.s) # M*nknot matrix #
+  if( model==1) { 
+    log.density1 <- log.lamb + as.vector(Ztime %*% phi) + alpha * Btime.b # n*nknot matrix #
+    eta.s <- as.vector(Ztime2 %*% phi) + alpha * Btime2.b # M*nknot matrix #
+  } else if(model ==2){
+   log.density1 <- log.lamb + as.vector(Ztime %*% phi) + alpha * bi # n*nknot matrix #
+   eta.s <- as.vector(Ztime2 %*% phi) + alpha * bi[Index, ] # M*nknot matrix #
+  } else {
+    stop("Invalid model type")
+  }
+
+  # exp.es <- exp(eta.s) # M*nknot matrix #
+  calc_expM3(eta.s)
   const <- matrix(0, n, nknot) # n*nknot matrix #
-  const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb[Index1], exp.es)
+  const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb[Index1], eta.s )
   log.density2 <- - log(1 + rho * const) # n*nknot matrix # 
   log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*nknot matrix #
   
@@ -45,33 +56,48 @@ DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
   Q <- rep(0, len)
   
   Q[len] <- - n / sqrt(pBsigma2) + sum((Integral * (bi - 1) ^ 2) %*% wGQ) / (pBsigma2 ^ (3 / 2))
-  Q[len - 1] <- - N / sqrt(pYsigma2) + sum(((Y - as.vector(B %*% pgamma) * bi[ID, ]) ^ 2 * 
-                                            Integral[ID, ]) %*% wGQ) / (pYsigma2 ^ (3 / 2))
+  Q[len - 1] <- - N / sqrt(pYsigma2) + sum(((Y - as.vector(B %*% pgamma) * bi[ID, ]) ^ 2 * Integral[ID, ]) %*% wGQ) / (pYsigma2 ^ (3 / 2))
   
-  pBtime2.b <- as.vector(Btime2 %*% pgamma) * bi[Index, ] # M*nknot matrix #
-  eta.sp <- as.vector(Ztime2 %*% pphi) + palpha * pBtime2.b # M*nknot matrix #
-  temp0 <- exp(eta.sp) # M*nknot matrix #
-
+  if( model==1) { 
+    pBtime2.b <- as.vector(Btime2 %*% pgamma) * bi[Index, ] # M*nknot matrix #
+    temp0 <- as.vector(Ztime2 %*% pphi) + palpha * pBtime2.b # M*nknot matrix #
+  } else { 
+    temp0 <- as.vector(Ztime2 %*% pphi) + palpha * bi[Index, ] # M*nknot matrix #
+  }
+  calc_expM3(temp0)
+  # temp0 <- exp(eta.sp) # M*nknot matrix #
 
   calc_M1_M2_M3_Hadamard(temp0, CondExp, Integral,as.integer(Index-1))
   temp1 <- as.vector( temp0 %*% wGQ) # vector of length M #
-  temp2 <- as.vector((pBtime2.b * temp0) %*% wGQ) # vector of length M # 
-  calc_M1_a_M2_Hadamard( temp0, bi, palpha, as.integer(Index-1))
-  temp3 <- calc_M1_M2_Hadamard_y2(temp0,Btime2,wGQ, ncb)
+  if( model==1) { 
+    temp2 <- as.vector((pBtime2.b * temp0) %*% wGQ) # vector of length M # 
+    calc_M1_a_M2_Hadamard( temp0, bi, palpha, as.integer(Index-1))
+    temp3 <- calc_M1_M2_Hadamard_y2(temp0,Btime2,wGQ, ncb)
+  } else { 
+    temp2 <- as.vector((bi[Index, ] * temp0) %*% wGQ) # vector of length M #
+  }
   temp4 <- Ztime2 * temp1 # M*ncz matrix #
   temp5 <- lapply(1:ncb, function(i) (Y - as.vector(B %*% pgamma) * bi[ID, ]) * B[, i] * bi[ID, ]) # N*nknot matrices #
   
   post1 <- calc_tapply_vect_sum(temp1,  as.integer(Index1-1))
   post2 <- calc_tapply_vect_sum(temp2,  as.integer(Index1-1))
-  post3 <- as.matrix(apply(temp3, 2, function(x) calc_tapply_vect_sum(x,  as.integer(Index1-1)))) # n_u*ncb matrix #
+  if( model==1) { 
+    post3 <- as.matrix(apply(temp3, 2, function(x) calc_tapply_vect_sum(x,  as.integer(Index1-1)))) # n_u*ncb matrix # 
+  }
   post4 <- as.matrix(apply(temp4, 2, function(x) calc_tapply_vect_sum(x,  as.integer(Index1-1)))) # n_u*ncz matrix #
   post5 <- unlist(lapply(temp5, function(x) sum((x * Integral[ID, ]) %*% wGQ))) # vector of length ncb #
   post.bi <- as.vector((Integral * bi) %*% wGQ) # vector of length n #
   
-  Q[1 : ncb] <- palpha * colSums(d * post.bi * Btime) - 
-                colSums(Index2 * post3 / post1) + post5 / pYsigma2
-  Q[(ncb + 1) : (ncb + ncz)] <- colSums(d * Ztime) - colSums(Index2 * post4 / post1) # vector of length ncz #
-  Q[ncb + ncz + 1] <- sum(d * post.bi * as.vector(Btime %*% pgamma)) - sum(Index2 * post2 / post1)
+  if( model==1) { 
+    Q[1 : ncb] <- palpha * colSums(d * post.bi * Btime) - colSums(Index2 * post3 / post1) + post5 / pYsigma2
+    Q[(ncb + 1) : (ncb + ncz)] <- colSums(d * Ztime) - colSums(Index2 * post4 / post1) # vector of length ncz #
+    Q[ncb + ncz + 1] <- sum(d * post.bi * as.vector(Btime %*% pgamma)) - sum(Index2 * post2 / post1)
+  } else {
+    Q[1 : ncb] <- post5 / pYsigma2
+    Q[(ncb + 1) : (ncb + ncz)] <- colSums(d * Ztime) - colSums(Index2 * post4 / post1) # vector of length ncz #
+    Q[ncb + ncz + 1] <- sum(d * post.bi) - sum(Index2 * post2 / post1)
+  }
+
   
   return(Q)
 }
