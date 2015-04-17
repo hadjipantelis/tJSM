@@ -39,7 +39,7 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
   calc_expM2(exp.es)
 
   const <- matrix(0, n, nknot) # n*nknot matrix #
-  const[nk != 0, ] <- rowsum(lamb.old[Index1] * exp.es, Index) # n*nknot matrix # 
+  const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb.old[Index1], exp.es) # n*nknot matrix #  
   log.density2 <- -log(1 + rho * const) # n*GQ matrix # 
   log.survival <- if(rho > 0) log.density2 / rho else - const # n*nknot matrix #
   
@@ -70,7 +70,8 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
   #========== calculate the score and gradient of phi and alpha ==========# 
   CondExp2 <- CondExp[nk!=0, ]
   temp0 <- exp.es * lamb.old[Index1]
-  temp1 <- lapply(1:ncz, function(i) CondExp2 * rowsum(Ztime2[, i] * temp0, Index)) 
+  #temp1 <- lapply(1:ncz, function(i) CondExp2 * rowsum(Ztime2[, i] * temp0, Index)) 
+  temp1 <- lapply(1:ncz, function(i)  calc_mult_rowsum((Index), Ztime2[, i] , temp0, CondExp2))
   # n*nknot matrices #
   # temp2 <- CondExp2 * rowsum(Btime2.b * temp0, Index) # n*nknot matrix #
   #temp3 <- lapply(1:(ncz ^ 2), function(i) CondExp2 * rowsum(Ztime22[, i] * temp0, Index)) 
@@ -79,18 +80,24 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
   # temp4 <- CondExp2 * rowsum(Btime2.b ^ 2 * temp0, Index) # n*nknot matrix #
 
   if (model ==2) { 
+    #temp0c <- bi[Index, ]* temp0
+    #temp2 <- CondExp2 * calc_rowsum(temp0c,  v =Index) # n*nknot matrix # 
+    #  temp4 <- calc_mult_rowsum(Index, bi[Index, ], temp0c, A = CondExp2)
+    #temp4 <- CondExp2 * rowsum(bi[Index, ] * temp0c, Index) # n*nknot matrix #
+     #temp0d <-  bi[Index, ] *temp0
     temp0c <- bi[Index, ]* temp0
     temp2 <- CondExp2 * rowsum(temp0c, Index) # n*nknot matrix #
     temp4 <- CondExp2 * rowsum(bi[Index, ] * temp0c, Index) # n*nknot matrix #
-    temp0d <-  bi[Index, ] *temp0
+
+
   } else {
     temp0c <- Btime2.b * temp0;
-    temp2 <- CondExp2 * rowsum(temp0c, Index) # n*nknot matrix #
-    temp4 <- CondExp2 * rowsum(Btime2.b * temp0c, Index) # n*nknot matrix #
-    temp0d <- Btime2.b *temp0
+    temp2 <- CondExp2 * calc_rowsum(temp0c,  v =Index) # n*nknot matrix #
+    # temp4 <- CondExp2 * rowsum(Btime2.b * temp0c, Index) # n*nknot matrix #
+     temp4 <- calc_mult_rowsum2(A = CondExp2, v= Index, Btime2.b, temp0c) 
   }
   # temp5 <- lapply(1:ncz, function(i) CondExp2 * rowsum( Ztime2[, i] * temp0c, Index)) 
-  temp5 <- lapply(1:(ncz), function(i) calc_mult_rowsum(Index, Ztime2[, i], temp0d, A = CondExp2))
+  temp5 <- lapply(1:(ncz), function(i) calc_mult_rowsum(Index, Ztime2[, i], temp0c, A = CondExp2))
   # n*nknot matrices #
   Integral2 <- Integral[nk != 0, ]
   post1 <- unlist(lapply(temp1, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncz #
@@ -129,7 +136,6 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
     #exp.es.n1 <- exp(eta.s.n1) # M*nknot matrix #
     calc_expM2(exp.es.n1)
     temp0b <- exp.es.n1 * lamb.old[Index1] * alpha.new * bi[Index, ]
-    #temp6 <- lapply(1:ncb, function(i) CondExp2 * rowsum( Btime2[, i] * temp0b, Index))
     temp6 <- calc_mult_rowsum3( Index, Btime2, temp0b, A = CondExp2, ncb)  
     temp0c <-  alpha.new * bi[Index, ] *temp0b
     temp7 <- calc_mult_rowsum3( Index, Btime22, temp0c, A = CondExp2, ncb^2)
@@ -160,8 +166,10 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
   }
 
   calc_expM2(eta.s.n2)
-  tempLamb <- (CondExp[Index, ] *  (eta.s.n2) * Integral[Index, ]) %*% wGQ # vector of length M #
-  postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
+  calc_M1_M2_M3_Hadamard(eta.s.n2, CondExp ,  Integral, as.integer(Index-1))
+  tempLamb <- calc_M_y(v =wGQ, M=eta.s.n2)
+  #tempLamb <- (CondExp[Index, ] *  (eta.s.n2) * Integral[Index, ]) %*% wGQ # vector of length M #
+  postLamb <- calc_tapply_vect_sum(  v1=tempLamb, v2=  as.integer(Index1-1)) # vector of length n_u #
   lamb.new <- Index2 / postLamb
   
   result <- list(gamma = gamma, phi = phi.new, alpha = alpha.new, Ysigma = sqrt(Ysigma2.new), 
