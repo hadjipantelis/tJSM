@@ -127,11 +127,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   Btime22 <- if(ncb > 1) t(apply(Btime2, 1, function(x) tcrossprod(x))) else Btime2 ^ 2
   B2 <- if(ncb > 1) t(apply(B, 1, function(x) tcrossprod(x))) else B ^ 2
   
-  if (model == 1) {
-    environment(InitValMultGeneric) <- environment(EMiterMult1) <- environment()
-  } else {
-    environment(InitValMultGeneric) <- environment(EMiterMult2) <- environment()
-  }
+   environment(InitValMultGeneric) <- environment(EMiterMultGeneric) <- environment() 
   
   tempResp <- strsplit(toString(formLongX), ", ")[[1]][c(2, 1)]
   tempResp <- paste(tempResp, collapse = "")
@@ -158,7 +154,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
     
     if (err.P < tol.P | err.L < tol.L) break
     
-    theta.new <- if (model == 1) EMiterMult1(theta.old) else EMiterMult2(theta.old)
+    theta.new <-  EMiterMultGeneric(theta.old)
     
     new.P <- c(theta.new$gamma, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$Bsigma)
     old.P <- c(theta.old$gamma, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$Bsigma)
@@ -176,11 +172,8 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   
   delta <- controlvals$delta
   environment(SfuncMult) <- environment()  
-  if (model == 1) {
     environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
-  } else {
-    environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
-  }
+
   if (controlvals$SE.method == 'PFDS') {
     environment(PFDSMult) <- environment()
     time.SE <- system.time(Vcov <- PFDSMult(model, theta.new, min(tol.P, delta) / 100, iter, delta))[3]

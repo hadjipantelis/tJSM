@@ -76,7 +76,7 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
   #temp3 <- lapply(1:(ncz ^ 2), function(i) CondExp2 * rowsum(Ztime22[, i] * temp0, Index)) 
   temp3 <- lapply(1:(ncz^2), function(i) calc_mult_rowsum(Index, Ztime22[, i], temp0, A = CondExp2))
   # n*nknot matrices #
-  temp4 <- CondExp2 * rowsum(Btime2.b ^ 2 * temp0, Index) # n*nknot matrix #
+  # temp4 <- CondExp2 * rowsum(Btime2.b ^ 2 * temp0, Index) # n*nknot matrix #
 
   if (model ==2) { 
     temp0c <- bi[Index, ]* temp0

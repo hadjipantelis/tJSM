@@ -45,7 +45,7 @@ DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
   const <- matrix(0, n, nknot) # n*nknot matrix #
   const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb[Index1], eta.s )
   log.density2 <- - log(1 + rho * const) # n*nknot matrix # 
-  log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*nknot matrix #
+  log.survival <- if(rho > 0) log.density2 / rho else - const # n*nknot matrix #
   
   f.surv <- exp(d * log.density1 + d * log.density2 + log.survival) # n*nknot matrix #
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #
@@ -72,7 +72,7 @@ DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
   if( model==1) { 
     temp2 <- as.vector((pBtime2.b * temp0) %*% wGQ) # vector of length M # 
     calc_M1_a_M2_Hadamard( temp0, bi, palpha, as.integer(Index-1))
-    temp3 <- calc_M1_M2_Hadamard_y2(temp0,Btime2,wGQ, ncb)
+    temp3 <- calc_M1_M2_Hadamard_y2(temp0,Btime2,wGQ, u = ncb)
   } else { 
     temp2 <- as.vector((bi[Index, ] * temp0) %*% wGQ) # vector of length M #
   }
