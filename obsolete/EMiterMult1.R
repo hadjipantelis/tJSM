@@ -12,13 +12,7 @@ EMiterMult1 <- function (theta.old) { # Use apply instead of matrix calculation 
   Bsigma2.old <- (theta.old$Bsigma) ^ 2
   lamb.old <- theta.old$lamb
   
-  BTg <- lapply(B.st, function(x) as.vector(x %*% gamma.old))
-
-  # VY <- lapply(1:n, function(i) as.matrix(Bsigma2.old * BTg[[i]] %*% t(BTg[[i]]) + Ysigma2.old * diag(1, ni[i])))
-  # VB <- lapply(1:n, function(i) as.numeric(Bsigma2.old - (Bsigma2.old ^ 2) * t(BTg[[i]]) %*% solve(VY[[i]]) %*% BTg[[i]]))
-  # muB <- lapply(1:n, function(i) as.numeric(1 + Bsigma2.old * t(BTg[[i]]) %*% solve(VY[[i]]) %*% as.vector(Y.st[[i]] - BTg[[i]])))
-  # bi.st <- lapply(1:n, function(i) as.matrix(muB[[i]] + sqrt(2 * VB[[i]]) * t(b)))
-
+  BTg <- lapply(B.st, function(x) as.vector(x %*% gamma.old)) 
   VY <- lapply(1:n, function(i) calc_VY( BTg[[i]], Bsigma2.old, Ysigma2.old) )
   VB <-  lapply(1:n, function(i) calc_VB(M1 = Bsigma2.old, M2 = BTg[[i]], M3 = VY[[i]]))
   muB <- lapply(1:n, function(i) calc_muBMult(  Bsigma2.old,VY[[i]],BTg[[i]],Y.st[[i]] )+1 )
@@ -42,7 +36,6 @@ EMiterMult1 <- function (theta.old) { # Use apply instead of matrix calculation 
   deno <- as.vector(f.surv %*% wGQ) # vector of length n #
   Integral <- f.surv / deno # n*nknot matrix #
   
-  # f.long <- sapply(1:n, function(i) dmvnorm(Y.st[[i]], as.vector(BTg[[i]]), VY[[i]]))
   f.long <- sapply(1:n, function(i) calc_MVND(Y.st[[i]], as.vector(BTg[[i]]), VY[[i]]))
   lgLik <- sum(log(f.long * deno / sqrt(pi)))
   
@@ -57,13 +50,17 @@ EMiterMult1 <- function (theta.old) { # Use apply instead of matrix calculation 
   
   #========== calculate the score and gradient of phi and alpha ==========# 
   CondExp2 <- CondExp[nk!=0, ]
-  temp1 <- lapply(1:ncz, function(i) CondExp2 * rowsum(Ztime2[, i] * exp.es * lamb.old[Index1], Index)) 
+  temp0 <- exp.es * lamb.old[Index1]
+  temp1 <- lapply(1:ncz, function(i) CondExp2 * rowsum(Ztime2[, i] * temp0, Index)) 
   # n*nknot matrices #
-  temp2 <- CondExp2 * rowsum(Btime2.b * exp.es * lamb.old[Index1], Index) # n*nknot matrix #
-  temp3 <- lapply(1:(ncz ^ 2), function(i) CondExp2 * rowsum(Ztime22[, i] * exp.es * lamb.old[Index1], Index)) 
+  temp2 <- CondExp2 * rowsum(Btime2.b * temp0, Index) # n*nknot matrix #
+  #temp3 <- lapply(1:(ncz ^ 2), function(i) CondExp2 * rowsum(Ztime22[, i] * temp0, Index)) 
+  temp3 <- lapply(1:(ncz^2), function(i) calc_mult_rowsum(Index, Ztime22[, i], temp0, A = CondExp2))
   # n*nknot matrices #
-  temp4 <- CondExp2 * rowsum(Btime2.b ^ 2 * exp.es * lamb.old[Index1], Index) # n*nknot matrix #
-  temp5 <- lapply(1:ncz, function(i) CondExp2 * rowsum(Btime2.b * Ztime2[, i] * exp.es * lamb.old[Index1], Index)) 
+  temp4 <- CondExp2 * rowsum(Btime2.b ^ 2 * temp0, Index) # n*nknot matrix #
+  temp0c <- Btime2.b *temp0
+  # temp5 <- lapply(1:ncz, function(i) CondExp2 * rowsum( Ztime2[, i] * temp0c, Index)) 
+  temp5 <- lapply(1:(ncz), function(i) calc_mult_rowsum(Index, Ztime2[, i], temp0c, A = CondExp2))
   # n*nknot matrices #
   Integral2 <- Integral[nk != 0, ]
   post1 <- unlist(lapply(temp1, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncz #
@@ -91,12 +88,16 @@ EMiterMult1 <- function (theta.old) { # Use apply instead of matrix calculation 
   alpha.new <- pa.new[ncz + 1]
   
   #========== calculate the score of gamma ==========#
-  eta.s.n1 <- as.vector(Ztime2 %*% phi.new) + alpha.new * Btime2.b # M*nknot matrix #
-  exp.es.n1 <- exp(eta.s.n1) # M*nknot matrix #
-  temp6 <- lapply(1:ncb, function(i) CondExp2 * rowsum(alpha.new * bi[Index, ] * Btime2[, i] * 
-                                     exp.es.n1 * lamb.old[Index1], Index))
-  temp7 <- lapply(1:(ncb ^ 2), function(i) CondExp2 * rowsum(alpha.new ^ 2 * bi[Index, ] ^ 2 * 
-                                           Btime22[, i] * exp.es.n1 * lamb.old[Index1], Index))
+  exp.es.n1 <- as.vector(Ztime2 %*% phi.new) + alpha.new * Btime2.b # M*nknot matrix #
+  #exp.es.n1 <- exp(eta.s.n1) # M*nknot matrix #
+  calc_expM2(exp.es.n1)
+  temp0b <- exp.es.n1 * lamb.old[Index1] * alpha.new * bi[Index, ]
+  #temp6 <- lapply(1:ncb, function(i) CondExp2 * rowsum( Btime2[, i] * temp0b, Index))
+  temp6 <- calc_mult_rowsum3( Index, Btime2, temp0b, A = CondExp2, ncb)  
+  temp0c <-  alpha.new * bi[Index, ] *temp0b
+  # temp7 <- lapply(1:(ncb ^ 2), function(i) CondExp2 * rowsum( Btime22[, i] * temp0c, Index))
+   # temp7 <- lapply(1:ncb^2, function(i) calc_mult_rowsum(Index, Btime22[,      i], temp0c, A = CondExp2))
+   temp7 <- calc_mult_rowsum3( Index, Btime22, temp0c, A = CondExp2, ncb^2)
   temp8 <- lapply(1:ncb, function(i) (Y - as.vector(B %*% gamma.old) * bi[ID, ]) * B[, i] * bi[ID, ]) 
   # N*nknot matrices #
   post6 <- unlist(lapply(temp6, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncb #
@@ -116,7 +117,8 @@ EMiterMult1 <- function (theta.old) { # Use apply instead of matrix calculation 
   #========== Calculate the new lambda with new parameters ==========#
   Btime2.bnew <- as.vector(Btime2 %*% gamma.new) * bi[Index, ] # M*nknot matrix #
   eta.s.n2 <- as.vector(Ztime2 %*% phi.new) + alpha.new * Btime2.bnew # M*nknot matrix #
-  tempLamb <- (CondExp[Index, ] * exp(eta.s.n2) * Integral[Index, ]) %*% wGQ # vector of length M #
+  calc_expM2(eta.s.n2)
+  tempLamb <- (CondExp[Index, ] *  (eta.s.n2) * Integral[Index, ]) %*% wGQ # vector of length M #
   postLamb <- as.vector(tapply(tempLamb, Index1, sum)) # vector of length n_u #
   lamb.new <- Index2 / postLamb
   

@@ -177,9 +177,9 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   delta <- controlvals$delta
   environment(SfuncMult) <- environment()  
   if (model == 1) {
-    environment(LambMult1) <- environment(DQfuncMult1) <- environment(LHMultGeneric) <- environment()
+    environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
   } else {
-    environment(LambMult2) <- environment(DQfuncMult2) <- environment(LHMultGeneric) <- environment()
+    environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
   }
   if (controlvals$SE.method == 'PFDS') {
     environment(PFDSMult) <- environment()
