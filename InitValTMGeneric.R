@@ -1,7 +1,7 @@
 
 #=============== Initial Value Calculation for Transformation Model II ===============#
 
-InitValTMGeneric <- function (beta,model) {
+InitValTMGeneric <- function (beta) {
 
   if(model == 1) { 
     fixedOrRand <- as.vector(X %*% beta) + rowSums(Z * bBLUP[ID, ]) # vector of length N #

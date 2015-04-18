@@ -150,11 +150,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   X2 <- if(ncx > 1) t(apply(X, 1, function(x) tcrossprod(x))) else X ^ 2
   X2.sum <- matrix(colSums(X2), nrow = ncx)  
   
-  #if (model == 1) {
-  #  environment(InitValTM1) <- environment(EMiterTM1) <- environment()
-  #} else {
-  #  environment(InitValTM2) <- environment(EMiterTM2) <- environment()
-  #}
+
   environment(InitValTMGeneric) <- environment(EMiterTMGeneric) <- environment()
 
     
@@ -166,7 +162,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   Ysigma <- fitLME$sigma
   
   #surv.init <- if (model == 1) InitValTM1(beta) else InitValTM2(beta)
-  surv.init <- InitValTMGeneric(beta,model)
+  surv.init <- InitValTMGeneric(beta)
   phi <- surv.init$phi
   alpha <- surv.init$alpha
   lamb <- surv.init$lamb
@@ -178,9 +174,8 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   while (step <= iter) {
      
     if (err.P < tol.P | err.L < tol.L) break
-    
-    # theta.new <- if (model == 1) EMiterTM1(theta.old) else EMiterTM2(theta.old)
-    theta.new  <-   EMiterTMGeneric(theta.old,model)
+     
+    theta.new  <-   EMiterTMGeneric(theta.old)
     new.P <- c(theta.new$beta, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$BSigma)
     old.P <- c(theta.old$beta, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$BSigma)
     err.P <- max(abs(new.P - old.P) / (abs(old.P) + tol.P))
@@ -197,12 +192,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
    
   
   delta <- controlvals$delta
-  environment(Sfunc) <- environment()
-  #if (model == 1) {
-  #  environment(Lamb1) <- environment(DQfunc1) <- environment(LH1) <- environment()
-  #} else {
-  #  environment(Lamb2) <- environment(DQfunc2) <- environment(LH2) <- environment()
-  #}
+  environment(Sfunc) <- environment() 
   environment(LambGeneric) <- environment(DQfuncGeneric) <- environment(LHGeneric) <- environment()
 
   if (controlvals$SE.method == 'PFDS') {

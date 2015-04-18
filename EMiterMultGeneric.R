@@ -16,7 +16,7 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
   VY <- lapply(1:n, function(i) calc_VY( BTg[[i]], Bsigma2.old, Ysigma2.old) )
   VB <-  lapply(1:n, function(i) calc_VB(M1 = Bsigma2.old, M2 = BTg[[i]], M3 = VY[[i]]))
   muB <- lapply(1:n, function(i) calc_muBMult(  Bsigma2.old,VY[[i]],BTg[[i]],Y.st[[i]] )+1 )
-  bi.st <- lapply(1:n, function(i) calc_bi_st(muB[[i]], b ,VB[[i]]) ) 
+  bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]], b ,M = VB[[i]]) ) 
  
   bi <- do.call(rbind, bi.st) # n*nknot matrix #
   if (model==1) {
@@ -69,34 +69,20 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
   
   #========== calculate the score and gradient of phi and alpha ==========# 
   CondExp2 <- CondExp[nk!=0, ]
-  temp0 <- exp.es * lamb.old[Index1]
-  #temp1 <- lapply(1:ncz, function(i) CondExp2 * rowsum(Ztime2[, i] * temp0, Index)) 
+  temp0 <- exp.es * lamb.old[Index1] 
   temp1 <- lapply(1:ncz, function(i)  calc_mult_rowsum((Index), Ztime2[, i] , temp0, CondExp2))
-  # n*nknot matrices #
-  # temp2 <- CondExp2 * rowsum(Btime2.b * temp0, Index) # n*nknot matrix #
-  #temp3 <- lapply(1:(ncz ^ 2), function(i) CondExp2 * rowsum(Ztime22[, i] * temp0, Index)) 
+  # n*nknot matrices # 
   temp3 <- lapply(1:(ncz^2), function(i) calc_mult_rowsum(Index, Ztime22[, i], temp0, A = CondExp2))
   # n*nknot matrices #
-  # temp4 <- CondExp2 * rowsum(Btime2.b ^ 2 * temp0, Index) # n*nknot matrix #
-
   if (model ==2) { 
-    #temp0c <- bi[Index, ]* temp0
-    #temp2 <- CondExp2 * calc_rowsum(temp0c,  v =Index) # n*nknot matrix # 
-    #  temp4 <- calc_mult_rowsum(Index, bi[Index, ], temp0c, A = CondExp2)
-    #temp4 <- CondExp2 * rowsum(bi[Index, ] * temp0c, Index) # n*nknot matrix #
-     #temp0d <-  bi[Index, ] *temp0
     temp0c <- bi[Index, ]* temp0
-    temp2 <- CondExp2 * rowsum(temp0c, Index) # n*nknot matrix #
-    temp4 <- CondExp2 * rowsum(bi[Index, ] * temp0c, Index) # n*nknot matrix #
-
-
+    temp2 <- CondExp2 * calc_rowsum(temp0c,  v =Index) # n*nknot matrix # 
+    temp4 <- calc_mult_rowsum2(Index, bi[Index, ], temp0c, A = CondExp2)
   } else {
     temp0c <- Btime2.b * temp0;
-    temp2 <- CondExp2 * calc_rowsum(temp0c,  v =Index) # n*nknot matrix #
-    # temp4 <- CondExp2 * rowsum(Btime2.b * temp0c, Index) # n*nknot matrix #
-     temp4 <- calc_mult_rowsum2(A = CondExp2, v= Index, Btime2.b, temp0c) 
-  }
-  # temp5 <- lapply(1:ncz, function(i) CondExp2 * rowsum( Ztime2[, i] * temp0c, Index)) 
+    temp2 <- CondExp2 * calc_rowsum(temp0c,  v =Index) # n*nknot matrix # 
+    temp4 <- calc_mult_rowsum2(A = CondExp2, v= Index, Btime2.b, temp0c) 
+  } 
   temp5 <- lapply(1:(ncz), function(i) calc_mult_rowsum(Index, Ztime2[, i], temp0c, A = CondExp2))
   # n*nknot matrices #
   Integral2 <- Integral[nk != 0, ]
@@ -167,8 +153,7 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
 
   calc_expM2(eta.s.n2)
   calc_M1_M2_M3_Hadamard(eta.s.n2, CondExp ,  Integral, as.integer(Index-1))
-  tempLamb <- calc_M_y(v =wGQ, M=eta.s.n2)
-  #tempLamb <- (CondExp[Index, ] *  (eta.s.n2) * Integral[Index, ]) %*% wGQ # vector of length M #
+  tempLamb <- calc_M_y(v =wGQ, M=eta.s.n2) 
   postLamb <- calc_tapply_vect_sum(  v1=tempLamb, v2=  as.integer(Index1-1)) # vector of length n_u #
   lamb.new <- Index2 / postLamb
   
