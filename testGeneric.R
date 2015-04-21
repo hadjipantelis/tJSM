@@ -86,10 +86,10 @@ fitLME <- lme(proth ~ Trt * obstime, random = ~ obstime | ID, data = liver)
 fitCOX <- coxph(Surv(start, stop, event) ~ Trt, data = liver, x = TRUE) 
 control <- list(tol.P = 10 ^ (- 3))
  
-LIVER_TM_RESULT_NEW <- microbenchmark( times = 70, fitJTm1r0po_TM <- jmodelTM(fitLME, fitCOX, liver, model = 1, rho=0, timeVarY = 'obstime', control = control)
-fitJTm1r1po_TM <- jmodelTM(fitLME, fitCOX, liver, model = 1, rho=1, timeVarY = 'obstime', control = control)
-fitJTm2r0po_TM <- jmodelTM(fitLME, fitCOX, liver, model = 2, rho=0, timeVarY = 'obstime', control = control)
-fitJTm2r0po_TM <- jmodelTM(fitLME, fitCOX, liver, model = 2, rho=1, timeVarY = 'obstime', control = control)
+LIVER_TM_RESULT_NEW <- microbenchmark( times = 70, fitJTm1r0po_TM <- jmodelTM(fitLME, fitCOX, liver, model = 1, rho=0, timeVarY = 'obstime', control = control),
+fitJTm1r1po_TM <- jmodelTM(fitLME, fitCOX, liver, model = 1, rho=1, timeVarY = 'obstime', control = control),
+fitJTm2r0po_TM <- jmodelTM(fitLME, fitCOX, liver, model = 2, rho=0, timeVarY = 'obstime', control = control),
+fitJTm2r0po_TM <- jmodelTM(fitLME, fitCOX, liver, model = 2, rho=1, timeVarY = 'obstime', control = control))
  
 save(file='LIVER_TM_RESULT_NEW.RData',LIVER_TM_RESULT_NEW)
 

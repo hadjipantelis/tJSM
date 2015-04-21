@@ -3,7 +3,7 @@
 
 PLFDMult <- function (model, theta, tol, iter, delta) {
   
-  pl <- if(model == 1) LHMult1(theta) / n else LHMult2(theta) / n
+  pl <- LHMultGeneric(theta) / n
   
   para <- List2VecMult(theta)
   lamb.init <- theta$lamb
@@ -41,7 +41,7 @@ PLFDMult <- function (model, theta, tol, iter, delta) {
     }
   }
   I <- I + t(I) - diag(diag(I)) 
-  V <- -solve(DS);
+  V <- solve(I) / n;
   Valpha.name <- if (model == 1) paste("alpha:", alpha.name, sep = "") else "alpha"
   Vnames <- c(paste("gamma.", 1:ncb, sep = ""), paste(rep("phi:", ncz), phi.names, sep = ""), Valpha.name, 
               "sigma.e", "sigma.b")
