@@ -38,3 +38,5 @@ Thumbs.db
 
 # Specific to this repo
 .RData
+obsolete/
+basicSpeedTests/
