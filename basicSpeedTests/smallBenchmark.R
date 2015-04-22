@@ -1,9 +1,0 @@
-Reps=40
-library(microbenchmark)
-B1 = microbenchmark(times= Reps, fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime'))
-
-B4 = microbenchmark(times= Reps, fitJT.po2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 1, timeVarY = 'obstime'))
-save.image('BenchmarkingTestTM_verV.RData.Pantelis') 
-savehistory('BenchmarkingTestTM_verV.Rhist')
-
-
