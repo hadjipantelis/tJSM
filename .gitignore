@@ -40,3 +40,4 @@ Thumbs.db
 .RData
 obsolete/
 basicSpeedTests/
+timeBenchmarkResults/

@@ -19,7 +19,7 @@ PLFDMult <- function (model, theta, tol, iter, delta) {
       para1.list <- Vec2ListMult(para1, ncz, ncb)
       theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
                            Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
-      PLs[i, j] <- LambMultGeneric(theta.input1)/n
+      PLs[i, j] <- LHMultGeneric(theta.input1)/n
     }
   }
   
@@ -31,7 +31,7 @@ PLFDMult <- function (model, theta, tol, iter, delta) {
     para1.list <- Vec2ListMult(para1, ncz, ncb)
     theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
                          Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
-    pls[i] <- LambMultGeneric(theta.input1) / n  
+    pls[i] <- LHMultGeneric(theta.input1) / n  
   }
   
   I <- matrix(0, len, len)
