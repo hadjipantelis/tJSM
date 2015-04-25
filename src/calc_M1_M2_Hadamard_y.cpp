@@ -8,8 +8,9 @@
 
 Eigen::VectorXd calc_M1_M2_Hadamard_y(Eigen::Map<Eigen::MatrixXd> & M1, const Eigen::Map<Eigen::ArrayXd> & v1, const Eigen::Map<Eigen::VectorXd> & v2){ 
   
-  // Calculate the Hadamard product $M_i1 M_i2 M_i3$ using indeces at v_i
-  // This function makes in-place computations
+  //  This function implements:
+  //  the Hadamard product $M_i1 M_i2 M_i3$ using indeces at v_i
+  //  This function makes in-place computations
 
   unsigned int N = M1.cols();
 

@@ -1,4 +1,3 @@
-
 #include <RcppEigen.h>
 #include <exception>      // std::exception
 
@@ -8,8 +7,8 @@
 
 double calc_MVND(const Eigen::Map<Eigen::VectorXd> & x, const Eigen::Map<Eigen::VectorXd> & mu, const Eigen::Map<Eigen::MatrixXd> & K){ 
  
-  // This function implements:
-  // dmvnorm(x, mu, K)
+  //  This function implements:
+  //  dmvnorm(x, mu, K)
 
   double p = x.size();
   Eigen::LLT<Eigen::MatrixXd> LLT_of_K(K); // compute the Cholesky decomposition of K

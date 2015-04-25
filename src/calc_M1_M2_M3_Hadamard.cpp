@@ -7,9 +7,9 @@
 
 
 void calc_M1_M2_M3_Hadamard(Eigen::Map<Eigen::MatrixXd> & M1, const Eigen::Map<Eigen::MatrixXd> & M2, const Eigen::Map<Eigen::MatrixXd> & M3, const Eigen::Map<Eigen::VectorXi> & v){ 
-  
-  // Calculate the Hadamard product $M_i1 M_i2 M_i3$ using indeces at v_i
-  // This function makes in-place computations
+  //  This function implements:
+  //  the Hadamard product $M1 M2[v,] M3[v, ]$  
+  //  This function makes in-place computations
 
   unsigned int N = v.size();
 

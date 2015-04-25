@@ -7,8 +7,9 @@
 
 void calc_M1_M2_Hadamard(Eigen::Map<Eigen::ArrayXd> & M1, const Eigen::Map<Eigen::ArrayXd> & M2){ 
  
-  // Calculate the Hadamard product $M_i1 M_i2$
-  // This function makes in-place computations  
+  //  This function implements:
+  //  the Hadamard product $M1 M2$
+  //  This function makes in-place computations
   
      M1 *= M2;   
 }

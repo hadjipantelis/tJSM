@@ -6,7 +6,12 @@
 // [[Rcpp::export]]
  
 Eigen::MatrixXd calc_mult0_rowsum(const Eigen::Map<Eigen::VectorXi> & v, const Eigen::Map<Eigen::VectorXd> & u, const Eigen::Map<Eigen::MatrixXd> & M){ 
-         
+     
+
+  //  This function implements:
+  //  rowsum( M1 * u , v)
+  //  as before 'v' needs to be sorted!!
+    
   const unsigned int l = v.size();
   const unsigned int m = M.cols();  
 

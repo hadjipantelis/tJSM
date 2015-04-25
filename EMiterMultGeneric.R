@@ -23,6 +23,7 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
     Btime.b <- as.vector(Btime %*% gamma) * bi # n*nknot matrix #
     Btime2.b <- as.vector(Btime2 %*% gamma) * bi[Index, ] # M*nknot matrix #
   } else if (model == 2){
+    # Do nothing
   } else {
     stop("Invalid model type")
   }    

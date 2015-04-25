@@ -8,8 +8,9 @@
 
 void calc_y_a(Eigen::Map<Eigen::ArrayXd> & v, const double & a){
 
-  // Calculate the vector multiplication $a v_i1$ a_i being a scalar
-  // This function makes in-place computations 
+  //  This function implements:
+  //  the vector multiplication $a v$ a being a scalar
+  //  This function makes in-place computations 
 
   v *= a;  
 

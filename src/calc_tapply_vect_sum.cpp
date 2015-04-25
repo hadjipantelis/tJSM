@@ -7,7 +7,8 @@
  
 Eigen::ArrayXd calc_tapply_vect_sum(const Eigen::Map<Eigen::ArrayXd> & v1, const Eigen::Map<Eigen::ArrayXi> & v2){
 
-  // Calculate the equivalent of tapply(v_i1, v_i2, sum)
+  //  This function implements:
+  //  the equivalent of tapply(v_i1, v_i2, sum) for vectors
    
   unsigned int N = v2.size();
   unsigned int a = v2.maxCoeff();

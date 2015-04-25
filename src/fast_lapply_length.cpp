@@ -8,6 +8,9 @@
  
 Eigen::MatrixXd fast_lapply_length(Rcpp::List const input1, Rcpp::List const input2, Rcpp::NumericVector const Ind){ 
           
+  //  This function implements:
+  //  do.call(rbind, lapply(Ind, function(i) input1[[i]] %*% input2[[i]] ))  
+
   const unsigned int l = Ind.size();
   unsigned int s = 0; 
 

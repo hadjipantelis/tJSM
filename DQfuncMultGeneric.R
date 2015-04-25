@@ -40,7 +40,6 @@ DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
     stop("Invalid model type")
   }
 
-  # exp.es <- exp(eta.s) # M*nknot matrix #
   calc_expM3(eta.s)
   const <- matrix(0, n, nknot) # n*nknot matrix #
   const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb[Index1], eta.s )
@@ -65,7 +64,6 @@ DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
     temp0 <- as.vector(Ztime2 %*% pphi) + palpha * bi[Index, ] # M*nknot matrix #
   }
   calc_expM3(temp0)
-  # temp0 <- exp(eta.sp) # M*nknot matrix #
 
   calc_M1_M2_M3_Hadamard(temp0, CondExp, Integral,as.integer(Index-1))
   temp1 <- as.vector( temp0 %*% wGQ) # vector of length M #
