@@ -5,7 +5,7 @@
 
 // [[Rcpp::export]]
  
-Eigen::MatrixXd fast_rbind_lapply(Rcpp::List const input){ 
+Eigen::MatrixXd fast_rbind_lapply_outerprod(Rcpp::List const input){ 
 
   //  This function implements:
   //  do.call(rbind, lapply(1:n, function(i) apply(t(bi.st[[i]]), 1, function(x) x %o% x)))

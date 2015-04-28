@@ -1,4 +1,3 @@
-
 #include <RcppEigen.h>
 
 // [[Rcpp::depends(RcppEigen)]]

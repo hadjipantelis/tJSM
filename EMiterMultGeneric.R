@@ -40,7 +40,7 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
   calc_expM2(exp.es)
 
   const <- matrix(0, n, nknot) # n*nknot matrix #
-  const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb.old[Index1], exp.es) # n*nknot matrix #  
+  const[nk != 0, ] <- calc_rowsum_mult((Index), lamb.old[Index1], exp.es) # n*nknot matrix #  
   log.density2 <- -log(1 + rho * const) # n*GQ matrix # 
   log.survival <- if(rho > 0) log.density2 / rho else - const # n*nknot matrix #
   
@@ -71,9 +71,9 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
   #========== calculate the score and gradient of phi and alpha ==========# 
   CondExp2 <- CondExp[nk!=0, ]
   temp0 <- exp.es * lamb.old[Index1] 
-  temp1 <- lapply(1:ncz, function(i)  calc_mult_rowsum((Index), Ztime2[, i] , temp0, CondExp2))
+  temp1 <- lapply(1:ncz, function(i)  calc_mult_rowsum1((Index), Ztime2[, i] , temp0, CondExp2))
   # n*nknot matrices # 
-  temp3 <- lapply(1:(ncz^2), function(i) calc_mult_rowsum(Index, Ztime22[, i], temp0, A = CondExp2))
+  temp3 <- lapply(1:(ncz^2), function(i) calc_mult_rowsum1(Index, Ztime22[, i], temp0, A = CondExp2))
   # n*nknot matrices #
   if (model ==2) { 
     temp0c <- bi[Index, ]* temp0
@@ -84,7 +84,7 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
     temp2 <- CondExp2 * calc_rowsum(temp0c,  v =Index) # n*nknot matrix # 
     temp4 <- calc_mult_rowsum2(A = CondExp2, v= Index, Btime2.b, temp0c) 
   } 
-  temp5 <- lapply(1:(ncz), function(i) calc_mult_rowsum(Index, Ztime2[, i], temp0c, A = CondExp2))
+  temp5 <- lapply(1:(ncz), function(i) calc_mult_rowsum1(Index, Ztime2[, i], temp0c, A = CondExp2))
   # n*nknot matrices #
   Integral2 <- Integral[nk != 0, ]
   post1 <- unlist(lapply(temp1, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncz #
@@ -154,7 +154,7 @@ EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calcul
 
   calc_expM2(eta.s.n2)
   calc_M1_M2_M3_Hadamard(eta.s.n2, CondExp ,  Integral, as.integer(Index-1))
-  tempLamb <- calc_M_y(v =wGQ, M=eta.s.n2) 
+  tempLamb <- calc_M_v(v =wGQ, M=eta.s.n2) 
   postLamb <- calc_tapply_vect_sum(  v1=tempLamb, v2=  as.integer(Index1-1)) # vector of length n_u #
   lamb.new <- Index2 / postLamb
   

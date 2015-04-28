@@ -28,7 +28,7 @@ LambGeneric <- function (para, lamb.init, tol, iter) {
   } else {
     stop("Invalid model type")
   }
-  calc_y_a( Ztime2.b,alpha); # Ztime2.b gets altered
+  calc_v_a( Ztime2.b,alpha); # Ztime2.b gets altered
   if ( model == 2){
     exp.es<- as.numeric(Wtime2 %*% phi) + Ztime2.b  
   } else {
@@ -45,7 +45,7 @@ LambGeneric <- function (para, lamb.init, tol, iter) {
     log.lamb[is.na(log.lamb)] <- 0
     log.density1 <- log.lamb + eta.h # n*GQ matrix #
     const <- matrix(0, n, GQ) # n*GQ matrix 
-    const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb.old[Index1], exp.es)
+    const[nk != 0, ] <- calc_rowsum_mult((Index), lamb.old[Index1], exp.es)
     log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
     log.survival <- if(rho > 0) log.density2 / rho else - const # n*GQ matrix # 
     
@@ -57,7 +57,7 @@ LambGeneric <- function (para, lamb.init, tol, iter) {
     # WE DO IN PLACE MULTIPLICATION / variable 'tempLamb0' is holding the results    
     tempLamb0 <- exp.es; tempLamb0[1] = tempLamb0[1] +0 # "touch the variable"
     calc_M1_M2_M3_Hadamard(tempLamb0, CondExp ,  Integral, as.integer(Index-1))
-    tempLamb <- calc_M_y(v =wGQ, M =tempLamb0)
+    tempLamb <- calc_M_v(v =wGQ, M =tempLamb0)
     postLamb <- calc_tapply_vect_sum( v1= tempLamb, v2= as.integer(Index1-1)); ## Check this!
     lamb.new <- Index2 / postLamb[postLamb!=0]
     

@@ -62,7 +62,7 @@ EMiterTMGeneric <- function (theta.old) { # Use apply instead of matrix calculat
 	}  
   #========== Update BSigma ==========#
   if (ncz>1) {
-    tempB <-  fast_rbind_lapply( bi.st )    # (n*ncz^2)*GQ matrix #      
+    tempB <-  fast_rbind_lapply_outerprod( bi.st )    # (n*ncz^2)*GQ matrix #      
   } else {
     tempB <- bi ^ 2
   }
@@ -93,19 +93,19 @@ EMiterTMGeneric <- function (theta.old) { # Use apply instead of matrix calculat
     temp0b <- Ztime2.b * temp0a 
     temp1 <- CondExp2 * calc_rowsum( (Index), temp0b) 
     temp2 <- calc_mult_rowsum2(v= Index, A=CondExp2, M=temp0b,L=Ztime2.b)
-    temp3 <- lapply(1:(ncw), function(i) calc_mult_rowsum(v= Index, u = Wtime2[, i], A= CondExp2,  M=temp0a))
-    temp4 <- lapply(1:(ncw^2), function(i) calc_mult_rowsum(v= Index, u = Wtime22[, i], A= CondExp2, M= temp0a)) 
+    temp3 <- lapply(1:(ncw), function(i) calc_mult_rowsum1(v= Index, u = Wtime2[, i], A= CondExp2,  M=temp0a))
+    temp4 <- lapply(1:(ncw^2), function(i) calc_mult_rowsum1(v= Index, u = Wtime22[, i], A= CondExp2, M= temp0a)) 
     temp0c <- Ztime2.b *temp0a
   } else {
     XZb2 <- as.vector(Xtime2 %*% beta.old) + Ztime2.b # M*GQ matrix # 
     temp0b <- XZb2 * temp0a; 
     temp1 <- CondExp2 * calc_rowsum( (Index), temp0b)
     temp2 <- calc_mult_rowsum2(v = Index, A = CondExp2, M= temp0b,      XZb2)
-    temp3 <- lapply(1:(ncw), function(i) calc_mult_rowsum(v = Index, u = Wtime2[, i], A = CondExp2,  M=temp0a))
-    temp4 <- lapply(1:(ncw^2), function(i) calc_mult_rowsum(v = Index, u = Wtime22[, i], A = CondExp2, M= temp0a)) 
+    temp3 <- lapply(1:(ncw), function(i) calc_mult_rowsum1(v = Index, u = Wtime2[, i], A = CondExp2,  M=temp0a))
+    temp4 <- lapply(1:(ncw^2), function(i) calc_mult_rowsum1(v = Index, u = Wtime22[, i], A = CondExp2, M= temp0a)) 
     temp0c <- XZb2 *temp0a 
   }
-  temp5 <- lapply(1:(ncw), function(i) calc_mult_rowsum(v= Index, u = Wtime2[, i], A=CondExp2, M=temp0c)) 
+  temp5 <- lapply(1:(ncw), function(i) calc_mult_rowsum1(v= Index, u = Wtime2[, i], A=CondExp2, M=temp0c)) 
 
   Integral2 <- Integral[nk != 0,]
   post1 <- sum((temp1 * Integral2) %*% wGQ)
@@ -142,9 +142,9 @@ EMiterTMGeneric <- function (theta.old) { # Use apply instead of matrix calculat
   eta.s.n1 <- as.vector(Wtime2 %*% phi.new + alpha.new * Xtime2 %*% beta.old) + newZtime2.b # M*GQ matrix # 
   calc_expM2(eta.s.n1)
   temp0e <- alpha.new * eta.s.n1 * lamb.old[Index1]; 
-  temp6 <- lapply(1:(ncx), function(i) calc_mult_rowsum(v = Index, u = Xtime2[, i], A = CondExp2, M= temp0e))
+  temp6 <- lapply(1:(ncx), function(i) calc_mult_rowsum1(v = Index, u = Xtime2[, i], A = CondExp2, M= temp0e))
   temp0d <- alpha.new*temp0e
-  temp7 <- lapply(1:(ncx^2), function(i) calc_mult_rowsum(v = Index, u = Xtime22[, i], A = CondExp2, M= temp0d))
+  temp7 <- lapply(1:(ncx^2), function(i) calc_mult_rowsum1(v = Index, u = Xtime22[, i], A = CondExp2, M= temp0d))
 
   post6 <- unlist(lapply(temp6, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncx #
   post7 <- unlist(lapply(temp7, function(x) sum((x * Integral2) %*% wGQ))) # vector of length ncx^2 #
@@ -168,7 +168,7 @@ EMiterTMGeneric <- function (theta.old) { # Use apply instead of matrix calculat
   }
   calc_expM2(eta.sn);
   calc_M1_M2_M3_Hadamard(eta.sn, CondExp ,  Integral, as.integer(Index-1))
-  tempLamb <- calc_M_y(v =wGQ, M=eta.sn)
+  tempLamb <- calc_M_v(v =wGQ, M=eta.sn)
   postLamb <- calc_tapply_vect_sum(  v1= tempLamb, v2=  as.integer(Index1-1)); ## Check this!
 
   lamb.new <- Index2 / postLamb

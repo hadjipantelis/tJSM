@@ -1,12 +1,10 @@
-
 #include <RcppEigen.h>
 
 // [[Rcpp::depends(RcppEigen)]]
 
 // [[Rcpp::export]]
  
-Eigen::MatrixXd calc_mult_rowsum(const Eigen::Map<Eigen::VectorXi> & v, const Eigen::Map<Eigen::VectorXd> & u, const Eigen::Map<Eigen::MatrixXd> & M, const Eigen::Map<Eigen::ArrayXd> & A){         
-
+Eigen::MatrixXd calc_mult_rowsum1(const Eigen::Map<Eigen::VectorXi> & v, const Eigen::Map<Eigen::VectorXd> & u, const Eigen::Map<Eigen::MatrixXd> & M, const Eigen::Map<Eigen::ArrayXd> & A){         
 
   //  This function implements:
   //  A *  rowsum( M1 * u , v)

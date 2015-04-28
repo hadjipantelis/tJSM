@@ -6,7 +6,7 @@
 // [[Rcpp::export]]
 
 
-void calc_y_a(Eigen::Map<Eigen::ArrayXd> & v, const double & a){
+void calc_v_a(Eigen::Map<Eigen::ArrayXd> & v, const double & a){
 
   //  This function implements:
   //  the vector multiplication $a v$ a being a scalar

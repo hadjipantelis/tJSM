@@ -42,7 +42,7 @@ LambMultGeneric <- function (para, lamb.init, tol, iter) {
     log.lamb[is.na(log.lamb)] <- 0
     log.density1 <- log.lamb + eta.h # n*nknot matrix #
     const <- matrix(0, n, nknot) # n*nknot matrix # 
-    const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb.old[Index1], exp.es)
+    const[nk != 0, ] <- calc_rowsum_mult((Index), lamb.old[Index1], exp.es)
     log.density2 <- - log(1 + rho * const) # n*nknot matrix # 
     log.survival <- if(rho > 0) - log(1 + rho * const) / rho else - const # n*nknot matrix # 
     
@@ -53,7 +53,7 @@ LambMultGeneric <- function (para, lamb.init, tol, iter) {
      
     tempLamb0 <- exp.es; tempLamb0[1] = tempLamb0[1] +0 # "touch the variable"
     calc_M1_M2_M3_Hadamard(tempLamb0, CondExp ,  Integral, as.integer(Index-1))
-    tempLamb <- calc_M_y(v =wGQ, M =tempLamb0)   
+    tempLamb <- calc_M_v(v =wGQ, M =tempLamb0)   
     postLamb <-calc_tapply_vect_sum(  v1=tempLamb, v2=  as.integer(Index1-1))
     lamb.new <- Index2 / postLamb
     

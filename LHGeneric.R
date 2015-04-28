@@ -30,7 +30,7 @@ LHGeneric <- function (theta) {
     stop("Invalid model type")
   }
 
-  calc_y_a( Ztime2.b,alpha); # Ztime2.b gets altered
+  calc_v_a( Ztime2.b,alpha); # Ztime2.b gets altered
 
   if ( model == 2){
     exp.es<- as.numeric(Wtime2 %*% phi) + Ztime2.b  

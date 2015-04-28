@@ -43,7 +43,7 @@ DQfuncGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
 
   const <- matrix(0, n, GQ) # n*GQ matrix #
 
-  const[nk != 0, ] <- calc_mult0_rowsum((Index), lamb[Index1], exp.es)
+  const[nk != 0, ] <- calc_rowsum_mult((Index), lamb[Index1], exp.es)
   log.density2 <- - log(1 + rho * const) # n*GQ matrix # 
   log.survival <- if(rho > 0) log.density2 / rho else - const # n*GQ matrix #
   
@@ -60,7 +60,7 @@ DQfuncGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
              matrix(diag(post.bi), nrow = n) # n*ncz matrix #
   
   if (ncz>1) {    
-    tempB <-  fast_rbind_lapply( bi.st )  # (n*ncz^2)*GQ matrix #     
+    tempB <-  fast_rbind_lapply_outerprod( bi.st )  # (n*ncz^2)*GQ matrix #     
   } else {
     tempB <- bi ^ 2
   }
@@ -88,13 +88,13 @@ DQfuncGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
 
   temp0 <- exp.esp; temp0[1] = temp0[1] +0 # "touch the variable"
   calc_M1_M2_M3_Hadamard(temp0, CondExp ,  Integral, as.integer(Index-1))
-  temp1 <- calc_M_y(v = wGQ, M = temp0)
+  temp1 <- calc_M_v(v = wGQ, M = temp0)
   if (model==2){
     calc_M1_M2_Hadamard(temp0,Ztime2.b) }
   else{ 
     calc_M1_M2_Hadamard(temp0,XZb2)
   }
-  temp2 <- calc_M_y(v =wGQ, M= temp0)
+  temp2 <- calc_M_v(v =wGQ, M= temp0)
 
   temp3 <- Wtime2 * temp1 # M*ncw matrix #
    
