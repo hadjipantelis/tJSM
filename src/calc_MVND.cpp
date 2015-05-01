@@ -1,5 +1,4 @@
-#include <RcppEigen.h>
-#include <exception>      // std::exception
+#include <RcppEigen.h> 
 
 // [[Rcpp::depends(RcppEigen)]]
 
@@ -18,7 +17,7 @@ double calc_MVND(const Eigen::Map<Eigen::VectorXd> & x, const Eigen::Map<Eigen::
     double res   =  exp( -((p/2.0)*log(2.0*M_PI))  + Rooti.diagonal().array().log().sum() - 0.5*quads); 
     return ( res );
   } else {
-    std::cerr << "Exception caused as LLT failed! \n";
+    return ( -1.0 );
   }
 }
 

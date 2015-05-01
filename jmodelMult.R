@@ -1,5 +1,17 @@
-
-#=============== Joint Modeling Main Function with NMRE (nonparametric Multiplicative random effects) ===============#
+#' Joint Modeling Main Function with NMRE (nonparametric Multiplicative random effects)
+#' 
+#' @param fitLME is a  
+#' @param fitCOX is a  
+#' @param data is a  
+#' @param model is a  
+#' @param rho is a  
+#' @param timeVarT is a  
+#' @param control is a  
+#' @param ... can be additional arguments
+#' @return jmodelMult class model
+#' @import splines statmod survival nlme
+#' @examples
+#' 1 + 3
 
 jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NULL, 
                         control = list(), ...) 

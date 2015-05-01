@@ -16,7 +16,7 @@ print.summary.jmodelMult <- function (result, digits = max(4, getOption("digits"
   
   cat("\nCoefficients:")
   cat("\nLongitudinal Process: Nonparametric multiplicative random effects model\n")
-  printCoefmat(result$infoLong, P.value = TRUE, has.Pvalue = TRUE)
+  printCoefmat(result$infoLong, P.values = TRUE, has.Pvalue = TRUE)
   cat("\nSurvival Process: ")
   if (result$rho == 0)
     cat("Proportional hazards model with unspecified baseline hazard function\n")
@@ -24,7 +24,7 @@ print.summary.jmodelMult <- function (result, digits = max(4, getOption("digits"
     cat("Proportional odds model with unspecified baseline hazard function\n")
   else
     cat("Transformation model with rho=", result$rho, "and unspecified baseline hazard function\n")
-  printCoefmat(result$infoSurv, P.value = TRUE, has.Pvalue = TRUE)
+  printCoefmat(result$infoSurv, P.values = TRUE, has.Pvalue = TRUE)
   
   cat("\nVariance Components:\n")
   SD <- c(result$sigma.b, result$sigma.e)

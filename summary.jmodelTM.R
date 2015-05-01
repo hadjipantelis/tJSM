@@ -1,8 +1,9 @@
 
 #========== Function to compute summaries of objects in the joint model class ==========#
 
-summary.jmodelTM <- function (fit, ...) 
+summary.jmodelTM <- function (object, ...) 
 {
+  fit = object
   betas <- fit$coefficients$beta
   Vcov <- fit$Vcov
   ncx <- length(betas)

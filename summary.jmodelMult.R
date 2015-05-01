@@ -1,8 +1,9 @@
 
 #========== Function to compute summaries of objects in the joint model class with NMRE ==========#
 
-summary.jmodelMult <- function (fit, ...) 
-{
+summary.jmodelMult <- function (object, ...) 
+{ 
+  fit = object
   gammas <- fit$coefficients$gamma
   Vcov <- fit$Vcov
   ncb <- length(gammas)

@@ -1,4 +1,18 @@
-
+#' Joint Modeling Main Function with LME (linear mixed effects)
+#' 
+#' @param fitLME is a 
+#' @param fitCOX is a  
+#' @param data is a  
+#' @param model is a  
+#' @param rho is a  
+#' @param timeVarY is a  
+#' @param timeVarT is a  
+#' @param control is a  
+#' @param ... can be additional arguments
+#' @return jmodelTM class model
+#' @import splines statmod survival nlme
+#' @examples
+#' 1 + 3
 
 jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL, timeVarT = NULL, 
                       control = list(), ...)
@@ -161,7 +175,6 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   beta.names <- names(fixef(fitLME))
   Ysigma <- fitLME$sigma
   
-  #surv.init <- if (model == 1) InitValTM1(beta) else InitValTM2(beta)
   surv.init <- InitValTMGeneric(beta)
   phi <- surv.init$phi
   alpha <- surv.init$alpha
