@@ -2,7 +2,7 @@
 #========== Function to Obtain Lamb Given Other Finite Dimensional Parameters for Model II ==========#
 #=============== Transformation model is fitted for the survival part ===============#
 
-LambGeneric <- function (para, lamb.init, tol, iter) {
+LambGeneric <- function (para, lamb.init, tol, iter, ncz, ncx, ncw,n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, model, GQ, d, Index2){
 
   para.list <- Vec2List(para, ncx, ncz, ncw)
   beta <- para.list$beta

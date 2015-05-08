@@ -2,7 +2,7 @@
 #=============== The DQ Function for Model II ===============#
 #=============== Transformation model is fitted for the survival part ===============#
 
-DQfuncGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
+DQfuncGeneric <- function (model, ptheta, theta, n, Z.st, Y.st, X.st, Ztime, nk, Wtime, Ztime.b, Wtime2, Xtime, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncx, ncw, p, ncz, ncz2, b, Ztime2.st, Index0, X, Y, ID, N, Index2, Z) { # ptheta means "theta prime"
   ## This might have significant (e-14) numerical difference with the original code. Something odd is happening with VB/muB.
   pbeta <- ptheta$beta
   beta <- theta$beta

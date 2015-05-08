@@ -40,5 +40,6 @@ Thumbs.db
 .RData
 obsolete/
 basicSpeedTests/
+JSM_partially_OK/
 timeBenchmarkResults/
 JSM/

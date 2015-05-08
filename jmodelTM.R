@@ -165,7 +165,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   X2.sum <- matrix(colSums(X2), nrow = ncx)  
   
 
-  environment(InitValTMGeneric) <- environment(EMiterTMGeneric) <- environment()
+  # environment(InitValTMGeneric) <- environment(EMiterTMGeneric) <- environment()
 
     
   BSigma <- lapply(lapply(fitLME$modelStruct$reStruct, as.matrix), 
@@ -175,7 +175,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   beta.names <- names(fixef(fitLME))
   Ysigma <- fitLME$sigma
   
-  surv.init <- InitValTMGeneric(beta)
+  surv.init <- InitValTMGeneric(beta, model = model, n = n, X = X, Z = Z, bBLUP = bBLUP, ID = ID, Xtime = Xtime, Ztime = Ztime, Xtime2 = Xtime2, Ztime2 = Ztime2, Index = Index, start = start, event = event, stop = stop, W = W, ncw = ncw, Wtime2 = Wtime2, Index2 = Index2, Index1 =  Index1, iter = iter, rho= rho, nk = nk, Wtime22 = Wtime22, d = d,  Wtime = Wtime, tol.P = tol.P )
   phi <- surv.init$phi
   alpha <- surv.init$alpha
   lamb <- surv.init$lamb
@@ -188,7 +188,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
      
     if (err.P < tol.P | err.L < tol.L) break
      
-    theta.new  <-   EMiterTMGeneric(theta.old)
+    theta.new  <-   EMiterTMGeneric(theta.old, n = n, Z.st = Z.st, Ztime = Ztime, Ztime2.st = Ztime2.st, nk = nk, Index0 = Index0, Wtime2 = Wtime2, Xtime2 = Xtime2, GQ = GQ, Index1 = Index1, Index = Index, rho = rho, wGQ = wGQ, d = d, Y.st = Y.st, X.st = X.st, ncz = ncz, ncz2 = ncz2, b = b, model =  model, Wtime = Wtime, Xtime = Xtime, X = X, Y = Y, ID = ID, N = N, ncw = ncw, Wtime22 = Wtime22, ncx = ncx, Xtime22 = Xtime22, Z = Z, X2.sum = X2.sum, Index2 = Index2)
     new.P <- c(theta.new$beta, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$BSigma)
     old.P <- c(theta.old$beta, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$BSigma)
     err.P <- max(abs(new.P - old.P) / (abs(old.P) + tol.P))
@@ -205,11 +205,11 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
    
   
   delta <- controlvals$delta
-  environment(Sfunc) <- environment() 
-  environment(LambGeneric) <- environment(DQfuncGeneric) <- environment(LHGeneric) <- environment()
+  # environment(Sfunc) <- environment() 
+  # environment(LambGeneric) <- environment(DQfuncGeneric) <- environment(LHGeneric) <- environment()
 
   if (controlvals$SE.method == 'PFDS') {
-    environment(PFDS) <- environment()
+    # environment(PFDS) <- environment()
     if (CheckDeltaFD(theta.new, ncz, delta)) {
       time.SE <- system.time(Vcov <- PFDS(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
@@ -219,9 +219,9 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
       warning("\n 'delta' is too large, use smaller 'delta'!")
     }
   } else if (controlvals$SE.method == 'PRES') {
-    environment(PRES) <- environment()
+    # environment(PRES) <- environment()
     if (CheckDeltaRE(theta.new, ncz, delta)) {
-      time.SE <- system.time(Vcov <- PRES(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
+      time.SE <- system.time(Vcov <- PRES(model, theta.new, min(tol.P, delta)/100, iter, delta, ncz = ncz, ncx = ncx, ncw = ncw, n = n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, b = b, Ztime = Ztime, Ztime2.st = Ztime2.st, nk = nk, Wtime = Wtime, Xtime = Xtime, Wtime2 = Wtime2, Xtime2 = Xtime2, rho = rho, Index0 = Index0, Index1 = Index1, Index = Index, wGQ =wGQ, GQ = GQ, d = d, Index2 = Index2, p = p, ncz2 = ncz2, X = X, Y = Y, Z = Z, ID = ID, N = N, alpha.name, beta.names, phi.names))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
@@ -229,7 +229,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
       warning("\n 'delta' is too large, use smaller 'delta'!")
     }
   } else if (controlvals$SE.method == 'PLFD') {
-    environment(PLFD) <- environment()
+    # environment(PLFD) <- environment()
     if (CheckDeltaFD(theta.new, ncz, delta)) {
       time.SE <- system.time(Vcov <- PLFD(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))

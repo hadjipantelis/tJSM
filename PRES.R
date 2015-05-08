@@ -1,8 +1,8 @@
 
 #========== Differentiate the S function with Richardson Extrapolation for Model I & II ==========#
 
-PRES <- function (model, theta, tol, iter, delta) {     
-  
+PRES <- function (model, theta, tol, iter, delta, ncz, ncx, ncw,n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, GQ, d, Index2, p, ncz2, X, Y, ID, N, Z, alpha.name, beta.names, phi.names) {     
+ 
   para <- List2Vec(theta)
   lamb.init <- theta$lamb
   len <- length(para)
@@ -16,10 +16,10 @@ PRES <- function (model, theta, tol, iter, delta) {
     para2[i] <- para[i] - delta
     para3[i] <- para[i] + delta
     para4[i] <- para[i] + 2 * delta
-    result1 <- LambGeneric(para1, lamb.init, tol, iter)
-    result2 <- LambGeneric(para2, lamb.init, tol, iter)
-    result3 <- LambGeneric(para3, lamb.init, tol, iter)
-    result4 <- LambGeneric(para4, lamb.init, tol, iter)
+    result1 <- LambGeneric(para1, lamb.init, tol, iter, ncz, ncx, ncw, n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, model, GQ, d, Index2) 
+    result2 <- LambGeneric(para2, lamb.init, tol, iter, ncz, ncx, ncw, n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, model, GQ, d, Index2)
+    result3 <- LambGeneric(para3, lamb.init, tol, iter, ncz, ncx, ncw, n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, model, GQ, d, Index2)
+    result4 <- LambGeneric(para4, lamb.init, tol, iter, ncz, ncx, ncw, n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, model, GQ, d, Index2)
     list1 <- Vec2List(para1, ncx, ncz, ncw)
     list2 <- Vec2List(para2, ncx, ncz, ncw)
     list3 <- Vec2List(para3, ncx, ncz, ncw)
@@ -28,10 +28,10 @@ PRES <- function (model, theta, tol, iter, delta) {
     theta.input2 <- list(beta = list2$beta, phi = list2$phi, alpha = list2$alpha, Ysigma = list2$Ysigma, BSigma = list2$BSigma, lamb = result2$lamb)
     theta.input3 <- list(beta = list3$beta, phi = list3$phi, alpha = list3$alpha, Ysigma = list3$Ysigma, BSigma = list3$BSigma, lamb = result3$lamb)
     theta.input4 <- list(beta = list4$beta, phi = list4$phi, alpha = list4$alpha, Ysigma = list4$Ysigma, BSigma = list4$BSigma, lamb = result4$lamb)
-    S1 <- Sfunc(model, theta.input1)
-    S2 <- Sfunc(model, theta.input2)
-    S3 <- Sfunc(model, theta.input3)
-    S4 <- Sfunc(model, theta.input4)
+    S1 <- DQfuncGeneric(model = model, ptheta = theta.input1, theta = theta.input1, n =  n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, Ztime = Ztime, nk = nk, Wtime = Wtime, Wtime2 = Wtime2, Xtime = Xtime, Xtime2 = Xtime2, GQ = GQ, Index = Index, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncx = ncx, ncw = ncw, p = p, ncz = ncz, ncz2 = ncz2, b = b, Ztime2.st = Ztime2.st, Index0 = Index0, X = X, Y = Y , ID = ID, N = N, Index2 = Index2, Z= Z)
+    S2 <- DQfuncGeneric(model = model, ptheta = theta.input2, theta = theta.input2, n =  n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, Ztime = Ztime, nk = nk, Wtime = Wtime, Wtime2 = Wtime2, Xtime = Xtime, Xtime2 = Xtime2, GQ = GQ, Index = Index, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncx = ncx, ncw = ncw, p = p, ncz = ncz, ncz2 = ncz2, b = b, Ztime2.st = Ztime2.st, Index0 = Index0, X = X, Y = Y , ID = ID, N = N, Index2 = Index2, Z= Z)
+    S3 <- DQfuncGeneric(model = model, ptheta = theta.input3, theta = theta.input3, n =  n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, Ztime = Ztime, nk = nk, Wtime = Wtime, Wtime2 = Wtime2, Xtime = Xtime, Xtime2 = Xtime2, GQ = GQ, Index = Index, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncx = ncx, ncw = ncw, p = p, ncz = ncz, ncz2 = ncz2, b = b, Ztime2.st = Ztime2.st, Index0 = Index0, X = X, Y = Y , ID = ID, N = N, Index2 = Index2, Z= Z)
+    S4 <- DQfuncGeneric(model = model, ptheta = theta.input4, theta = theta.input4, n =  n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, Ztime = Ztime, nk = nk, Wtime = Wtime, Wtime2 = Wtime2, Xtime = Xtime, Xtime2 = Xtime2, GQ = GQ, Index = Index, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncx = ncx, ncw = ncw, p = p, ncz = ncz, ncz2 = ncz2, b = b, Ztime2.st = Ztime2.st, Index0 = Index0, X = X, Y = Y , ID = ID, N = N, Index2 = Index2, Z= Z)
     DS[i, ] <- (S1 - 8 * S2 + 8 * S3 - S4) / (12 * delta)
   }
   
