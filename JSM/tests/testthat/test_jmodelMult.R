@@ -2,7 +2,7 @@
 
  myEps <- .Machine$double.eps
 
-load("aids.rda")
+#load("../../../data/aids.rda")
 fitLME <- lme(sqrt(CD4) ~ bs(obstime, 4), random =~ 1 | ID, data = aids)
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 control <- list( max.iter = 100, nknot = 5)
@@ -31,7 +31,7 @@ test_that(" basic jmodelMult test with for aids data model = 2, rho = 1 ", {
   expect_equal( mean (m_MULT$coefficients$lamb),4.393738379111060, tolerance = (10^1)*myEps, scale = 1)
 })
  
-load("pbc.rda")
+#load("../../../data/pbc.rda")
 fitLME <- lme(log(serBilir) ~ bs(obstime, df = 6, degree = 2), random = ~ 1 | ID, data = pbc)
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = pbc, x = TRUE) 
 control <- list(tol.P = 10 ^ (- 3), max.iter = 100, nknot = 10)

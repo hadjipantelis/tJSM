@@ -1,8 +1,9 @@
 
 #========== Function to print basic summary of joint model with NMRE ==========#
 
-print.jmodelMult <- function (result, digits = max(4, getOption("digits") - 4), ...) 
+print.jmodelMult <- function (x, digits = max(4, getOption("digits") - 4), ...) 
 {
+  result = x
   cat("Joint modeling fitting of longitudinal and survival data by ML\n")
   cat("Nonparametric multiplicative random effects are used\n")
   

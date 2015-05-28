@@ -1,8 +1,9 @@
 
 #========== Function to print basic summary of joint model ==========#
 
-print.jmodelTM <- function (result, digits = max(4, getOption("digits") - 4), ...) 
+print.jmodelTM <- function (x, digits = max(4, getOption("digits") - 4), ...) 
 {
+  result = x
   cat("Joint modeling fitting of longitudinal and survival data by ML\n")
     
   cat("\nCoefficients:\n")

@@ -1,8 +1,9 @@
 
-#========== Function to print detailed summary of joint model ==========
+#========== Function to print detailed summary of joint model with NMRE ==========#
 
-print.summary.jmodelTM <- function (result, digits = max(4, getOption("digits") - 4), printKnots = FALSE, ...) 
+print.summary.jmodelMult <- function (x, digits = max(4, getOption("digits") - 4), printKnots = FALSE, ...) 
 {
+  result = x
   cat("\nCall:\n")
   cat(paste(deparse(result$call), sep = "\n", collapse = "\n"), "\n")
   cat("\nData Descriptives:\n")
@@ -15,7 +16,7 @@ print.summary.jmodelTM <- function (result, digits = max(4, getOption("digits") 
   print(model.sum)
   
   cat("\nCoefficients:")
-  cat("\nLongitudinal Process: Linear mixed-effects model\n")
+  cat("\nLongitudinal Process: Nonparametric multiplicative random effects model\n")
   printCoefmat(result$infoLong, P.values = TRUE, has.Pvalue = TRUE)
   cat("\nSurvival Process: ")
   if (result$rho == 0)
@@ -27,26 +28,9 @@ print.summary.jmodelTM <- function (result, digits = max(4, getOption("digits") 
   printCoefmat(result$infoSurv, P.values = TRUE, has.Pvalue = TRUE)
   
   cat("\nVariance Components:\n")
-  BSigma <- result$BSigma
-  ncz <- if(length(BSigma) == 1) 1 else nrow(BSigma)
-  SD <- if (ncz == 1) sqrt(BSigma) else sqrt(diag(BSigma))
-  SD <- c(SD, result$sigma.e)
-  if (ncz > 1) {
-    corr <- cov2cor(BSigma)
-    corr[upper.tri(corr, TRUE)] <- 0
-    corr <- rbind(corr, rep(0, ncz))
-    tempMat <- round(cbind(SD, corr[ , - ncz]), digits)
-    tempMat <- apply(tempMat, 2, sprintf, fmt = "% .4f")
-    tempMat[tempMat == tempMat[1, 2]] <- ""
-    tempMat[1, -1] <- abbreviate(colnames(tempMat)[- 1], 6)
-    colnames(tempMat) <- c(colnames(tempMat)[1], rep("", ncz - 1))
-    Mat <- data.frame(tempMat, check.rows = FALSE, check.names = FALSE)
-    colnames(Mat) <- c("StdDev", "Corr", if (ncz > 2) rep(" ", ncz - 2) else NULL)
-    rownames(Mat) <- c(dimnames(BSigma)[[1]], "Residual")
-  }else {
-    Mat <- data.frame("StdDev" = SD, row.names = c("Random", "Residual"), 
-                      check.rows = FALSE, check.names = FALSE)
-  }
+  SD <- c(result$sigma.b, result$sigma.e)
+  Mat <- data.frame("StdDev" = SD, row.names = c("Random", "Residual"), 
+                    check.rows = FALSE, check.names = FALSE)
   print(if(!is.numeric(Mat)) Mat else round(Mat, digits))
   
   cat("\nIntegration: (Adaptive Gauss-Hermite Quadrature)")

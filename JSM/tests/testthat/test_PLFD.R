@@ -2,7 +2,7 @@
 
  myEps <- .Machine$double.eps
 
-load("aids.rda")
+#load("data/aids.rda")
 fitLME <- lme(sqrt(CD4) ~ bs(obstime, 4), random =~ 1 | ID, data = aids)
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 control <- list( max.iter = 100, nknot = 5, SE.method ='PLFD')

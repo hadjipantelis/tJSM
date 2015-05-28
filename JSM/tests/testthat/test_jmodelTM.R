@@ -2,7 +2,7 @@
 
  myEps <- .Machine$double.eps
 
-load('aids.rda')
+#load('../../../data/aids.rda')
 fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), random = ~ 1 | ID, data = aids)
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 control <- list(nknot = 15)
@@ -33,7 +33,7 @@ test_that(" basic jmodelTM test with for aids data model = 2, rho = 1 ", {
 
 if(1==3){
 
-load("liver.rda")
+#load("../../../data/liver.rda")
 fitLME <- lme(proth ~ Trt * obstime, random = ~ obstime | ID, data = liver)
 fitCOX <- coxph(Surv(start, stop, event) ~ Trt, data = liver, x = TRUE) 
 control <- list(tol.P = 10 ^ (- 3))

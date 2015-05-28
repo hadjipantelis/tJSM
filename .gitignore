@@ -42,4 +42,6 @@ obsolete/
 basicSpeedTests/
 JSM_partially_OK/
 timeBenchmarkResults/
-JSM/
+JSM_old/
+OTHER_stuff/
+JSM.Rcheck/
