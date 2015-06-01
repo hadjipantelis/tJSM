@@ -1,7 +1,8 @@
 
 #========== Differentiate the S function with Forward Difference for Model I & II ==========#
 
-PFDS <- function (model, theta, tol, iter, delta) {
+# PFDS <- function (model, theta, tol, iter, delta) {
+PFDS <- function (model, theta, tol, iter, delta, ncz, ncx, ncw, alpha.name, beta.names, phi.names, p){
   
   S <- Sfunc(model, theta)
   

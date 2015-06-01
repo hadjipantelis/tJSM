@@ -1,18 +1,3 @@
-#' Joint Modeling Main Function with LME (linear mixed effects)
-#' 
-#' @param fitLME is a 
-#' @param fitCOX is a  
-#' @param data is a  
-#' @param model is a  
-#' @param rho is a  
-#' @param timeVarY is a  
-#' @param timeVarT is a  
-#' @param control is a  
-#' @param ... can be additional arguments
-#' @return jmodelTM class model
-#' @import splines statmod survival nlme
-#' @examples
-#' 1 + 3
 
 jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL, timeVarT = NULL, 
                       control = list(), ...)
@@ -211,7 +196,8 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   if (controlvals$SE.method == 'PFDS') {
     # environment(PFDS) <- environment()
     if (CheckDeltaFD(theta.new, ncz, delta)) {
-      time.SE <- system.time(Vcov <- PFDS(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
+      #time.SE <- system.time(Vcov <- PFDS(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
+      time.SE <- system.time(Vcov <- PFDS(model, theta.new, min(tol.P, delta)/100, iter, delta, p = p, ncz = ncz, ncx = ncx, ncw = ncw, alpha.name = alpha.name, beta.names= beta.names, phi.names = phi.names))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
@@ -231,7 +217,8 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   } else if (controlvals$SE.method == 'PLFD') {
     # environment(PLFD) <- environment()
     if (CheckDeltaFD(theta.new, ncz, delta)) {
-      time.SE <- system.time(Vcov <- PLFD(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
+     # time.SE <- system.time(Vcov <- PLFD(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
+      time.SE <- system.time(Vcov <- PLFD(model, theta.new, min(tol.P, delta)/100, iter, delta, ncz = ncz, ncx = ncx, ncw = ncw, n = n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, b = b, Ztime = Ztime, Ztime2.st = Ztime2.st, nk = nk, Wtime = Wtime, Xtime = Xtime, Wtime2 = Wtime2, Xtime2 = Xtime2, rho = rho, Index0 = Index0, Index1 = Index1, Index = Index, wGQ =wGQ, GQ = GQ, d = d, Index2 = Index2, p = p, ncz2 = ncz2, X = X, Y = Y, Z = Z, ID = ID, N = N, alpha.name, beta.names, phi.names))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {

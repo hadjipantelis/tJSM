@@ -2,7 +2,7 @@
 #========== Differentiate the S function with Forward Difference for Model I & II ==========#
 #========== Multipicative Joint Modeling ==========#
 
-PFDSMult <- function (model, theta, tol, iter, delta) {
+PFDSMult <- function (model, theta, tol, iter, delta, ncz, ncb, alpha.name, phi.names, B.st, n, Y.st,  b, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2) {
   
   S <- SfuncMult(model, theta)
   
@@ -16,7 +16,7 @@ PFDSMult <- function (model, theta, tol, iter, delta) {
   for (i in 1:len) {
     para1 <- para
     para1[i] <- para[i] + delta
-    result <-   LambMultGeneric(para1, lamb.init, tol, iter)
+    result <-   LambMultGeneric(para1, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2)
     para1.list <- Vec2ListMult(para1, ncz, ncb)
     theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
                          Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)

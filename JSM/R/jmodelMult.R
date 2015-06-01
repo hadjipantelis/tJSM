@@ -1,17 +1,3 @@
-#' Joint Modeling Main Function with NMRE (nonparametric Multiplicative random effects)
-#' 
-#' @param fitLME is a  
-#' @param fitCOX is a  
-#' @param data is a  
-#' @param model is a  
-#' @param rho is a  
-#' @param timeVarT is a  
-#' @param control is a  
-#' @param ... can be additional arguments
-#' @return jmodelMult class model
-#' @import splines statmod survival nlme
-#' @examples
-#' 1 + 3
 
 jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NULL, 
                         control = list(), ...) 
@@ -183,18 +169,18 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   converge <- as.numeric(err.P < tol.P | err.L < tol.L)
   
   delta <- controlvals$delta
-  environment(SfuncMult) <- environment()  
-    environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
+  # environment(SfuncMult) <- environment()  
+  # environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
 
   if (controlvals$SE.method == 'PFDS') {
     environment(PFDSMult) <- environment()
-    time.SE <- system.time(Vcov <- PFDSMult(model, theta.new, min(tol.P, delta) / 100, iter, delta))[3]
+    time.SE <- system.time(Vcov <- PFDSMult(model = model, theta = theta.new, tol = min(tol.P, delta) / 100, iter = iter, delta = delta, ncz = ncz, ncb = ncb, alpha.name = alpha.name, phi.names = phi.names, B.st = B.st, n = n, Y.st = Y.st , b = b, Btime = Btime , Btime2= Btime2, Index = Index , Ztime = Ztime , Ztime2 = Ztime2, Index0 =Index0 , nknot = nknot , nk = nk, Index1 = Index1, rho = rho , d =d , wGQ =wGQ, Index2 = Index2))[3]
     if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
       warning("NA's present in StdErr estimation due to numerical error!\n")
   } else if (controlvals$SE.method == 'PRES') {
     environment(PRESMult) <- environment()
     if (CheckDeltaMult(theta.new, delta)) {
-      time.SE <- system.time(Vcov <- PRESMult(model, theta.new, min(tol.P, delta) / 100, iter, delta))[3]
+      time.SE <- system.time(Vcov <- PRESMult(model = model, theta = theta.new, tol = min(tol.P, delta) / 100, iter = iter, delta = delta, ncz = ncz, ncb = ncb, alpha.name = alpha.name, phi.names = phi.names, B.st = B.st, n = n, Y.st = Y.st , b = b, Btime = Btime , Btime2= Btime2, Index = Index , Ztime = Ztime , Ztime2 = Ztime2, Index0 =Index0 , nknot = nknot , nk = nk, Index1 = Index1, rho = rho , d =d , wGQ =wGQ, Index2 = Index2))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
@@ -203,7 +189,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
     }
   } else if (controlvals$SE.method == 'PLFD') {
     environment(PLFDMult) <- environment()
-    time.SE <- system.time(Vcov <- PLFDMult(model, theta.new, min(tol.P, delta) / 100, iter, delta))[3]
+    time.SE <- system.time(Vcov <- PLFDMult(model = model, theta = theta.new, tol = min(tol.P, delta) / 100, iter = iter, delta = delta, ncz = ncz, ncb = ncb, alpha.name = alpha.name, phi.names = phi.names, B.st = B.st, n = n, Y.st = Y.st , b = b, Btime = Btime , Btime2= Btime2, Index = Index , Ztime = Ztime , Ztime2 = Ztime2, Index0 =Index0 , nknot = nknot , nk = nk, Index1 = Index1, rho = rho , d =d , wGQ =wGQ, Index2 = Index2))[3]
     if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
       warning("NA's present in StdErr estimation due to numerical error!\n")
   } else {

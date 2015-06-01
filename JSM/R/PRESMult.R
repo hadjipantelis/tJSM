@@ -2,7 +2,7 @@
 #========== Differentiate the S function with Richardson Extrapolation for Model I & II ==========#
 #========== Multipicative Joint Modeling ==========#
 
-PRESMult <- function (model, theta, tol, iter, delta) {     
+PRESMult <- function (model, theta, tol, iter, delta, ncz, ncb, alpha.name, phi.names, B.st, n, Y.st,  b, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2) {     
 
 para <- List2VecMult(theta)
 lamb.init <- theta$lamb
@@ -17,10 +17,10 @@ for (i in 1:len) {
   para2[i] <- para[i] - delta
   para3[i] <- para[i] + delta
   para4[i] <- para[i] + 2 * delta
-  result1 <- LambMultGeneric(para1, lamb.init, tol, iter)
-  result2 <- LambMultGeneric(para2, lamb.init, tol, iter)
-  result3 <- LambMultGeneric(para3, lamb.init, tol, iter)
-  result4 <- LambMultGeneric(para4, lamb.init, tol, iter)
+  result1 <- LambMultGeneric(para1, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2)
+  result2 <- LambMultGeneric(para2, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2)
+  result3 <- LambMultGeneric(para3, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2)
+  result4 <- LambMultGeneric(para4, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2)
   list1 <- Vec2ListMult(para1, ncz, ncb)
   list2 <- Vec2ListMult(para2, ncz, ncb)
   list3 <- Vec2ListMult(para3, ncz, ncb)
