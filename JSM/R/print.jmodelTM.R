@@ -14,12 +14,12 @@ print.jmodelTM <- function (x, digits = max(4, getOption("digits") - 4), ...)
   print(round(phis, digits))
   
   cat("\nVariance Components:\n")
-  BSigma <- result$coefficients$BSigma
-  ncz <- if(length(BSigma) == 1) 1 else nrow(BSigma)
-  SD <- if (ncz == 1) sqrt(BSigma) else sqrt(diag(BSigma))
+  Bsigma <- result$coefficients$Bsigma
+  ncz <- if(length(Bsigma) == 1) 1 else nrow(Bsigma)
+  SD <- if (ncz == 1) sqrt(Bsigma) else sqrt(diag(Bsigma))
   SD <- c(SD, result$coefficients$Ysigma)
   if (ncz > 1) {
-    corr <- cov2cor(BSigma)
+    corr <- cov2cor(Bsigma)
     corr[upper.tri(corr, TRUE)] <- 0
     corr <- rbind(corr, rep(0, ncz))
     tempMat <- round(cbind(SD, corr[ , - ncz]), digits)
@@ -29,9 +29,9 @@ print.jmodelTM <- function (x, digits = max(4, getOption("digits") - 4), ...)
     colnames(tempMat) <- c(colnames(tempMat)[1], rep("", ncz - 1))
     Mat <- data.frame(tempMat, check.rows = FALSE, check.names = FALSE)
     colnames(Mat) <- c("StdDev", "Corr", if (ncz > 2) rep(" ", ncz - 2) else NULL)
-    rownames(Mat) <- c(dimnames(BSigma)[[1]], "Residual")
+    rownames(Mat) <- c(dimnames(Bsigma)[[1]], "Residual")
   } else {
-    Mat <- data.frame("StdDev" = SD, row.names = c(names(BSigma), "Residual"), 
+    Mat <- data.frame("StdDev" = SD, row.names = c(names(Bsigma), "Residual"), 
                       check.rows = FALSE, check.names = FALSE)
   }
   print(if(!is.numeric(Mat)) Mat else round(Mat, digits))

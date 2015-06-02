@@ -24,10 +24,10 @@ PRES <- function (model, theta, tol, iter, delta, ncz, ncx, ncw,n, Z.st, Y.st, X
     list2 <- Vec2List(para2, ncx, ncz, ncw)
     list3 <- Vec2List(para3, ncx, ncz, ncw)
     list4 <- Vec2List(para4, ncx, ncz, ncw)
-    theta.input1 <- list(beta = list1$beta, phi = list1$phi, alpha = list1$alpha, Ysigma = list1$Ysigma, BSigma = list1$BSigma, lamb = result1$lamb)
-    theta.input2 <- list(beta = list2$beta, phi = list2$phi, alpha = list2$alpha, Ysigma = list2$Ysigma, BSigma = list2$BSigma, lamb = result2$lamb)
-    theta.input3 <- list(beta = list3$beta, phi = list3$phi, alpha = list3$alpha, Ysigma = list3$Ysigma, BSigma = list3$BSigma, lamb = result3$lamb)
-    theta.input4 <- list(beta = list4$beta, phi = list4$phi, alpha = list4$alpha, Ysigma = list4$Ysigma, BSigma = list4$BSigma, lamb = result4$lamb)
+    theta.input1 <- list(beta = list1$beta, phi = list1$phi, alpha = list1$alpha, Ysigma = list1$Ysigma, Bsigma = list1$Bsigma, lamb = result1$lamb)
+    theta.input2 <- list(beta = list2$beta, phi = list2$phi, alpha = list2$alpha, Ysigma = list2$Ysigma, Bsigma = list2$Bsigma, lamb = result2$lamb)
+    theta.input3 <- list(beta = list3$beta, phi = list3$phi, alpha = list3$alpha, Ysigma = list3$Ysigma, Bsigma = list3$Bsigma, lamb = result3$lamb)
+    theta.input4 <- list(beta = list4$beta, phi = list4$phi, alpha = list4$alpha, Ysigma = list4$Ysigma, Bsigma = list4$Bsigma, lamb = result4$lamb)
     S1 <- DQfuncGeneric(model = model, ptheta = theta.input1, theta = theta.input1, n =  n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, Ztime = Ztime, nk = nk, Wtime = Wtime, Wtime2 = Wtime2, Xtime = Xtime, Xtime2 = Xtime2, GQ = GQ, Index = Index, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncx = ncx, ncw = ncw, p = p, ncz = ncz, ncz2 = ncz2, b = b, Ztime2.st = Ztime2.st, Index0 = Index0, X = X, Y = Y , ID = ID, N = N, Index2 = Index2, Z= Z)
     S2 <- DQfuncGeneric(model = model, ptheta = theta.input2, theta = theta.input2, n =  n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, Ztime = Ztime, nk = nk, Wtime = Wtime, Wtime2 = Wtime2, Xtime = Xtime, Xtime2 = Xtime2, GQ = GQ, Index = Index, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncx = ncx, ncw = ncw, p = p, ncz = ncz, ncz2 = ncz2, b = b, Ztime2.st = Ztime2.st, Index0 = Index0, X = X, Y = Y , ID = ID, N = N, Index2 = Index2, Z= Z)
     S3 <- DQfuncGeneric(model = model, ptheta = theta.input3, theta = theta.input3, n =  n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, Ztime = Ztime, nk = nk, Wtime = Wtime, Wtime2 = Wtime2, Xtime = Xtime, Xtime2 = Xtime2, GQ = GQ, Index = Index, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncx = ncx, ncw = ncw, p = p, ncz = ncz, ncz2 = ncz2, b = b, Ztime2.st = Ztime2.st, Index0 = Index0, X = X, Y = Y , ID = ID, N = N, Index2 = Index2, Z= Z)
@@ -40,7 +40,7 @@ PRES <- function (model, theta, tol, iter, delta, ncz, ncx, ncw,n, Z.st, Y.st, X
   V <- -solve(DS);
   Valpha.name <- if (model == 1) paste("alpha:", alpha.name, sep = "") else "alpha"
   Vnames <- c(paste(rep("beta:", ncx), beta.names, sep = ""), paste(rep("phi:", ncw), phi.names, sep = ""),
-              Valpha.name, "sigma.e", paste("BSigma.", 1:p, sep = ""))
+              Valpha.name, "sigma.e", paste("Bsigma.", 1:p, sep = ""))
   dimnames(V) <- list(Vnames, Vnames)
   
   return(V)

@@ -8,8 +8,8 @@ DQfuncGeneric <- function (model, ptheta, theta, n, Z.st, Y.st, X.st, Ztime, nk,
   beta <- theta$beta
   pYsigma2 <- (ptheta$Ysigma) ^ 2
   Ysigma2 <- (theta$Ysigma) ^ 2
-  pBSigma <- ptheta$BSigma
-  BSigma <- theta$BSigma
+  pBsigma <- ptheta$Bsigma
+  Bsigma <- theta$Bsigma
   pphi <- ptheta$phi
   phi <- theta$phi
   palpha <- ptheta$alpha
@@ -17,9 +17,9 @@ DQfuncGeneric <- function (model, ptheta, theta, n, Z.st, Y.st, X.st, Ztime, nk,
   plamb <- ptheta$lamb
   lamb <- theta$lamb
   
-  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = BSigma, b = Ysigma2 ))  
-  VB <-  lapply(1:n, function(i) calc_VB( BSigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
-  muB <- lapply(1:n, function(i) calc_muB( BSold=BSigma , Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta ,VY= VY[[i]], Xst=X.st[[i]]))
+  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = Bsigma, b = Ysigma2 ))  
+  VB <-  lapply(1:n, function(i) calc_VB( Bsigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
+  muB <- lapply(1:n, function(i) calc_muB( BSold=Bsigma , Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta ,VY= VY[[i]], Xst=X.st[[i]]))
   bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]], b ,M = VB[[i]]) ) 
 
   bi <- do.call(rbind, bi.st) # (n*ncz)*GQ matrix #
@@ -72,8 +72,8 @@ DQfuncGeneric <- function (model, ptheta, theta, n, Z.st, Y.st, X.st, Ztime, nk,
   post.resid <- ((Y - pYmu) ^ 2 * Integral[ID, ]) %*% wGQ # vector of length N #
   Q[ncx + ncw + 2] <- - N / sqrt(pYsigma2) + sum(post.resid) / (pYsigma2 ^ (3 / 2))
   
-  pBSigmaInv = solve(pBSigma);
-  tempB <- - n * pBSigmaInv / 2 + pBSigmaInv %*% matrix(colSums(post.bi2), ncz, ncz) %*% pBSigmaInv / 2
+  pBsigmaInv = solve(pBsigma);
+  tempB <- - n * pBsigmaInv / 2 + pBsigmaInv %*% matrix(colSums(post.bi2), ncz, ncz) %*% pBsigmaInv / 2
 
   ind <- Indexing(ncz)
   Q[(ncx + ncw + 3):len] <- as.vector(tapply(c(tempB), ind, sum))

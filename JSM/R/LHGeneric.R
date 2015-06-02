@@ -5,14 +5,14 @@ LHGeneric <- function (theta, n, Z.st, Y.st, X.st, b, Ztime, Ztime.st, nk, Index
   
   beta <- theta$beta
   Ysigma2 <- (theta$Ysigma) ^ 2
-  BSigma <- theta$BSigma
+  Bsigma <- theta$Bsigma
   phi <- theta$phi
   alpha <- theta$alpha
   lamb <- theta$lamb
 
-  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = BSigma, b = Ysigma2 ))  
-  VB <-  lapply(1:n, function(i) calc_VB( BSigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
-  muB <- lapply(1:n, function(i) calc_muB( BSold=BSigma , Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta ,VY= VY[[i]], Xst=X.st[[i]]))
+  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = Bsigma, b = Ysigma2 ))  
+  VB <-  lapply(1:n, function(i) calc_VB( Bsigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
+  muB <- lapply(1:n, function(i) calc_muB( BSold=Bsigma , Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta ,VY= VY[[i]], Xst=X.st[[i]]))
   bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]], b ,M = VB[[i]]) ) 
 
   # each element is ncz*GQ matrix #

@@ -7,14 +7,14 @@ EMiterTMGeneric <- function (theta.old, n, Z.st, Ztime, Ztime2.st, nk, Index0, W
   # Get Old Estimates #
   beta.old <- theta.old$beta
   Ysigma2.old <- (theta.old$Ysigma) ^ 2
-  BSigma.old <- theta.old$BSigma
+  Bsigma.old <- theta.old$Bsigma
   phi.old <- theta.old$phi
   alpha.old <- theta.old$alpha
   lamb.old <- theta.old$lamb
   
-  VY <- lapply(1:n, function(i) calc_VY( M = Z.st[[i]], A = BSigma.old, b = Ysigma2.old))  
-  VB <-  lapply(1:n, function(i) calc_VB( BSigma.old,M2 =  Z.st[[i]], M3 = VY[[i]])) 
-  muB <- lapply(1:n, function(i) calc_muB( BSold=BSigma.old, Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta.old,VY= VY[[i]], Xst=X.st[[i]]))
+  VY <- lapply(1:n, function(i) calc_VY( M = Z.st[[i]], A = Bsigma.old, b = Ysigma2.old))  
+  VB <-  lapply(1:n, function(i) calc_VB( Bsigma.old,M2 =  Z.st[[i]], M3 = VY[[i]])) 
+  muB <- lapply(1:n, function(i) calc_muB( BSold=Bsigma.old, Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta.old,VY= VY[[i]], Xst=X.st[[i]]))
   bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]], b ,M = VB[[i]]) ) 
  
   bi <- do.call(rbind, bi.st)
@@ -60,7 +60,7 @@ EMiterTMGeneric <- function (theta.old, n, Z.st, Ztime, Ztime2.st, nk, Index0, W
 		} else { 
              matrix(diag(post.bi), nrow = n) # n*ncz matrix Ehat(bi) #
 	}  
-  #========== Update BSigma ==========#
+  #========== Update Bsigma ==========#
   if (ncz>1) {
     tempB <-  fast_rbind_lapply_outerprod( bi.st )    # (n*ncz^2)*GQ matrix #      
   } else {
@@ -72,7 +72,7 @@ EMiterTMGeneric <- function (theta.old, n, Z.st, Ztime, Ztime2.st, nk, Index0, W
 	} else { 
               matrix(diag(post.bi2), nrow = n) # n*(ncz^2) matrix Ehat(bibi^T) #
   }
-  BSigma.new <- if (ncz > 1) matrix(colMeans(post.bi2), ncz, ncz) else mean(post.bi2) # ncz*ncz matrix #
+  Bsigma.new <- if (ncz > 1) matrix(colMeans(post.bi2), ncz, ncz) else mean(post.bi2) # ncz*ncz matrix #
   
   if(model==2) {
     #========== Update beta: the linear regresion coefficents of regression Yi-E(Zi*bi) on X_i ==========#
@@ -173,7 +173,7 @@ EMiterTMGeneric <- function (theta.old, n, Z.st, Ztime, Ztime2.st, nk, Index0, W
 
   lamb.new <- Index2 / postLamb
   
-  result <- list(beta = beta.new, Ysigma = sqrt(Ysigma2.new), BSigma = BSigma.new, phi = phi.new, 
+  result <- list(beta = beta.new, Ysigma = sqrt(Ysigma2.new), Bsigma = Bsigma.new, phi = phi.new, 
                  alpha = alpha.new, lamb = lamb.new, lgLik = lgLik, est.bi = post.bi)
   return(result)
 }

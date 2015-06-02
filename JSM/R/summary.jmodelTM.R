@@ -17,15 +17,15 @@ summary.jmodelTM <- function (object, ...)
   infoP <- cbind("Estimate" = phis, "StdErr" = seP, "z.value" = phis / seP,
                   "p.value" = 2 * pnorm(abs(phis / seP), lower.tail = FALSE))
   
-  BSigma <- fit$coefficients$BSigma
-  ncz <- if(length(BSigma) == 1) 1 else nrow(BSigma)
+  Bsigma <- fit$coefficients$Bsigma
+  ncz <- if(length(Bsigma) == 1) 1 else nrow(Bsigma)
   npar <- ncx + ncw + ncz * (ncz + 1) / 2 + 2
   
   logLik <- fit$logLik
   AIC <- - 2 * logLik + 2 * npar
   BIC <- - 2 * logLik + log(fit$n) * npar
   
-  result <- list("infoLong" = infoB, "infoSurv" = infoP, BSigma = BSigma,
+  result <- list("infoLong" = infoB, "infoSurv" = infoP, Bsigma = Bsigma,
                  sigma.e = fit$coefficients$Ysigma, logLik = logLik, AIC = AIC, BIC = BIC)
   result$N <- fit$N
   result$n <- fit$n

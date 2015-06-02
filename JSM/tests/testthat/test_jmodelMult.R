@@ -30,7 +30,9 @@ test_that(" basic jmodelMult test with for aids data model = 2, rho = 1 ", {
   expect_equal(  m_MULT$coefficients$lgLik, -2542.768126923503132, tolerance = (10^4)*myEps, scale = 1)
   expect_equal( mean (m_MULT$coefficients$lamb),4.393738379111060, tolerance = (10^1)*myEps, scale = 1)
 })
- 
+
+
+if(1==3){ 
 #load("../../../data/pbc.rda")
 fitLME <- lme(log(serBilir) ~ bs(obstime, df = 6, degree = 2), random = ~ 1 | ID, data = pbc)
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = pbc, x = TRUE) 
@@ -59,4 +61,4 @@ test_that(" basic jmodelMult test with for pbc data model = 2, rho = 1 ", {
   expect_equal(  m_MULT$coefficients$lgLik, -2541.720928353124691, tolerance = (10^4)*myEps, scale = 1)
   expect_equal( mean (m_MULT$coefficients$lamb), 2.207320505861047, tolerance = (10^1)*myEps, scale = 1)
 })
-
+}

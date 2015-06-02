@@ -7,13 +7,13 @@ LambGeneric <- function (para, lamb.init, tol, iter, ncz, ncx, ncw,n, Z.st, Y.st
   para.list <- Vec2List(para, ncx, ncz, ncw)
   beta <- para.list$beta
   Ysigma2 <- (para.list$Ysigma) ^ 2
-  BSigma <- para.list$BSigma
+  Bsigma <- para.list$Bsigma
   phi <- para.list$phi
   alpha <- para.list$alpha
   
-  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = BSigma, b = Ysigma2 ))  
-  VB <-  lapply(1:n, function(i) calc_VB( BSigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
-  muB <- lapply(1:n, function(i) calc_muB( BSold=BSigma , Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta ,VY= VY[[i]], Xst=X.st[[i]]))
+  VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = Bsigma, b = Ysigma2 ))  
+  VB <-  lapply(1:n, function(i) calc_VB( Bsigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
+  muB <- lapply(1:n, function(i) calc_muB( BSold=Bsigma , Zst=Z.st[[i]], Yst=Y.st[[i]], betaold=beta ,VY= VY[[i]], Xst=X.st[[i]]))
   bi.st <- lapply(1:n, function(i) calc_bi_st(v0=muB[[i]], b ,M = VB[[i]]) ) 
 
   # each element is ncz*GQ matrix #

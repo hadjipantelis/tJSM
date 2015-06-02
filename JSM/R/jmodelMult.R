@@ -1,40 +1,11 @@
-#' Joint Modeling Main Function with NMRE (nonparametric Multiplicative random effects)
-#' 
-#' @param fitLME is a  
-#' @param fitCOX is a  
-#' @param data is a  
-#' @param model is a  
-#' @param rho is a  
-#' @param timeVarT is a  
-#' @param control is a  
-#' @param ... can be additional arguments
-#' @return jmodelMult class model
-#' @import splines statmod survival nlme
-#' @examples
-#' 1 + 3
+# Joint Modeling Main Function with NMRE (nonparametric Multiplicative random effects)
 
 jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NULL, 
                         control = list(), ...) 
 {
   call <- match.call()
-  if(!inherits(fitLME, "lme"))
-    stop("\n'fitLME'must be a fit returned by lme().")
-  if(length(fitLME$group) > 1)
-    stop("\n nested random-effects are not allowed in lme().")
-  if(!is.null(fitLME$modelStruct$corStruct))
-    warning("\n correlation structure in 'fitLME' is ignored.")
-  if(!is.null(fitLME$modelStruct$varStruct))
-    warning("\n heteroscedasticity structure in 'fitLME' is ignored.")
-  
-  if(!inherits(fitCOX, "coxph"))
-    stop("\n'fitCOX' must be a fit returned by coxph().")
-  if(is.null(fitCOX$x))
-    stop("\n must specify argument 'x=TRUE' when using coxph().")
-  
-  if (rho < 0) {
-    rho <- 0 # fit Cox model if not specified #
-    warning("\n rho<0 is not valid, Cox model is fitted instead!")
-  }
+
+  CheckInputs(fitLME, fitCOX, rho)
   
   ID <- as.vector(unclass(fitLME$groups[[1]])) 
   ni <- as.vector(tapply(ID, ID, length))           
@@ -118,10 +89,10 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
                       nknot = 12)
   control <- c(control, list(...))
   namec <- names(control)
-  if (length(uname <- namec[!namec %in% names(controlvals)]) > 0) 
+  if(length(uname <- namec[!namec %in% names(controlvals)]) > 0) 
     warning("\n unknown names in 'control': ", paste(uname, collapse = ", "))
   controlvals[namec] <- control
-  if (controlvals$SE.method == 'PLFD' | controlvals$SE.method == 'PFDS') controlvals$delta <- 10 ^ (- 3)
+  if(controlvals$SE.method == 'PLFD' | controlvals$SE.method == 'PFDS') controlvals$delta <- 10 ^ (- 3)
   controlvals[namec] <- control
   
   tol.P <- controlvals$tol.P
@@ -162,7 +133,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   
   while (step <= iter) {
     
-    if (err.P < tol.P | err.L < tol.L) break
+    if(err.P < tol.P | err.L < tol.L) break
     
     theta.new <-  EMiterMultGeneric(theta.old, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ, ID, ncb, B, Y, N, ncz, Ztime22, Index2, B2, Btime22)
     
@@ -184,14 +155,14 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   #environment(SfuncMult) <- environment()  
   #  environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
 
-  if (controlvals$SE.method == 'PFDS') {
+  if(controlvals$SE.method == 'PFDS') {
    # environment(PFDSMult) <- environment()
     time.SE <- system.time(Vcov <- PFDSMult(model, theta.new, min(tol.P, delta) / 100, iter, delta, ncz = ncz, ncb = ncb, B.st = B.st, n =n, Y.st = Y.st, b = b, Btime = Btime, Btime2 = Btime2, Index = Index, Ztime = Ztime, Ztime2 = Ztime2, Index0 = Index0, nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, Index2 = Index2, alpha.name = alpha.name, phi.names = phi.names,N = N, Y = Y, B = B, ID = ID))[3]
     if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
       warning("NA's present in StdErr estimation due to numerical error!\n")
-  } else if (controlvals$SE.method == 'PRES') {
+  } else if(controlvals$SE.method == 'PRES') {
     #environment(PRESMult) <- environment()
-    if (CheckDeltaMult(theta.new, delta)) {
+    if(CheckDeltaMult(theta.new, delta)) {
       time.SE <- system.time(Vcov <- PRESMult(model, theta.new, min(tol.P, delta) / 100, iter = iter, delta = delta, ncz = ncz, ncb = ncb, B.st = B.st, n = n, Y.st = Y.st, b =b, Btime = Btime, Btime2 = Btime2, Index = Index, Ztime = Ztime, Ztime2 = Ztime2, Index0 = Index0 , nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, Index2 =Index2, alpha.name =alpha.name, phi.names = phi.names,N = N, Y = Y, B = B, ID = ID  ))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
@@ -199,7 +170,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
       Vcov <- time.SE <- NA
       warning("\n 'delta' is too large, use smaller 'delta'!")
     }
-  } else if (controlvals$SE.method == 'PLFD') {
+  } else if(controlvals$SE.method == 'PLFD') {
    # environment(PLFDMult) <- environment()
     time.SE <- system.time(Vcov <- PLFDMult( model = model, theta.new, min(tol.P, delta) / 100, iter = iter, delta = delta, B.st = B.st, n = n, Y.st = Y.st, b = b, Btime = Btime, Btime2 = Btime2, Index = Index, Index0 = Index0, Ztime = Ztime, Ztime2 = Ztime2, nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncz = ncz, ncb = ncb, Index2 = Index2, alpha.name = alpha.name, phi.names = phi.names))[3]
     if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
@@ -212,7 +183,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   theta.new$lamb <- cbind("time" = U, "bashaz" = theta.new$lamb)
   names(theta.new$gamma) <- paste("gamma.", 1:ncb, sep = "")
   names(theta.new$phi) <- phi.names
-  names(theta.new$alpha) <- if (model == 1) alpha.name else "alpha"
+  names(theta.new$alpha) <- if(model == 1) alpha.name else "alpha"
   names(theta.new$Ysigma) <- "sigma.e"
   names(theta.new$Bsigma) <- "sigma.b"
   
@@ -224,13 +195,14 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   result$Vcov <- Vcov
   result$est.bi <- theta.new$est.bi
   result$coefficients$est.bi <- NULL
-  result$convergence <- if (converge == 1) "success" else "failure"
+  result$convergence <- if(converge == 1) "success" else "failure"
   result$control <- controlvals
   result$time.SE <- time.SE
   result$N <- N
   result$n <- n
   result$d <- d
   result$rho <- rho
-  class(result) <- "jmodelMult"
-  result
+  class(result) <-  unlist(strsplit(deparse(sys.call()), split = '\\('))[1]
+
+  return(result)
 }

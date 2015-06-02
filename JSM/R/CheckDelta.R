@@ -6,9 +6,9 @@ CheckDeltaFD <- function (theta, ncz, delta) {
   Ysigma <- theta$Ysigma
   check1 <- (Ysigma - 2 * delta > 0)
   
-  BSigma <- theta$BSigma
-  if (is.matrix(BSigma)) {
-    VecB <- BSigma[lower.tri(BSigma, diag=TRUE)]
+  Bsigma <- theta$Bsigma
+  if (is.matrix(Bsigma)) {
+    VecB <- Bsigma[lower.tri(Bsigma, diag=TRUE)]
     check2 <- rep(FALSE, length(VecB))
     for (k in 1:length(VecB)) {
       temp.VecB <- VecB
@@ -32,9 +32,9 @@ CheckDeltaRE <- function (theta, ncz, delta) {
   Ysigma <- theta$Ysigma
   check1 <- (Ysigma - 2 * delta > 0)
   
-  BSigma <- theta$BSigma
-  if (is.matrix(BSigma)) {
-    VecB <- BSigma[lower.tri(BSigma, diag=TRUE)]
+  Bsigma <- theta$Bsigma
+  if (is.matrix(Bsigma)) {
+    VecB <- Bsigma[lower.tri(Bsigma, diag=TRUE)]
     check21 <- check22 <- rep(FALSE, length(VecB))
     for (k in 1:length(VecB)) {
       temp.VecB1 <- temp.VecB2 <- VecB
@@ -49,7 +49,7 @@ CheckDeltaRE <- function (theta, ncz, delta) {
       if(all(eigen(temp.B2)$values > 0)) check22[k] <- TRUE
     }
   }else{
-    check21 <- check22 <- (BSigma - 2 * delta > 0)
+    check21 <- check22 <- (Bsigma - 2 * delta > 0)
   }
   return(all(c(check1, check21, check22))) 
 }

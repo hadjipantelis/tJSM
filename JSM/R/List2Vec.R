@@ -1,9 +1,9 @@
 
 List2Vec <- function (theta) {
 
-  BSigma <- theta$BSigma
-  BSigma <- if (is.matrix(BSigma)) BSigma[lower.tri(BSigma, diag = TRUE)] else BSigma
+  Bsigma <- theta$Bsigma
+  Bsigma <- if (is.matrix(Bsigma)) Bsigma[lower.tri(Bsigma, diag = TRUE)] else Bsigma
   
-  para <- c(theta$beta, theta$phi, theta$alpha, theta$Ysigma, BSigma)
+  para <- c(theta$beta, theta$phi, theta$alpha, theta$Ysigma, Bsigma)
   return(para)
 }
