@@ -148,13 +148,10 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   Xtime22 <- if (ncx > 1) t(apply(Xtime2, 1, function(x) tcrossprod(x))) else Xtime2 ^ 2
   X2 <- if(ncx > 1) t(apply(X, 1, function(x) tcrossprod(x))) else X ^ 2
   X2.sum <- matrix(colSums(X2), nrow = ncx)  
-  
-
-  # environment(InitValTMGeneric) <- environment(EMiterTMGeneric) <- environment()
-
-    
+      
   BSigma <- lapply(lapply(fitLME$modelStruct$reStruct, as.matrix), 
                    function(x) x * fitLME$sigma ^ 2)[[1]]
+
   # the estimated variance-covariance matrix for the random effects  #
   beta <- as.vector(fixef(fitLME))
   beta.names <- names(fixef(fitLME))
@@ -190,14 +187,15 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
    
   
   delta <- controlvals$delta
-  # environment(Sfunc) <- environment() 
-  # environment(LambGeneric) <- environment(DQfuncGeneric) <- environment(LHGeneric) <- environment()
 
   if (controlvals$SE.method == 'PFDS') {
-    # environment(PFDS) <- environment()
     if (CheckDeltaFD(theta.new, ncz, delta)) {
+<<<<<<< HEAD
       #time.SE <- system.time(Vcov <- PFDS(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
       time.SE <- system.time(Vcov <- PFDS(model, theta.new, min(tol.P, delta)/100, iter, delta, p = p, ncz = ncz, ncx = ncx, ncw = ncw, alpha.name = alpha.name, beta.names= beta.names, phi.names = phi.names))[3]
+=======
+      time.SE <- system.time(Vcov <- PFDS(model, theta.new, min(tol.P, delta)/100, iter, delta, ncx = ncx, ncz = ncz, ncw = ncw, alpha.name = alpha.name, beta.names = beta.names, phi.names = phi.names, p = p))[3]
+>>>>>>> Just_Before_Merge
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
@@ -205,7 +203,6 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
       warning("\n 'delta' is too large, use smaller 'delta'!")
     }
   } else if (controlvals$SE.method == 'PRES') {
-    # environment(PRES) <- environment()
     if (CheckDeltaRE(theta.new, ncz, delta)) {
       time.SE <- system.time(Vcov <- PRES(model, theta.new, min(tol.P, delta)/100, iter, delta, ncz = ncz, ncx = ncx, ncw = ncw, n = n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, b = b, Ztime = Ztime, Ztime2.st = Ztime2.st, nk = nk, Wtime = Wtime, Xtime = Xtime, Wtime2 = Wtime2, Xtime2 = Xtime2, rho = rho, Index0 = Index0, Index1 = Index1, Index = Index, wGQ =wGQ, GQ = GQ, d = d, Index2 = Index2, p = p, ncz2 = ncz2, X = X, Y = Y, Z = Z, ID = ID, N = N, alpha.name, beta.names, phi.names))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
@@ -215,10 +212,13 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
       warning("\n 'delta' is too large, use smaller 'delta'!")
     }
   } else if (controlvals$SE.method == 'PLFD') {
-    # environment(PLFD) <- environment()
     if (CheckDeltaFD(theta.new, ncz, delta)) {
+<<<<<<< HEAD
      # time.SE <- system.time(Vcov <- PLFD(model, theta.new, min(tol.P, delta)/100, iter, delta))[3]
       time.SE <- system.time(Vcov <- PLFD(model, theta.new, min(tol.P, delta)/100, iter, delta, ncz = ncz, ncx = ncx, ncw = ncw, n = n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, b = b, Ztime = Ztime, Ztime2.st = Ztime2.st, nk = nk, Wtime = Wtime, Xtime = Xtime, Wtime2 = Wtime2, Xtime2 = Xtime2, rho = rho, Index0 = Index0, Index1 = Index1, Index = Index, wGQ =wGQ, GQ = GQ, d = d, Index2 = Index2, p = p, ncz2 = ncz2, X = X, Y = Y, Z = Z, ID = ID, N = N, alpha.name, beta.names, phi.names))[3]
+=======
+      time.SE <- system.time(Vcov <- PLFD(model, theta.new, min(tol.P, delta)/100, iter, delta, n= n, ncx = ncx, ncz = ncz, ncw = ncw, alpha.name = alpha.name, beta.names = beta.names, phi.names = phi.names, p = p))[3]
+>>>>>>> Just_Before_Merge
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {

@@ -2,7 +2,7 @@
 #=============== EM iteration Using Adaptive Gaussian Quadrature for Model I with NMRE ===============#
 #=============== Transformation model is fitted for the survival part ===============#
 
-EMiterMultGeneric <- function (theta.old) { # Use apply instead of matrix calculation #
+EMiterMultGeneric <- function (theta.old, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ, ID, ncb, B, Y, N, ncz, Ztime22, Index2, B2, Btime22) { # Use apply instead of matrix calculation #
   
   # Get Old Estimates #
   gamma <- theta.old$gamma

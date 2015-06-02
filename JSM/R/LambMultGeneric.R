@@ -2,7 +2,11 @@
 #========== Function to Obtain Lamb Given Other Finite Dimensional Parameters ==========#
 #=============== Model I for Multiplicative Joint Modeling ===============#
 
+<<<<<<< HEAD
 LambMultGeneric <- function (para, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2) {
+=======
+LambMultGeneric <- function (para, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st, b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2){
+>>>>>>> Just_Before_Merge
   
   para.list <- Vec2ListMult(para, ncz, ncb)
   gamma <- para.list$gamma

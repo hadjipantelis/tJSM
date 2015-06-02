@@ -1,7 +1,7 @@
 
 #=============== Initial Value Calculation for Model II with NMRE ===============#
 
-InitValMultGeneric <- function (gamma) {
+InitValMultGeneric <- function (gamma, B.st, n, Y.st, ni, model, ID, Index, B, Btime, Btime2, start, stop, event, Z, ncz, Ztime2, Index2, Index1, rho, iter, nk, d, Ztime22, Ztime, tol.P) {
   
   BTg <- lapply(B.st, function(x) as.vector(x %*% gamma))
   G <- unlist(lapply(1:n, function(i)  as.vector(   tcrossprod(Y.st[[i]] -  BTg[[i]]))))
@@ -16,7 +16,6 @@ InitValMultGeneric <- function (gamma) {
   
   VY <- lapply(1:n, function(i) calc_VY( M = BTg[[i]], A = Bsigma2, b = Ysigma2))  
   bBLUP <-unlist(lapply(1:n, function(i) calc_muBMult(  Bsigma2,VY[[i]],BTg[[i]],Y.st[[i]] )+1 ))
-  
   #========== fit the Cox model ==========#
 
   if (model == 2){
@@ -29,8 +28,8 @@ InitValMultGeneric <- function (gamma) {
   } else {
     stop("Invalid model type")     
   }
-
   data.init <- data.frame(start = start, stop = stop, event = event, Z = Z, fixedOrRand = fixedOrRand)
+
   fit <- coxph(Surv(start, stop, event) ~ Z + fixedOrRand, data = data.init) 
   phi.old <- fit$coefficients[1 : ncz]
   alpha.old <- fit$coefficients[ncz + 1]

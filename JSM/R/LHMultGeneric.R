@@ -2,7 +2,7 @@
 #=============== Function to Calculate the Likelihood Value for Model I ===============#
 #================ Multiplicative Joint Modeling ===============#
 
-LHMultGeneric <- function (theta) {
+LHMultGeneric <- function (theta, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ) {
   
   gamma <- theta$gamma
   phi <- theta$phi

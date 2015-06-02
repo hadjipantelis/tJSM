@@ -1,8 +1,12 @@
 
 #================== Profile Likelihood Method with Forward Difference for Model I & II ==================#
 
+<<<<<<< HEAD
 #PLFD <- function (model, theta, tol, iter, delta) {
 PLFD <- function (model, theta, tol, iter, delta, ncz, ncx, ncw,n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, GQ, d, Index2, p, ncz2, X, Y, ID, N, Z, alpha.name, beta.names, phi.names){
+=======
+PLFD <- function (model, theta, tol, iter, delta, n, ncx, ncz, ncw, alpha.name, beta.names, phi.names, p) {
+>>>>>>> Just_Before_Merge
   
   pl <- LHGeneric(theta) / n
   

@@ -1,7 +1,7 @@
 
 #=============== The DQ Function for Model I of Multiplicative Joint Model ===============#
 
-DQfuncMultGeneric <- function (ptheta, theta) { # ptheta means "theta prime"
+DQfuncMultGeneric <- function (ptheta, theta, B.st, n, Y.st, b, model, Btime, Btime2,  Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ, ncz, ncb, N, Y, B, ID, Index2 ) { # ptheta means "theta prime"
   
   pgamma <- ptheta$gamma
   pphi <- ptheta$phi

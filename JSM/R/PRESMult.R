@@ -2,7 +2,11 @@
 #========== Differentiate the S function with Richardson Extrapolation for Model I & II ==========#
 #========== Multipicative Joint Modeling ==========#
 
+<<<<<<< HEAD
 PRESMult <- function (model, theta, tol, iter, delta, ncz, ncb, alpha.name, phi.names, B.st, n, Y.st,  b, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2) {     
+=======
+PRESMult <- function (model, theta, tol, iter, delta, ncz, ncb, B.st, n, Y.st, b, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2, alpha.name, phi.names, N, Y, B, ID) {     
+>>>>>>> Just_Before_Merge
 
 para <- List2VecMult(theta)
 lamb.init <- theta$lamb
@@ -17,10 +21,17 @@ for (i in 1:len) {
   para2[i] <- para[i] - delta
   para3[i] <- para[i] + delta
   para4[i] <- para[i] + 2 * delta
+<<<<<<< HEAD
   result1 <- LambMultGeneric(para1, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2)
   result2 <- LambMultGeneric(para2, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2)
   result3 <- LambMultGeneric(para3, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2)
   result4 <- LambMultGeneric(para4, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st,  b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2)
+=======
+  result1 <- LambMultGeneric(para1, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st, b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2 )
+  result2 <- LambMultGeneric(para2, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st, b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2 )
+  result3 <- LambMultGeneric(para3, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st, b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2 )
+  result4 <- LambMultGeneric(para4, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st, b, model, Btime, Btime2, Index, Ztime, Ztime2, Index0, nknot, nk, Index1, rho, d, wGQ, Index2 )
+>>>>>>> Just_Before_Merge
   list1 <- Vec2ListMult(para1, ncz, ncb)
   list2 <- Vec2ListMult(para2, ncz, ncb)
   list3 <- Vec2ListMult(para3, ncz, ncb)
@@ -33,10 +44,10 @@ for (i in 1:len) {
                        Ysigma = list3$Ysigma, Bsigma = list3$Bsigma, lamb = result3$lamb)
   theta.input4 <- list(gamma = list4$gamma, phi = list4$phi, alpha = list4$alpha, 
                        Ysigma = list4$Ysigma, Bsigma = list4$Bsigma, lamb = result4$lamb)
-  S1 <- SfuncMult(model, theta.input1)
-  S2 <- SfuncMult(model, theta.input2)
-  S3 <- SfuncMult(model, theta.input3)
-  S4 <- SfuncMult(model, theta.input4)
+  S1 <- SfuncMult(model, theta.input1, B.st = B.st, n = n, Y.st = Y.st, b = b, Btime = Btime, Btime2 =  Btime2, Index =  Index, Index0 =  Index0, Ztime =  Ztime, Ztime2 = Ztime2, nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncz = ncz, ncb = ncb, N = N, Y = Y, B = B, ID = ID, Index2 = Index2)
+  S2 <- SfuncMult(model, theta.input2, B.st = B.st, n = n, Y.st = Y.st, b = b, Btime = Btime, Btime2 =  Btime2, Index =  Index, Index0 =  Index0, Ztime =  Ztime, Ztime2 = Ztime2, nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncz = ncz, ncb = ncb, N = N, Y = Y, B = B, ID = ID, Index2 = Index2)
+  S3 <- SfuncMult(model, theta.input3, B.st = B.st, n = n, Y.st = Y.st, b = b, Btime = Btime, Btime2 =  Btime2, Index =  Index, Index0 =  Index0, Ztime =  Ztime, Ztime2 = Ztime2, nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncz = ncz, ncb = ncb, N = N, Y = Y, B = B, ID = ID, Index2 = Index2)
+  S4 <- SfuncMult(model, theta.input4, B.st = B.st, n = n, Y.st = Y.st, b = b, Btime = Btime, Btime2 =  Btime2, Index =  Index, Index0 =  Index0, Ztime =  Ztime, Ztime2 = Ztime2, nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncz = ncz, ncb = ncb, N = N, Y = Y, B = B, ID = ID, Index2 = Index2)
   DS[i, ] <- (S1 - 8 * S2 + 8 * S3 - S4) / (12 * delta)
 }
 
