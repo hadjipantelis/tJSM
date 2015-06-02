@@ -138,9 +138,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   Ztime22 <- if(ncz > 1) t(apply(Ztime2, 1, function(x) tcrossprod(x))) else Ztime2 ^ 2
   Btime22 <- if(ncb > 1) t(apply(Btime2, 1, function(x) tcrossprod(x))) else Btime2 ^ 2
   B2 <- if(ncb > 1) t(apply(B, 1, function(x) tcrossprod(x))) else B ^ 2
-  
-   environment(InitValMultGeneric) <- environment(EMiterMultGeneric) <- environment() 
-  
+    
   tempResp <- strsplit(toString(formLongX), ", ")[[1]][c(2, 1)]
   tempResp <- paste(tempResp, collapse = "")
   tempForm3 <- strsplit(toString(splitFormula(formLongX)[[1]]), ", ")[[1]]
@@ -151,7 +149,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   fitLM <- eval(parse(text = tempForm3))
   gamma <- as.vector(fitLM$coefficients)
   
-  surv.init <-  InitValMultGeneric(gamma)  
+  surv.init <-  InitValMultGeneric(gamma = gamma,  B.st = B.st, n = n, Y.st = Y.st, ni = ni, model = model, ID = ID, Index = Index, start = start, stop = stop, B = B, Btime = Btime, Btime2 = Btime2, event = event, Z = Z, ncz = ncz, Ztime2 = Ztime2, Index2 = Index2, Index1 = Index1, rho = rho, iter = iter, nk = nk, d = d, Ztime22 = Ztime22, Ztime = Ztime, tol.P = tol.P)  
   phi <- surv.init$phi
   alpha <- surv.init$alpha
   lamb <- surv.init$lamb
@@ -166,7 +164,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
     
     if (err.P < tol.P | err.L < tol.L) break
     
-    theta.new <-  EMiterMultGeneric(theta.old)
+    theta.new <-  EMiterMultGeneric(theta.old, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ, ID, ncb, B, Y, N, ncz, Ztime22, Index2, B2, Btime22)
     
     new.P <- c(theta.new$gamma, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$Bsigma)
     old.P <- c(theta.old$gamma, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$Bsigma)
@@ -183,18 +181,18 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   converge <- as.numeric(err.P < tol.P | err.L < tol.L)
   
   delta <- controlvals$delta
-  environment(SfuncMult) <- environment()  
-    environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
+  #environment(SfuncMult) <- environment()  
+  #  environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
 
   if (controlvals$SE.method == 'PFDS') {
-    environment(PFDSMult) <- environment()
-    time.SE <- system.time(Vcov <- PFDSMult(model, theta.new, min(tol.P, delta) / 100, iter, delta))[3]
+   # environment(PFDSMult) <- environment()
+    time.SE <- system.time(Vcov <- PFDSMult(model, theta.new, min(tol.P, delta) / 100, iter, delta, ncz = ncz, ncb = ncb, B.st = B.st, n =n, Y.st = Y.st, b = b, Btime = Btime, Btime2 = Btime2, Index = Index, Ztime = Ztime, Ztime2 = Ztime2, Index0 = Index0, nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, Index2 = Index2, alpha.name = alpha.name, phi.names = phi.names,N = N, Y = Y, B = B, ID = ID))[3]
     if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
       warning("NA's present in StdErr estimation due to numerical error!\n")
   } else if (controlvals$SE.method == 'PRES') {
-    environment(PRESMult) <- environment()
+    #environment(PRESMult) <- environment()
     if (CheckDeltaMult(theta.new, delta)) {
-      time.SE <- system.time(Vcov <- PRESMult(model, theta.new, min(tol.P, delta) / 100, iter, delta))[3]
+      time.SE <- system.time(Vcov <- PRESMult(model, theta.new, min(tol.P, delta) / 100, iter = iter, delta = delta, ncz = ncz, ncb = ncb, B.st = B.st, n = n, Y.st = Y.st, b =b, Btime = Btime, Btime2 = Btime2, Index = Index, Ztime = Ztime, Ztime2 = Ztime2, Index0 = Index0 , nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, Index2 =Index2, alpha.name =alpha.name, phi.names = phi.names,N = N, Y = Y, B = B, ID = ID  ))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
@@ -202,8 +200,8 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
       warning("\n 'delta' is too large, use smaller 'delta'!")
     }
   } else if (controlvals$SE.method == 'PLFD') {
-    environment(PLFDMult) <- environment()
-    time.SE <- system.time(Vcov <- PLFDMult(model, theta.new, min(tol.P, delta) / 100, iter, delta))[3]
+   # environment(PLFDMult) <- environment()
+    time.SE <- system.time(Vcov <- PLFDMult( model = model, theta.new, min(tol.P, delta) / 100, iter = iter, delta = delta, B.st = B.st, n = n, Y.st = Y.st, b = b, Btime = Btime, Btime2 = Btime2, Index = Index, Index0 = Index0, Ztime = Ztime, Ztime2 = Ztime2, nknot = nknot, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncz = ncz, ncb = ncb, Index2 = Index2, alpha.name = alpha.name, phi.names = phi.names))[3]
     if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
       warning("NA's present in StdErr estimation due to numerical error!\n")
   } else {

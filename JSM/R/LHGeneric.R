@@ -1,7 +1,7 @@
 
 #=============== Function to Calculate the Likelihood Value for Model II ===============#
-
-LHGeneric <- function (theta) {
+#LHGeneric <- function (theta){
+LHGeneric <- function (theta, n, Z.st, Y.st, X.st, b, Ztime, Ztime.st, nk, Index0, model, Wtime, Xtime, Wtime2, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncz, Ztime2.st) {
   
   beta <- theta$beta
   Ysigma2 <- (theta$Ysigma) ^ 2
