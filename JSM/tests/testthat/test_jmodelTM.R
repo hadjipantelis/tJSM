@@ -7,11 +7,11 @@ fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + dru
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
 control <- list(nknot = 15)
 
-test_that(" basic jmodelTM test with for aids data model = 1, rho = 0 ", { 
-  m_TM <- jmodelTM(fitLME, fitCOX, aids, model = 1, rho=0,timeVarY = 'obstime', control = control)
-  expect_equal(      m_TM$coefficients$lgLik, -2522.306954085800498, tolerance = (10^4)*myEps, scale = 1)
-  expect_equal( mean (m_TM$coefficients$lamb), 4.354565736461517, tolerance = (10^1)*myEps, scale = 1)
-})
+#test_that(" basic jmodelTM test with for aids data model = 1, rho = 0 ", { 
+#  m_TM <- jmodelTM(fitLME, fitCOX, aids, model = 1, rho=0,timeVarY = 'obstime', control = control)
+#  expect_equal(      m_TM$coefficients$lgLik, -2522.306954085800498, tolerance = (10^4)*myEps, scale = 1)
+#  expect_equal( mean (m_TM$coefficients$lamb), 4.354565736461517, tolerance = (10^1)*myEps, scale = 1)
+#})
 
 test_that(" basic jmodelTM test with for aids data model = 1, rho = 1 ", { 
   m_TM <- jmodelTM(fitLME, fitCOX, aids, model = 1, rho=1,timeVarY = 'obstime', control = control)

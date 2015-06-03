@@ -6,6 +6,8 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   call <- match.call()
 
   CheckInputs(fitLME, fitCOX, rho)
+
+  controlvals <- GenerateControlList(control)
   
   ID <- as.vector(unclass(fitLME$groups[[1]])) 
   ni <- as.vector(tapply(ID, ID, length))           
@@ -103,22 +105,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   ncz2 <- ncz ^ 2
   p <- ncz * (ncz + 1) / 2
   
-  controlvals <- list(tol.P = 10 ^ (-4), tol.L = 10 ^ (-8), max.iter = 200, SE.method = 'PRES', delta = 10 ^ (- 5), 
-                      nknot = if(ncz == 1) 12 else if(ncz == 2) 10 else 8)
-  control <- c(control, list(...))
-  namec <- names(control)
-  if(length(uname <- namec[!namec %in% names(controlvals)]) > 0) 
-    warning("\n unknown names in 'control': ", paste(uname, collapse = ", "))
-  controlvals[namec] <- control
-  if(controlvals$SE.method == 'PLFD' | controlvals$SE.method == 'PFDS') controlvals$delta <- 10 ^ (- 3)
-  controlvals[namec] <- control
-  
-  tol.P <- controlvals$tol.P
-  tol.L <- controlvals$tol.L
-  iter <- controlvals$max.iter
-  nknot <- controlvals$nknot
-  
-  GHQ <- gauss.quad(nknot, kind = "hermite")
+  GHQ <- gauss.quad(controlvals$nknot, kind = "hermite")
   b <- as.matrix(expand.grid(rep(list(GHQ$nodes), ncz)))
   wGQ <- as.matrix(expand.grid(rep(list(GHQ$weights), ncz)))
   wGQ <- apply(wGQ, 1, prod)
@@ -142,7 +129,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   beta.names <- names(fixef(fitLME))
   Ysigma <- fitLME$sigma
   
-  surv.init <- InitValTMGeneric(beta, model = model, n = n, X = X, Z = Z, bBLUP = bBLUP, ID = ID, Xtime = Xtime, Ztime = Ztime, Xtime2 = Xtime2, Ztime2 = Ztime2, Index = Index, start = start, event = event, stop = stop, W = W, ncw = ncw, Wtime2 = Wtime2, Index2 = Index2, Index1 =  Index1, iter = iter, rho= rho, nk = nk, Wtime22 = Wtime22, d = d,  Wtime = Wtime, tol.P = tol.P )
+  surv.init <- InitValTMGeneric(beta, model = model, n = n, X = X, Z = Z, bBLUP = bBLUP, ID = ID, Xtime = Xtime, Ztime = Ztime, Xtime2 = Xtime2, Ztime2 = Ztime2, Index = Index, start = start, event = event, stop = stop, W = W, ncw = ncw, Wtime2 = Wtime2, Index2 = Index2, Index1 =  Index1, rho= rho, nk = nk, Wtime22 = Wtime22, d = d,  Wtime = Wtime, tol.P = controlvals$tol.P, iter = controlvals$max.iter )
   phi <- surv.init$phi
   alpha <- surv.init$alpha
   lamb <- surv.init$lamb
@@ -151,31 +138,31 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
                     lamb = lamb, lgLik = 0)
   err.P <- err.L <- step <- 1
   
-  while (step <= iter) {
+  while (step <= controlvals$max.iter) {
      
-    if(err.P < tol.P | err.L < tol.L) break
+    if(err.P < controlvals$tol.P | err.L < controlvals$tol.L) break
      
     theta.new  <-   EMiterTMGeneric(theta.old, n = n, Z.st = Z.st, Ztime = Ztime, Ztime2.st = Ztime2.st, nk = nk, Index0 = Index0, Wtime2 = Wtime2, Xtime2 = Xtime2, GQ = GQ, Index1 = Index1, Index = Index, rho = rho, wGQ = wGQ, d = d, Y.st = Y.st, X.st = X.st, ncz = ncz, ncz2 = ncz2, b = b, model =  model, Wtime = Wtime, Xtime = Xtime, X = X, Y = Y, ID = ID, N = N, ncw = ncw, Wtime22 = Wtime22, ncx = ncx, Xtime22 = Xtime22, Z = Z, X2.sum = X2.sum, Index2 = Index2)
     new.P <- c(theta.new$beta, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$Bsigma)
     old.P <- c(theta.old$beta, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$Bsigma)
-    err.P <- max(abs(new.P - old.P) / (abs(old.P) + tol.P))
+    err.P <- max(abs(new.P - old.P) / (abs(old.P) + controlvals$tol.P))
     # add tol.P to avoid zero value of the estimated parameters #
     
     new.L <- theta.new$lgLik
     old.L <- theta.old$lgLik
-    err.L <- abs(new.L - old.L) / (abs(old.L) + tol.P)
+    err.L <- abs(new.L - old.L) / (abs(old.L) + controlvals$tol.P)
     
     step <- step + 1
     theta.old <- theta.new
   }
-  converge <- as.numeric(err.P < tol.P | err.L < tol.L)
+  converge <- as.numeric(err.P < controlvals$tol.P | err.L < controlvals$tol.L)
    
   
   delta <- controlvals$delta
 
   if(controlvals$SE.method == 'PFDS') {
     if(CheckDeltaFD(theta.new, ncz, delta)) {
-      time.SE <- system.time(Vcov <- PFDS(model, theta.new, min(tol.P, delta)/100, iter, delta, ncx = ncx, ncz = ncz, ncw = ncw, alpha.name = alpha.name, beta.names = beta.names, phi.names = phi.names, p = p))[3]
+      time.SE <- system.time(Vcov <- PFDS(model, theta.new, delta, ncx = ncx, ncz = ncz, ncw = ncw, alpha.name = alpha.name, beta.names = beta.names, phi.names = phi.names, p = p,  tol =min(controlvals$tol.P, delta)/100, iter = controlvals$max.iter))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
@@ -184,7 +171,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
     }
   } else if(controlvals$SE.method == 'PRES') {
     if(CheckDeltaRE(theta.new, ncz, delta)) {
-      time.SE <- system.time(Vcov <- PRES(model, theta.new, min(tol.P, delta)/100, iter, delta, ncz = ncz, ncx = ncx, ncw = ncw, n = n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, b = b, Ztime = Ztime, Ztime2.st = Ztime2.st, nk = nk, Wtime = Wtime, Xtime = Xtime, Wtime2 = Wtime2, Xtime2 = Xtime2, rho = rho, Index0 = Index0, Index1 = Index1, Index = Index, wGQ =wGQ, GQ = GQ, d = d, Index2 = Index2, p = p, ncz2 = ncz2, X = X, Y = Y, Z = Z, ID = ID, N = N, alpha.name, beta.names, phi.names))[3]
+      time.SE <- system.time(Vcov <- PRES(model, theta.new, delta, ncz = ncz, ncx = ncx, ncw = ncw, n = n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, b = b, Ztime = Ztime, Ztime2.st = Ztime2.st, nk = nk, Wtime = Wtime, Xtime = Xtime, Wtime2 = Wtime2, Xtime2 = Xtime2, rho = rho, Index0 = Index0, Index1 = Index1, Index = Index, wGQ =wGQ, GQ = GQ, d = d, Index2 = Index2, p = p, ncz2 = ncz2, X = X, Y = Y, Z = Z, ID = ID, N = N, alpha.name, beta.names, phi.names, tol =min(controlvals$tol.P, delta)/100, iter = controlvals$max.iter))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
@@ -193,7 +180,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
     }
   } else if(controlvals$SE.method == 'PLFD') {
     if(CheckDeltaFD(theta.new, ncz, delta)) {
-      time.SE <- system.time(Vcov <- PLFD(model, theta.new, min(tol.P, delta)/100, iter, delta, n= n, ncx = ncx, ncz = ncz, ncw = ncw, alpha.name = alpha.name, beta.names = beta.names, phi.names = phi.names, p = p))[3]
+      time.SE <- system.time(Vcov <- PLFD(model, theta.new, delta, n= n, ncx = ncx, ncz = ncz, ncw = ncw, alpha.name = alpha.name, beta.names = beta.names, phi.names = phi.names, p = p, tol = min(controlvals$tol.P, delta)/100, iter = controlvals$max.iter))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
