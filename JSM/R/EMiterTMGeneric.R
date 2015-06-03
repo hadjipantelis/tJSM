@@ -2,7 +2,9 @@
 #=============== EM iteration Using Adaptive Gaussian Quadrature for Model I&II ===============#
 #=============== Transformation model is fitted for the survival part ===============#
 
-EMiterTMGeneric <- function (theta.old, n, Z.st, Ztime, Ztime2.st, nk, Index0, Wtime2, Xtime2, GQ, Index1, Index, rho, wGQ, d, Y.st, X.st, ncz, ncz2, b, model, Wtime, Xtime, X, Y, ID, N, ncw, Wtime22, ncx, Xtime22, Z, X2.sum, Index2){ # Use apply instead of matrix calculation #
+EMiterTMGeneric <- function (theta.old, n, Z.st, Ztime, Ztime2.st, nk, Wtime2, Xtime2, GQ, rho, wGQ, d, Y.st, X.st, ncz, ncz2, b, model, Wtime, Xtime, X, Y, ID, N, ncw, Wtime22, ncx, Xtime22, Z, X2.sum, Indcs){ # Use apply instead of matrix calculation #
+
+
   
   # Get Old Estimates #
   beta.old <- theta.old$beta
@@ -10,6 +12,12 @@ EMiterTMGeneric <- function (theta.old, n, Z.st, Ztime, Ztime2.st, nk, Index0, W
   Bsigma.old <- theta.old$Bsigma
   phi.old <- theta.old$phi
   alpha.old <- theta.old$alpha
+
+  Index = Indcs$Index  
+  Index0 = Indcs$Index0
+  Index1 = Indcs$Index1
+  Index2 = Indcs$Index2
+
   lamb.old <- theta.old$lamb
   
   VY <- lapply(1:n, function(i) calc_VY( M = Z.st[[i]], A = Bsigma.old, b = Ysigma2.old))  

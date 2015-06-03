@@ -1,8 +1,16 @@
 
 #=============== Initial Value Calculation for Transformation Model II ===============#
 
-InitValTMGeneric <- function (beta,model,n,X,Z,bBLUP, ID, Xtime, Ztime, Xtime2, Ztime2, Index, start, event, stop, W , ncw, Wtime2, Index2, Index1, rho, iter, nk, Wtime22, d, Wtime, tol.P) {
+InitValTMGeneric <- function (beta,model,n,X,Z,bBLUP, ID, Xtime, Ztime, Xtime2, Ztime2, Indcs, start, event, stop, W , ncw, Wtime2, rho, nk, Wtime22, d, Wtime, cvals) {
 
+  Index = Indcs$Index  
+  Index0 = Indcs$Index0
+  Index1 = Indcs$Index1
+  Index2 = Indcs$Index2
+
+  tol.P = cvals$tol.P;
+  iter = cvals$max.iter;
+   
   if(model == 1) { 
     fixedOrRand <- as.vector(X %*% beta) + rowSums(Z * bBLUP[ID, ]) # vector of length N #
     fixedOrRand.time <- as.vector(Xtime %*% beta) + rowSums(Ztime * bBLUP) # vector of length n #

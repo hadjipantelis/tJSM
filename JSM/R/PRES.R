@@ -1,8 +1,20 @@
 
 #========== Differentiate the S function with Richardson Extrapolation for Model I & II ==========#
 
-PRES <- function (model, theta, tol, iter, delta, ncz, ncx, ncw,n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, GQ, d, Index2, p, ncz2, X, Y, ID, N, Z, alpha.name, beta.names, phi.names) {     
+PRES <- function (model, theta, cvals, ncz, ncx, ncw,n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, wGQ, GQ, d, p, ncz2, X, Y, ID, N, Z, varNames, Indcs) {     
  
+  delta = cvals$delta;
+  tol = min(cvals$tol.P, cvals$delta)/100;
+  iter = cvals$max.iter
+  alpha.name = varNames$alpha.name;
+  phi.names = varNames$phi.names
+  beta.names = varNames$beta.names
+
+  Index = Indcs$Index  
+  Index0 = Indcs$Index0
+  Index1 = Indcs$Index1
+  Index2 = Indcs$Index2
+
   para <- List2Vec(theta)
   lamb.init <- theta$lamb
   len <- length(para)

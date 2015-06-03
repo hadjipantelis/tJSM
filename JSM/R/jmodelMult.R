@@ -7,7 +7,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
 
   CheckInputs(fitLME, fitCOX, rho)
 
-  controlvals <- GenerateControlList( control )
+  cntrlLst <- GenerateControlList( control )
   
   ID <- as.vector(unclass(fitLME$groups[[1]])) 
   ni <- as.vector(tapply(ID, ID, length))           
@@ -87,7 +87,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   ncz <- ncol(Z)
   ncb <- ncol(B)
   
-  GHQ <- gauss.quad(controlvals$nknot, kind = "hermite")
+  GHQ <- gauss.quad(cntrlLst$nknot, kind = "hermite")
   b <- GHQ$nodes
   wGQ <- GHQ$weights
   
@@ -107,7 +107,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   fitLM <- eval(parse(text = tempForm3))
   gamma <- as.vector(fitLM$coefficients)
   
-  surv.init <-  InitValMultGeneric(gamma = gamma,  B.st = B.st, n = n, Y.st = Y.st, ni = ni, model = model, ID = ID, Index = Index, start = start, stop = stop, B = B, Btime = Btime, Btime2 = Btime2, event = event, Z = Z, ncz = ncz, Ztime2 = Ztime2, Index2 = Index2, Index1 = Index1, rho = rho, nk = nk, d = d, Ztime22 = Ztime22, Ztime = Ztime, tol.P = controlvals$tol.P, iter = controlvals$max.iter)  
+  surv.init <-  InitValMultGeneric(gamma = gamma,  B.st = B.st, n = n, Y.st = Y.st, ni = ni, model = model, ID = ID, Index = Index, start = start, stop = stop, B = B, Btime = Btime, Btime2 = Btime2, event = event, Z = Z, ncz = ncz, Ztime2 = Ztime2, Index2 = Index2, Index1 = Index1, rho = rho, nk = nk, d = d, Ztime22 = Ztime22, Ztime = Ztime, tol.P = cntrlLst$tol.P, iter = cntrlLst$max.iter)  
   phi <- surv.init$phi
   alpha <- surv.init$alpha
   lamb <- surv.init$lamb
@@ -118,48 +118,42 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
                    lamb = lamb, lgLik = 0)
   err.P <- err.L <- step <- 1
   
-  while (step <= controlvals$max.iter) {
+  while (step <= cntrlLst$max.iter) {
     
-    if(err.P < controlvals$tol.P | err.L < controlvals$tol.L) break
+    if(err.P < cntrlLst$tol.P | err.L < cntrlLst$tol.L) break
     
-    theta.new <-  EMiterMultGeneric(theta.old, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot = controlvals$nknot, nk, Index1, rho, d, wGQ, ID, ncb, B, Y, N, ncz, Ztime22, Index2, B2, Btime22)
+    theta.new <-  EMiterMultGeneric(theta.old, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot = cntrlLst$nknot, nk, Index1, rho, d, wGQ, ID, ncb, B, Y, N, ncz, Ztime22, Index2, B2, Btime22)
     
     new.P <- c(theta.new$gamma, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$Bsigma)
     old.P <- c(theta.old$gamma, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$Bsigma)
-    err.P <- max(abs(new.P - old.P) / (abs(old.P) + controlvals$tol.P))
+    err.P <- max(abs(new.P - old.P) / (abs(old.P) + cntrlLst$tol.P))
     # add tol.P to avoid zero value of the estimated parameters #
     
     new.L <- theta.new$lgLik
     old.L <- theta.old$lgLik
-    err.L <- abs(new.L - old.L) / (abs(old.L) + controlvals$tol.P)
+    err.L <- abs(new.L - old.L) / (abs(old.L) + cntrlLst$tol.P)
     
     step <- step + 1
     theta.old <- theta.new
   }
-  converge <- as.numeric(err.P < controlvals$tol.P | err.L < controlvals$tol.L)
+  converge <- as.numeric(err.P < cntrlLst$tol.P | err.L < cntrlLst$tol.L)
   
-  delta <- controlvals$delta
-  #environment(SfuncMult) <- environment()  
-  #  environment(LambMultGeneric) <- environment(DQfuncMultGeneric) <- environment(LHMultGeneric) <- environment()
 
-  if(controlvals$SE.method == 'PFDS') {
-   # environment(PFDSMult) <- environment()
-    time.SE <- system.time(Vcov <- PFDSMult(model, theta.new, delta, ncz = ncz, ncb = ncb, B.st = B.st, n =n, Y.st = Y.st, b = b, Btime = Btime, Btime2 = Btime2, Index = Index, Ztime = Ztime, Ztime2 = Ztime2, Index0 = Index0, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, Index2 = Index2, alpha.name = alpha.name, phi.names = phi.names,N = N, Y = Y, B = B, ID = ID, nknot = controlvals$nknot, iter = controlvals$max.iter, tol = min(controlvals$tol.P, delta) / 100))[3]
+  if(cntrlLst$SE.method == 'PFDS') {
+    time.SE <- system.time(Vcov <- PFDSMult(model, theta.new, delta = cntrlLst$delta, ncz = ncz, ncb = ncb, B.st = B.st, n =n, Y.st = Y.st, b = b, Btime = Btime, Btime2 = Btime2, Index = Index, Ztime = Ztime, Ztime2 = Ztime2, Index0 = Index0, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, Index2 = Index2, alpha.name = alpha.name, phi.names = phi.names,N = N, Y = Y, B = B, ID = ID, nknot = cntrlLst$nknot, iter = cntrlLst$max.iter, tol = min(cntrlLst$tol.P, cntrlLst$delta) / 100))[3]
     if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
       warning("NA's present in StdErr estimation due to numerical error!\n")
-  } else if(controlvals$SE.method == 'PRES') {
-    #environment(PRESMult) <- environment()
-    if(CheckDeltaMult(theta.new, delta)) {
-      time.SE <- system.time(Vcov <- PRESMult(model, theta.new, delta = delta, ncz = ncz, ncb = ncb, B.st = B.st, n = n, Y.st = Y.st, b =b, Btime = Btime, Btime2 = Btime2, Index = Index, Ztime = Ztime, Ztime2 = Ztime2, Index0 = Index0 , nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, Index2 =Index2, alpha.name =alpha.name, phi.names = phi.names,N = N, Y = Y, B = B, ID = ID, nknot = controlvals$nknot, iter = controlvals$max.iter, tol = min(controlvals$tol.P, delta) / 100  ))[3]
+  } else if(cntrlLst$SE.method == 'PRES') {
+    if(CheckDeltaMult(theta.new, cntrlLst$delta)) {
+      time.SE <- system.time(Vcov <- PRESMult(model, theta.new, delta = cntrlLst$delta, ncz = ncz, ncb = ncb, B.st = B.st, n = n, Y.st = Y.st, b =b, Btime = Btime, Btime2 = Btime2, Index = Index, Ztime = Ztime, Ztime2 = Ztime2, Index0 = Index0 , nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, Index2 =Index2, alpha.name =alpha.name, phi.names = phi.names,N = N, Y = Y, B = B, ID = ID, nknot = cntrlLst$nknot, iter = cntrlLst$max.iter, tol = min(cntrlLst$tol.P, cntrlLst$delta) / 100  ))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
       Vcov <- time.SE <- NA
       warning("\n 'delta' is too large, use smaller 'delta'!")
     }
-  } else if(controlvals$SE.method == 'PLFD') {
-   # environment(PLFDMult) <- environment()
-    time.SE <- system.time(Vcov <- PLFDMult( model = model, theta.new, delta = delta, B.st = B.st, n = n, Y.st = Y.st, b = b, Btime = Btime, Btime2 = Btime2, Index = Index, Index0 = Index0, Ztime = Ztime, Ztime2 = Ztime2, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncz = ncz, ncb = ncb, Index2 = Index2, alpha.name = alpha.name, phi.names = phi.names, nknot = controlvals$nknot, iter = controlvals$max.iter, tol = min(controlvals$tol.P, delta) / 100))[3]
+  } else if(cntrlLst$SE.method == 'PLFD') {
+    time.SE <- system.time(Vcov <- PLFDMult( model = model, theta.new, delta = cntrlLst$delta, B.st = B.st, n = n, Y.st = Y.st, b = b, Btime = Btime, Btime2 = Btime2, Index = Index, Index0 = Index0, Ztime = Ztime, Ztime2 = Ztime2, nk = nk, Index1 = Index1, rho = rho, d = d, wGQ = wGQ, ncz = ncz, ncb = ncb, Index2 = Index2, alpha.name = alpha.name, phi.names = phi.names, nknot = cntrlLst$nknot, iter = cntrlLst$max.iter, tol = min(cntrlLst$tol.P, cntrlLst$delta) / 100))[3]
     if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
       warning("NA's present in StdErr estimation due to numerical error!\n")
   } else {
@@ -183,7 +177,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   result$est.bi <- theta.new$est.bi
   result$coefficients$est.bi <- NULL
   result$convergence <- if(converge == 1) "success" else "failure"
-  result$control <- controlvals
+  result$control <- cntrlLst
   result$time.SE <- time.SE
   result$N <- N
   result$n <- n

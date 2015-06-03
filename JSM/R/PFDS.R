@@ -1,8 +1,15 @@
 
 #========== Differentiate the S function with Forward Difference for Model I & II ==========#
 
-PFDS <- function (model, theta, tol, iter, delta, ncx, ncz, ncw, alpha.name, beta.names, phi.names, p) {
-  
+PFDS <- function (model, theta, cvals, ncx, ncz, ncw, p, varNames) {
+
+  delta = cvals$delta;
+  tol = min(cvals$tol.P, cvals$delta)/100;
+  iter = cvals$max.iter 
+  alpha.name = varNames$alpha.name;
+  phi.names = varNames$phi.names
+  beta.names = varNames$beta.names 
+
   S <- Sfunc(model, theta)
   
   para <- List2Vec(theta)

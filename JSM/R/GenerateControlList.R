@@ -1,3 +1,14 @@
+#' Generate the control variables used by the model 
+#' 
+#' @param tol.P :  
+#' @param tol.L  : 
+#' @param max.iter :  
+#' @param SE.method :  
+#' @param delta :
+#' @param nknot :
+#' @return VOID
+
+
 GenerateControlList <- function( control ){
 
  controlvals <- list(tol.P = 10 ^ (-4), tol.L = 10 ^ (-8), max.iter = 200, SE.method = 'PRES', delta = 10 ^ (- 5), 

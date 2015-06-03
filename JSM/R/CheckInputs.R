@@ -1,3 +1,10 @@
+#' Check that the basic input are reasonable
+#' 
+#' @param fitLME : fitted Linear Mixed Effects model
+#' @param fitCOX : fitted Proportional Hazards Regression model 
+#' @param rho :  number specifying the transformation model 
+#' @return VOID
+
 CheckInputs <- function(fitLME, fitCOX, rho){
 
   if(!inherits(fitLME, "lme"))
