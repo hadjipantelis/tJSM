@@ -2,7 +2,7 @@
 #' 
 #' @param fitLME : fitted Linear Mixed Effects model
 #' @param fitCOX : fitted Proportional Hazards Regression model 
-#' @param rho :  number specifying the transformation model 
+#' @param rho :  number specifying the logarthmic transformation model 
 #' @return VOID
 
 CheckInputs <- function(fitLME, fitCOX, rho){

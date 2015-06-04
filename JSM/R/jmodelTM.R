@@ -164,7 +164,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
      
   if(cntrlLst$SE.method == 'PFDS') {
     if(CheckDeltaFD(theta.new, ncz, cntrlLst$delta)) {
-      time.SE <- system.time(Vcov <- PFDS(model, theta.new, ncx = ncx, ncz = ncz, ncw = ncw, p = p, cvals = cntrlLst, varNames = varNames))[3]
+      time.SE <- system.time(Vcov <- PFDS(model, theta.new, ncx = ncx, ncz = ncz, ncw = ncw, p = p, cvals = cntrlLst, varNames = varNames, Indcs = Indcs, n = n, Z.st = Z.st, Y.st = Y.st, X.st = X.st, Ztime = Ztime, nk = nk, Wtime = Wtime, Ztime.b = Ztime.b, Wtime2 = Wtime2, Xtime = Xtime, Xtime2 = Xtime2, GQ = GQ, rho = rho, d = d, wGQ = wGQ, ncz2 = ncz2, b = b, Ztime2.st = Ztime2.st, X = X, Y = Y, ID = ID, N = N, Z = Z))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
@@ -182,7 +182,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
     }
   } else if(cntrlLst$SE.method == 'PLFD') {
     if(CheckDeltaFD(theta.new, ncz, cntrlLst$delta)) {
-      time.SE <- system.time(Vcov <- PLFD(model, theta.new, n= n, ncx = ncx, ncz = ncz, ncw = ncw, p = p, cvals = cntrlLst, varNames = varNames))[3]
+      time.SE <- system.time(Vcov <- PLFD(model, theta.new, n= n, ncx = ncx, ncz = ncz, ncw = ncw, p = p, cvals = cntrlLst, varNames = varNames, Z.st = Z.st, Y.st =Y.st, X.st = X.st, b = b, Ztime = Ztime, nk = nk, Indcs = Indcs, Wtime = Wtime, Xtime = Xtime, Wtime2 = Wtime2, Xtime2 = Xtime2, GQ = GQ, rho = rho, d = d, wGQ = wGQ, Ztime2.st = Ztime2.st ))[3]
       if(any(is.na(suppressWarnings(sqrt(diag(Vcov))))))
         warning("NA's present in StdErr estimation due to numerical error!\n")
     } else {
