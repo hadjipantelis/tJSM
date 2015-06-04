@@ -10,19 +10,20 @@ Rcpp::List calc_mult_rowsum3(const Eigen::Map<Eigen::ArrayXi> & v, const Eigen::
   //  lapply(1:ncb2, function(i) A * rowsum( B * M  , v))
   //  as before 'v' needs to be sorted!!
   
-  const unsigned int n =  uint(ncb2);
+  const unsigned int n = (unsigned int)ncb2;
   const unsigned int l = v.size();
-  const unsigned int m = M.cols();
+  const unsigned int mc = M.cols();
+  const unsigned int mr = M.rows();
        
   Rcpp::List output(n);
 
  for (unsigned int u = 0; u != n; u++){
-    Eigen::ArrayXXd Res = Eigen::ArrayXXd::Zero(v.maxCoeff() ,m);  
-    for (unsigned int i = 0; i < m; ++i){
+    Eigen::ArrayXXd Res = Eigen::ArrayXXd::Zero(v.maxCoeff() ,mc);  
+    for (unsigned int i = 0; i < mc; ++i){
       unsigned int k = 0;
-      for(unsigned int j = 0; j != l; ++j){
+      for (unsigned int j = 0; j != l; ++j){
         Res(k,i) = Res(k,i) + M(j,i) * B(j,u); 
-        if (j  < M.rows() ) {
+        if(j  < mr ) {
           if( v[j] != v[j+1] ){ 
             k++;
           } 
