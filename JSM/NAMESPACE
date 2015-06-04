@@ -1,6 +1,6 @@
 useDynLib(JSM) 
 importFrom(Rcpp, evalCpp)
-import(RcppEigen)
+# import(RcppEigen)
 
 # Exported functions
 export(jmodelTM, jmodelMult)
