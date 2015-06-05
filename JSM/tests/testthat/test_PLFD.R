@@ -37,7 +37,7 @@ test_that(" basic PLFD jmodelTM test with for aids data model = 1, rho = 0 ", {
 test_that(" basic PLFD jmodelTM test with for aids data model = 2, rho = 1 ", {
   m_TM <- jmodelTM(fitLME, fitCOX, aids, timeVarY = 'obstime', control= control, model=2, rho=1)
   expect_equal( mean (m_TM$est.bi), -0.000700231727253, tolerance = (10^4)*myEps, scale = 1)
-  expect_equal( mean (m_TM$Vcov), 0.000683913958988, tolerance = (10^5)*myEps, scale = 1)
+  expect_equal( mean (m_TM$Vcov), 0.000683913958988, tolerance = (10^9)*myEps, scale = 1)
 })
 
 
