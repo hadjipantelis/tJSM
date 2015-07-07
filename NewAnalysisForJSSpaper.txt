@@ -1,0 +1,195 @@
+devtools::load_all('../JSM/')
+load('../JSM/data/pbc.rda')
+load('../JSM/data/liver.rda')
+
+# Part 5.1
+
+fitLME <- lme(proth ~ Trt * obstime, random = ~ obstime | ID, data = liver)
+fitCOX <- coxph(Surv(start, stop, event) ~ Trt, data = liver, x = TRUE)
+
+fitJT.po0p00 <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime', rho = 0.00)
+fitJT.po0p25 <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime', rho = 0.25)
+fitJT.po0p375 <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime', rho = 0.375)
+fitJT.po0p50 <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime', rho = 0.50)
+fitJT.po0p563 <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime', rho = 0.563)
+fitJT.po0p625 <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime', rho = 0.625)
+fitJT.po0p75 <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime', rho = 0.75)
+fitJT.po1p00 <- jmodelTM(fitLME, fitCOX, liver, timeVarY = 'obstime', rho = 1.00)
+
+rho = c(0.000, 0.250, 0.375, 0.500, 0.563, 0.625, 0.750, 1.000)
+aics= c(AIC(fitJT.po0p00), AIC(fitJT.po0p25), AIC(fitJT.po0p375), AIC(fitJT.po0p50), AIC(fitJT.po0p563), AIC(fitJT.po0p625), AIC(fitJT.po0p75), AIC(fitJT.po1p00)) 
+
+png(filename="NewAICvsRho.png")
+
+ plot(rho, aics, type='l', ylab='AIC', xlab='ρ') 
+abline(v=(seq(0,1,length.out=26)), col="lightgray", lty="dotted") 
+abline(h=(seq(30126,30130,length.out=21)), col="lightgray", lty="dotted")
+
+dev.off()
+
+png(filename="NewFigure2.png")
+
+plot(lowess(times.pns, means.pns, f = .3), type = "l", col = "blue", ylab = "Prothrombin index", xlab = "Time (years)", ylim = c(50, 150), main = "Smoothed mean prothrombin index", lwd = 2)
+lines(lowess(times.pcb, means.pcb, f = .3), col = "red", lty = 2, lwd = 2)
+legend("topright", c("Prednisone", "Placebo"), col = c("blue", "red"), lty = 1:2, lwd = 2, bty = "n")
+
+beta <- fitJT.po0p563$coefficients$beta
+abline(a = (beta[1] + beta[2]), b = (beta[3] + beta[4]), col = "blue") 
+abline(a = beta[1], b = beta[3], col = "red", lty = 2)
+
+dev.off()
+
+save.image('AnalysisPart5p1.RData')
+
+# Part 5.2
+
+# Testing knots in the Joint-Model's LME model using AIC without changing the Cox mdel using rho 0
+# Define the LMEM
+
+fitCOXpbcFixed <- coxph(Surv(start, stop, event) ~ drug, data = pbc, x = TRUE)
+
+## Rho = 0;
+
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= NULL), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeKNull <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 1), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeK1 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 2), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeK2 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 3), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeK3 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 4), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeK4 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 5), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeK5 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 6), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeK6 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 7), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+
+## Rho = 0.5;
+
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= NULL), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeKNull <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 1), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeK1 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 2), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeK2 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 3), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeK3 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 4), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeK4 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 5), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeK5 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 6), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeK6 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 7), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+
+
+## Rho = 1.0;
+
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= NULL), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeKNull <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 1), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeK1 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 2), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeK2 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 3), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeK3 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 4), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeK4 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 5), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeK5 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 6), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeK6 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 7), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+
+
+save.image('AnalysisPart5p2a.RData')
+
+
+# Part 5.2
+
+# Testing knots in the Joint-Model's LME model using AIC without changing the Cox mdel using rho 0
+# Define the LMEM
+
+fitCOXpbcFixednoTrt <- coxph(Surv(start, stop, event) ~ 1 +  bs(obstime, degree = 3, knots= NULL), data = pbc, x = TRUE)
+
+## Rho = 0;
+
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= NULL), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeKNull <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 1), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeK1 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 2), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeK2 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 3), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeK3 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 4), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeK4 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 5), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeK5 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 6), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeK6 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 7), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+
+## Rho = 0.5;
+
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= NULL), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeKNull <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 1), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeK1 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 2), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeK2 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 3), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeK3 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 4), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeK4 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 5), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeK5 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 6), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeK6 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 7), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+
+## Rho = 1.0;
+
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= NULL), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeKNull <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 1), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeK1 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 2), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeK2 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 3), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeK3 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 4), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeK4 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 5), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeK5 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 6), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeK6 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 7), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+
+save.image('AnalysisPart5p2b.RData')
+
+
+
+
+
+
