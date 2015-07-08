@@ -37,7 +37,8 @@ ehthumbs.db
 Thumbs.db
 
 # Specific to this repo
-.RData
+*.pdf
+*.RData
 obsolete/
 basicSpeedTests/
 JSM_partially_OK/

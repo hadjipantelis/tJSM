@@ -35,6 +35,8 @@ pbcmodel_r0p0_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, contr
 cat('\n Check Point b4 \n')
 fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
 pbcmodel_r0p0_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 9), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p0_lmeK9 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
 
 ## Rho = 0.5;
 
@@ -61,6 +63,8 @@ fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 7), random = ~ 1
 pbcmodel_r0p5_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
 fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
 pbcmodel_r0p5_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 9), random = ~ 1 | ID, data = pbc)
+pbcmodel_r0p5_lmeK9 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
 
 
 ## Rho = 1.0;
@@ -88,6 +92,8 @@ pbcmodel_r1p0_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, contr
 cat('\n Check Point d4 \n')
 fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
 pbcmodel_r1p0_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 9), random = ~ 1 | ID, data = pbc)
+pbcmodel_r1p0_lmeK9 <- jmodelMult(fitLMEpbc, fitCOXpbcFixed, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
 
 
 save.image('AnalysisPart5p2a.RData')
@@ -125,6 +131,8 @@ pbcmodel_nTrt_r0p0_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=
 cat('\n Check Point e4 \n')
 fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
 pbcmodel_nTrt_r0p0_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 9), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p0_lmeK9 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
 
 ## Rho = 0.5;
 
@@ -142,7 +150,7 @@ cat('\n Check Point f2 \n')
 fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 4), random = ~ 1 | ID, data = pbc)
 pbcmodel_nTrt_r0p5_lmeK4 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
 fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 5), random = ~ 1 | ID, data = pbc)
-pbcmodel_nTrt_r0p5_lK5 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+pbcmodel_nTrt_r0p5_lmeK5 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
 cat('\n Check Point f3 \n')
 fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 6), random = ~ 1 | ID, data = pbc)
 pbcmodel_nTrt_r0p5_lmeK6 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
@@ -151,6 +159,8 @@ pbcmodel_nTrt_r0p5_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=
 cat('\n Check Point f4 \n')
 fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
 pbcmodel_nTrt_r0p5_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 9), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r0p5_lmeK9 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=0.5, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
 
 ## Rho = 1.0;
 
@@ -177,7 +187,74 @@ pbcmodel_nTrt_r1p0_lmeK7 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=
 cat('\n Check Point g4 \n')
 fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 8), random = ~ 1 | ID, data = pbc)
 pbcmodel_nTrt_r1p0_lmeK8 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+fitLMEpbc <- lme(log(serBilir) ~ bs(obstime, degree = 2, knots= 9), random = ~ 1 | ID, data = pbc)
+pbcmodel_nTrt_r1p0_lmeK9 <- jmodelMult(fitLMEpbc, fitCOXpbcFixednoTrt, pbc, rho=1.0, control = list(max.iter = 450, tol.P = 1e-3, nknot= 10))
+
+
+AICresult <- c(AIC(pbcmodel_r0p0_lmeKNull), AIC(pbcmodel_r0p0_lmeK1), AIC(pbcmodel_r0p0_lmeK2), AIC(pbcmodel_r0p0_lmeK3), AIC(pbcmodel_r0p0_lmeK4), AIC(pbcmodel_r0p0_lmeK5), AIC(pbcmodel_r0p0_lmeK6), AIC(pbcmodel_r0p0_lmeK7), AIC(pbcmodel_r0p0_lmeK8), AIC(pbcmodel_r0p0_lmeK9), AIC(pbcmodel_r0p5_lmeKNull), AIC(pbcmodel_r0p5_lmeK1), AIC(pbcmodel_r0p5_lmeK2), AIC(pbcmodel_r0p5_lmeK3), AIC(pbcmodel_r0p5_lmeK4), AIC(pbcmodel_r0p5_lmeK5), AIC(pbcmodel_r0p5_lmeK6), AIC(pbcmodel_r0p5_lmeK7), AIC(pbcmodel_r0p5_lmeK8), AIC(pbcmodel_r0p5_lmeK9), AIC(pbcmodel_r1p0_lmeKNull), AIC(pbcmodel_r1p0_lmeK1), AIC(pbcmodel_r1p0_lmeK2), AIC(pbcmodel_r1p0_lmeK3), AIC(pbcmodel_r1p0_lmeK4), AIC(pbcmodel_r1p0_lmeK5), AIC(pbcmodel_r1p0_lmeK6), AIC(pbcmodel_r1p0_lmeK7), AIC(pbcmodel_r1p0_lmeK8), AIC(pbcmodel_r1p0_lmeK9))
+
+
+png(filename="pbcWithTrt.png")
+
+knots= 0:9
+ymax = ceiling(max(AICresult))
+ymin = floor(min(AICresult))
+ plot(knots, AICresult[1:10], type='l', ylab='AIC', xlab='k', ylim=c(ymin,ymax)) 
+ lines(knots, AICresult[10+ c(1:10)], col= 'red')
+ lines(knots, AICresult[20+ c(1:10)], col= 'blue')
+abline(v=(seq(0,10,length.out=21)), col="lightgray", lty="dotted") 
+abline(h=seq(ymin,ymax,length.out=1+ 2*(- ymin + ymax )), col="lightgray", lty="dotted")
+legend("topright",c("ρ=0.0","ρ=0.5","ρ=1.0"), col=c("black", "red", "blue"), lwd=2, bty='n')
+dev.off()
+
+
+AICresultNoTrt <- c(AIC(pbcmodel_nTrt_r0p0_lmeKNull), AIC(pbcmodel_nTrt_r0p0_lmeK1), AIC(pbcmodel_nTrt_r0p0_lmeK2), AIC(pbcmodel_nTrt_r0p0_lmeK3), AIC(pbcmodel_nTrt_r0p0_lmeK4), AIC(pbcmodel_nTrt_r0p0_lmeK5), AIC(pbcmodel_nTrt_r0p0_lmeK6), AIC(pbcmodel_nTrt_r0p0_lmeK7), AIC(pbcmodel_nTrt_r0p0_lmeK8), AIC(pbcmodel_nTrt_r0p0_lmeK9), AIC(pbcmodel_nTrt_r0p5_lmeKNull), AIC(pbcmodel_nTrt_r0p5_lmeK1), AIC(pbcmodel_nTrt_r0p5_lmeK2), AIC(pbcmodel_nTrt_r0p5_lmeK3), AIC(pbcmodel_nTrt_r0p5_lmeK4), AIC(pbcmodel_nTrt_r0p5_lK5), AIC(pbcmodel_nTrt_r0p5_lmeK6), AIC(pbcmodel_nTrt_r0p5_lmeK7), AIC(pbcmodel_nTrt_r0p5_lmeK8), AIC(pbcmodel_nTrt_r0p5_lmeK9), AIC(pbcmodel_nTrt_r1p0_lmeKNull), AIC(pbcmodel_nTrt_r1p0_lmeK1), AIC(pbcmodel_nTrt_r1p0_lmeK2), AIC(pbcmodel_nTrt_r1p0_lmeK3), AIC(pbcmodel_nTrt_r1p0_lmeK4), AIC(pbcmodel_nTrt_r1p0_lmeK5), AIC(pbcmodel_nTrt_r1p0_lmeK6), AIC(pbcmodel_nTrt_r1p0_lmeK7), AIC(pbcmodel_nTrt_r1p0_lmeK8), AIC(pbcmodel_nTrt_r1p0_lmeK9))
+
+png(filename="pbcNoTrt.png")
+knots= 0:9 
+
+ymax = ceiling(max(AICresultNoTrt))
+ymin = floor(min(AICresultNoTrt))
+ plot(knots, AICresultNoTrt[1:10], type='l', ylab='AIC', xlab='k', ylim=c(ymin,ymax)) 
+ lines(knots, AICresultNoTrt[10+ c(1:10)], col= 'red')
+ lines(knots, AICresultNoTrt[20+ c(1:10)], col= 'blue')
+abline(v=(seq(0,10,length.out=21)), col="lightgray", lty="dotted") 
+abline(h=seq(ymin,ymax,length.out=1+ 2*(- ymin + ymax )), col="lightgray", lty="dotted")
+legend("topright",c("ρ=0.0","ρ=0.5","ρ=1.0"), col=c("black", "red", "blue"), lwd=2, bty='n')
+dev.off()
+
+
+
 
 save.image('AnalysisPart5p2b.RData')
+
+
+
+
+
+ modelToUse <- (pbcmodel_nTrt_r1p0_lmeK9)
+
+bi <- modelToUse$est.bi
+gamma <- modelToUse$coefficients$gamma
+times <- sort(pbc$obstime)
+N = 16;
+set.seed(123)
+patient <-sort(sample(312,N))
+B <- bs(times,knots = 2, degree = 2)
+mu <- gamma[1] + gamma[2] * B[, 1] + gamma[3] * B[, 2]+ gamma[4] * B[, 3]
+pdf("ModelFits_nTrt_r1p0_lmeK9.pdf" )
+par(mfrow = c(sqrt(N), sqrt(N)))
+for (i in 1:N) {
+ data <- pbc[pbc$ID == patient[i], ] 
+ mui <- bi[patient[i]] * mu
+ plot(times, mui, ylim = c(-2, 4.5), type = "l", xlab = "Time (years)",
+ ylab = "log(serBilir)", main = paste("Patient", patient[i], seq = " "),
+ lwd = 2, col = "chocolate")
+ points(data$obstime, log(data$serBilir), pch = 19, col = "darkgreen")
+} 
+dev.off()
+
+
+
 
 
