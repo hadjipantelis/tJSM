@@ -1,5 +1,11 @@
-
-#========== Function to compute summaries of objects in the joint model class ==========#
+#' Compute summaries of objects in the joint model class 
+#'
+#' Compute summaries of objects in the joint model class
+#'
+#' @param object A jmodelMult object as this is produced by function jmodelTM
+#' @param ... Not used.
+#'
+#' @export
 
 summary.jmodelTM <- function (object, ...) 
 {

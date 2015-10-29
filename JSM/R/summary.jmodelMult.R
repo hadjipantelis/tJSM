@@ -1,5 +1,11 @@
-
-#========== Function to compute summaries of objects in the joint model class with NMRE ==========#
+#' Compute summaries of objects in the joint model class with NMRE 
+#'
+#' Compute summaries of objects in the joint model class with NMRE
+#'
+#' @param object A jmodelMult object as this is produced by function jmodelMult
+#' @param ... Not used.
+#'
+#' @export
 
 summary.jmodelMult <- function (object, ...) 
 { 
