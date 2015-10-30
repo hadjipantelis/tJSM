@@ -6,7 +6,6 @@
 #' @param ... Not used.
 #'
 #' @export
-
 summary.jmodelMult <- function (object, ...) 
 { 
   fit = object

@@ -6,7 +6,6 @@
 #' @param ... Not used.
 #'
 #' @export
-
 summary.jmodelTM <- function (object, ...) 
 {
   fit = object
