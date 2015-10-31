@@ -1,7 +1,14 @@
+#' Print detailed summary of joint model model
+#'
+#' Print detailed summary of joint model model
+#'
+#' @param x A jmodelTM object.
+#' @param digits A scalar defining how many digits to use when printing out the summary (default & min: 4)
+#' @param ... Not used.
+#'
+#' @export
 
-#========== Function to print detailed summary of joint model ==========
-
-print.summary.jmodelTM <- function (x, digits = max(4, getOption("digits") - 4), printKnots = FALSE, ...) 
+print.summary.jmodelTM <- function (x, digits = max(4, getOption("digits") - 4), ...) 
 {
   result = x
   cat("\nCall:\n")

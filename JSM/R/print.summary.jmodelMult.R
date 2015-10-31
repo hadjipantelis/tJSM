@@ -1,7 +1,14 @@
+#' Print detailed summary of joint model model with NMRE
+#'
+#' Print detailed summary of joint model model with NMRE
+#'
+#' @param x A jmodelMult object.
+#' @param digits A scalar defining how many digits to use when printing out the summary (default & min: 4)
+#' @param ... Not used.
+#'
+#' @export
 
-#========== Function to print detailed summary of joint model with NMRE ==========#
-
-print.summary.jmodelMult <- function (x, digits = max(4, getOption("digits") - 4), printKnots = FALSE, ...) 
+print.summary.jmodelMult <- function (x, digits = max(4, getOption("digits") - 4), ...) 
 {
   result = x
   cat("\nCall:\n")

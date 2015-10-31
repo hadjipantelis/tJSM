@@ -1,3 +1,12 @@
+#' Print basic summary of joint model model with NMRE
+#'
+#' Print basic summary of joint model model with NMRE
+#'
+#' @param x A jmodelMult object
+#' @param digits A scalar defining how many digits to use when printing out the summary (min:4)
+#' @param ... Not used.
+#'
+#' @export
 
 #========== Function to print basic summary of joint model with NMRE ==========#
 

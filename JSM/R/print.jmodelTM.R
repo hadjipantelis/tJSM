@@ -1,3 +1,13 @@
+#' Print basic summary of joint model model
+#'
+#' Print basic summary of joint model model
+#'
+#' @param x A jmodelTM object.
+#' @param digits A scalar defining how many digits to use when printing out the summary (min:4)
+#' @param ... Not used.
+#'
+#' @export
+
 
 #========== Function to print basic summary of joint model ==========#
 
