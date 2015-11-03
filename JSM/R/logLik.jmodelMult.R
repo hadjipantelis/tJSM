@@ -1,3 +1,11 @@
+#' Print the logLikelihood of joint model model with NMRE
+#'
+#' Print the logLikelihood of joint model model with NMRE
+#'
+#' @param object A jmodelMult object
+#' @param ... Not used.
+#'
+#' @export
 
 logLik.jmodelMult <-  function (object, ...) {
   if (!inherits(object, "jmodelMult"))

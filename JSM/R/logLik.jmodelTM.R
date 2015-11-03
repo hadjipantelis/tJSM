@@ -1,3 +1,11 @@
+#' Print the logLikelihood of joint model model
+#'
+#' Print the logLikelihood of joint model model
+#'
+#' @param object A jmodelTM object.
+#' @param ... Not used.
+#'
+#' @export
 
 logLik.jmodelTM <-  function (object, ...) {
     if (!inherits(object, "jmodelTM"))
