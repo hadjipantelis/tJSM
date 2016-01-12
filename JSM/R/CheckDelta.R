@@ -1,3 +1,11 @@
+#' Check if the step of size delta is reasonable 
+#'
+#' Check if the step of size delta is reasonable 
+#'
+#' @param theta List of parameters returned by the EM iteration procedure 
+#' @param ncz Number of columns of Z matrix
+#' @param delta increment used by (forward/Richardson Extrapolation) difference algorithm
+#'
 
 #========== Check whether the delta is too large when forward difference is used ==========#
 

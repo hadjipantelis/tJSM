@@ -5,7 +5,7 @@
 #'  @param fitLME An object inheriting from class \code{lme} representing a fitted linear mixed-effects model. See \bold{Note}.
 #'  @param fitCOX An object inheriting from class \code{coxph} representing a fitted Cox proportional hazards regression model. Specifying \code{x = TRUE} is required in the call to \code{coxph()} to include the design matrix in the object fit. See \bold{Note}.
 #'  @param data A data.frame containing all the variables included in the joint modeling. See \bold{Note}.
-#'  @param mode An indicator specifying the dependency between the survival and longitudinal outcomes. Default is 1. See\bold{Details}.
+#'  @param model An indicator specifying the dependency between the survival and longitudinal outcomes. Default is 1. See\bold{Details}.
 #'  @param rho A nonnegative real number specifying the transformation model you would like to fit. Default is 0, i.e. the Cox proportional hazards model. See \bold{Details}.
 #'  @param timeVarY A character string indicating the time variable in the linear mixed-effects model. See \emph{Examples}.
 #'  @param timeVarT A character string indicating the time variable in the \code{coxph} object. Normally it is \code{NULL}. See \bold{Note} and \emph{Examples}.
@@ -106,45 +106,45 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   
   cntrlLst <- GenerateControlList(control)  
   
-  ID <- as.vector(unclass(fitLME$groups[[1]])) 
-  ni <- as.vector(tapply(ID, ID, length))           
-  bBLUP <- data.matrix(ranef(fitLME)) 
+  ID <- as.vector(unclass(fitLME$groups[[1]]))     # grouping factors as a vector
+  ni <- as.vector(tapply(ID, ID, length))          # number of each factor as vector
+  bBLUP <- data.matrix(ranef(fitLME))              # BLUP estimate of the random effects
   dimnames(bBLUP) <- NULL
-  nLong <- nrow(bBLUP)
+  nLong <- nrow(bBLUP)                             # number of groupings in the longitudinal process
   if(ncol(fitCOX$y) != 3)
     stop("\n must fit time-dependent Cox model in coxph().")
-  start <- as.vector(fitCOX$y[, 1])
-  stop <- as.vector(fitCOX$y[, 2])
-  event <- as.vector(fitCOX$y[, 3])
-  Time <- stop[cumsum(ni)]
-  d <- event[cumsum(ni)] 
-  nSurv <- length(Time) 
+  start <- as.vector(fitCOX$y[, 1])                # starting time of the interval which contains the time of measurements
+  stop <- as.vector(fitCOX$y[, 2])                 # ending time of the interval which contains the time of measurements
+  event <- as.vector(fitCOX$y[, 3])                # event indicator suggesting whether the event-of-interest happens in the interval given
+  Time <- stop[cumsum(ni)]                         # survival time, i.e. time to death or censoring for each subject
+  d <- event[cumsum(ni)]                           # event indicator for each subject
+  nSurv <- length(Time)                            # number of event measurements
   if(sum(d) < 5)
     warning("\n more than 5 events are required.")
   if(nLong != nSurv)
     stop("\n sample sizes in the longitudinal and event processes differ.")
   
-  W <- as.matrix(fitCOX$x)
+  W <- as.matrix(fitCOX$x)                         # observed covariates including baseline covariates as well as longitudinal
   
   varNames <- list()
-  varNames$phi.names <- colnames(W)
-  formSurv <- formula(fitCOX)
-  TermsSurv <- fitCOX$terms
-  mfSurv <- model.frame(TermsSurv, data)[cumsum(ni), ]
+  varNames$phi.names <- colnames(W)                # names of covariates
+  formSurv <- formula(fitCOX)                      # formula of survival model
+  TermsSurv <- fitCOX$terms                        # the ‘terms’ object used by the 'fitCOX'
+  mfSurv <- model.frame(TermsSurv, data)[cumsum(ni), ]  # fixed-effect design matrix of 'fitCOX'
   if(!is.null(timeVarT)) {
     if(!all(timeVarT %in% all.vars(TermsSurv)))
       stop("\n'timeVarT' does not correspond columns in the fixed-effect design matrix of 'fitCOX'.")
     mfSurv[timeVarT] <- Time
   }
-  Wtime <- as.matrix(model.matrix(formSurv, mfSurv))
-  if(attr(TermsSurv, 'intercept')) Wtime <- as.matrix(Wtime[, - 1])
+  Wtime <- as.matrix(model.matrix(formSurv, mfSurv)) # design matrix for survival part
+  if(attr(TermsSurv, 'intercept')) Wtime <- as.matri(x(Wtime[, - 1])
   # design matrix in survival part, one row for each subject, excluding intercept #
   
-  TermsLongX <- fitLME$terms
-  mydata <- fitLME$data[all.vars(TermsLongX)] 
-  formLongX <- formula(fitLME) 
-  mfLongX <- model.frame(TermsLongX, data = mydata) 
-  X <- as.matrix(model.matrix(formLongX, mfLongX))
+  TermsLongX <- fitLME$terms                       # the ‘terms’ object used by the 'fitLME'
+  mydata <- fitLME$data[all.vars(TermsLongX)]      # get all the data in the LME object
+  formLongX <- formula(fitLME)                     # formula of linear mixed model
+  mfLongX <- model.frame(TermsLongX, data = mydata)# fixed-effect design matrix of 'fitLME'
+  X <- as.matrix(model.matrix(formLongX, mfLongX)) # fixed-effect design matrix for both models
   varNames$alpha.name <- rownames(attr(TermsLongX, "factors"))[attr(TermsLongX, "response")]
   
   formLongZ <- formula(fitLME$modelStruct$reStruct[[1]]) 

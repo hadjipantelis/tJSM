@@ -1,6 +1,10 @@
-
-#========== Check whether the delta is too large when Richardson Extrapolation is used ==========#
-#========== Multiplicative Joint Modeling ==========#
+#' Check whether the delta is too large when Richardson Extrapolation is used
+#'
+#' Check whether the delta is too large when Richardson Extrapolation is used
+#'
+#' @param theta List of parameters returned by the EM iteration procedure  
+#' @param delta increment used by (forward/Richardson Extrapolation) difference algorithm
+#'
 
 CheckDeltaMult <- function (theta, delta) {
   
