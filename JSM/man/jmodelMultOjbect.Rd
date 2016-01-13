@@ -6,20 +6,20 @@
 \title{Fitted jmodelMult Object}
 
 \description{
-An object returned by the \code{jmodelMult} function, inheriting from class \code{jmodelMult} and representing a fitted
-joint model for survival and longitudinal data. Objects of this class have methods for the generic functions \code{AIC}, \code{BIC}, \code{logLik}, \code{print}, \code{summary}, and \code{vcov}.
+An object returned by the \code{jmodelMult} function, inheriting from class \code{jmodelMult} and representing a fitted joint model for survival and longitudinal data. Objects of this class have methods for the generic functions \code{AIC}, \code{BIC}, \code{logLik}, \code{print}, \code{summary}, and \code{vcov}.
+}
 
 \value{
   The following components must be included in a legitimate \code{jmodelMult} object.
-  \item{coefficients}{a list with the estimated parameters. The list is consist of the following components:
-    \describe{
+  \item{coefficients}{a list with the estimated parameters. The list is consist of the following components:}
+  \describe{
       \item{gamma}{the vector of estimated coefficients for the B-spline basis functions in the nonparametric multiplicative random effects model.}
       \item{phi}{the vector of estimated coefficients for the covariates other than the covariate associated with the longitudinal process in the survival model.}
       \item{alpha}{the estimated coefficient for the covariate associated with the longitudinal process in the survival model.}
       \item{Ysigma}{the estimated measurement error standard deviation for the linear mixed-effects model.}
       \item{Bsigma}{the estimated variance-covariance matrix of the random effects.}
       \item{lamb}{a numeric matrix with two columns: the first column contains the unique observed survival times in ascending order; the second column contains the corresponding estimated baseline hazard values.}
-      }
+  }
   \item{Vcov}{the variance-covariance matrix evaluated at the estimated parameter values.}
   \item{logLik}{the log-likelihood (the joint likelihood) value.}
   \item{est.bi}{the estimated values for the random effects}

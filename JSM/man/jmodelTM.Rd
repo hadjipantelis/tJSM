@@ -18,9 +18,7 @@ jmodelTM(fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{fitLME}{an object inheriting from class \code{lme} representing a fitted linear mixed-effects model. See \bold{Note}.}
-  \item{fitCOX}{an object inheriting from class \code{coxph} representing a fitted Cox proportional hazards 
-  regression model. Specifying \code {x = TRUE} is required in the call to \code{coxph()} to include the design 
-  matrix in the object fit. See \bold{Note}.}
+  \item{fitCOX}{an object inheriting from class \code{coxph} representing a fitted Cox proportional hazards regression model. Specifying \code{x = TRUE} is required in the call to \code{coxph()} to include the design matrix in the object fit. See \bold{Note}.}
   \item{data}{a data.frame containing all the variables included in the joint modeling. See \bold{Note}.}
   \item{model}{an indicator specifying the dependency between the survival and longitudinal outcomes. Default is 1. See 
   \bold{Details}.}
@@ -108,7 +106,8 @@ summary(fitJT.ph)
 fitJT.ph2 <- jmodelTM(fitLME, fitCOX, aids, model = 2, timeVarY = 'obstime')
 summary(fitJT.ph2)
 # joint model fit with standard error estimates calculated by the 'PFDS' method
-fitJT.ph3 <- jmodelTM(fitLME, fitCOX, aids, timeVarY = 'obstime', control = list(SE.method = 'PFDS'))
+fitJT.ph3 <- jmodelTM(fitLME, fitCOX, aids, timeVarY = 'obstime', 
+                      control = list(SE.method = 'PFDS'))
 summary(fitJT.ph3)
 
 # joint model fit which assumes the proportional odds model for the survival process
@@ -122,7 +121,8 @@ summary(fitJT.po2)
 fitLME2 <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), 
                random = ~ obstime | ID, data = aids)
 # Cox proportional hazards model fit with a time-dependent covariate
-fitCOX2 <- coxph(Surv(start, stop, event) ~ drug + as.numeric(drug) : obstime, data = aids, x = TRUE)
+fitCOX2 <- coxph(Surv(start, stop, event) ~ drug + as.numeric(drug) : obstime, 
+                 data = aids, x = TRUE)
 # joint model fit in which \code{timeVarT} must be specified
 fitJT.ph4 <- jmodelTM(fitLME2, fitCOX2, aids, timeVarY = 'obstime', timeVarT = 'obstime')
 summary(fitJT.ph4)

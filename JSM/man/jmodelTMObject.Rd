@@ -6,12 +6,12 @@
 \title{Fitted jmodelTM Object}
 
 \description{
-An object returned by the \code{jmodelTM} function, inheriting from class \code{jmodelTM} and representing a fitted
-joint model for survival and longitudinal data. Objects of this class have methods for the generic functions \code{AIC}, \code{BIC}, \code{logLik}, \code{print}, \code{summary}, and \code{vcov}.
+An object returned by the \code{jmodelTM} function, inheriting from class \code{jmodelTM} and representing a fitted joint model for survival and longitudinal data. Objects of this class have methods for the generic functions \code{AIC}, \code{BIC}, \code{logLik}, \code{print}, \code{summary}, and \code{vcov}.
+}
 
 \value{
   The following components must be included in a legitimate \code{jmodelTM} object.
-  \item{coefficients}{a list with the estimated parameters. The list is consist of the following components:
+  \item{coefficients}{a list with the estimated parameters. The list is consist of the following components:}
     \describe{
       \item{beta}{the vector of estimated coefficients for the fixed effects in the linear mixed-effects model.}
       \item{phi}{the vector of estimated coefficients for the covariates other than the covariate associated with the longitudinal process in the survival model.}

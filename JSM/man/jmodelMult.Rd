@@ -13,14 +13,13 @@ nonparametric multiplicative random effects (NMRE) model.
 }
 
 \usage{
-jmodelMult(fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NULL, control = list(), \dots)
+jmodelMult(fitLME, fitCOX, data, model = 1, rho = 0, 
+           timeVarT = NULL, control = list(), \dots)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{fitLME}{an object inheriting from class \code{lme} representing a fitted nonparametric multiplicative random effects model. See \bold{Details} and \bold{Note} and \bold{Examples}.}
-  \item{fitCOX}{an object inheriting from class \code{coxph} representing a fitted Cox proportional hazards 
-  regression model. Specifying \code {x = TRUE} is required in the call to \code{coxph()} to include the design 
-  matrix in the object fit. See \bold{Note}.}
+  \item{fitCOX}{an object inheriting from class \code{coxph} representing a fitted Cox proportional hazards regression model. Specifying \code{x = TRUE} is required in the call to \code{coxph()} to include the design matrix in the object fit. See \bold{Note}.}
   \item{data}{a data.frame containing all the variables included in the joint modeling. See \bold{Note}.}
   \item{model}{an indicator specifying the dependency between the survival and longitudinal outcomes. Default is 1. See 
   \bold{Details}.}
@@ -96,12 +95,14 @@ Pantelis Z. Hadjipantelis \email{pantelis@ucdavis.edu}
 }
 
 \examples{
-# linear mixed-effects model fit where the fixed effect is modeled by quadratic B-splie basis with four internal knots
+# linear mixed-effects model fit where the fixed effect is modeled by 
+# quadratic B-splie basis with four internal knots
 fitLME <- lme(log(serBilir) ~ bs(obstime, df = 6, degree = 2), random = ~ 1 | ID, data = pbc)
 # Cox proportional hazards model fit with a single time-independent covariate
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = pbc, x = TRUE)
 
-# joint model fit which assumes the Cox proportional hazards model for the survival process and NMRE for the longitudinal process
+# joint model fit which assumes the Cox proportional hazards model for the survival process and 
+# NMRE for the longitudinal process
 fitJTMult.ph <- jmodelMult(fitLME, fitCOX, pbc)
 summary(fitJTMult.ph)
 # joint model fit where the survival and longitudinal processes only share the same random effect
@@ -111,7 +112,8 @@ summary(fitJTMult.ph2)
 fitJTMult.ph3 <- jmodelMult(fitLME, fitCOX, pbc, control = list(SE.method = 'PFDS'))
 summary(fitJTMult.ph3)
 
-# joint model fit which assumes the proportional odds model for the survival process and NMRE for the longitudinal process
+# joint model fit which assumes the proportional odds model for the survival process and 
+# NMRE for the longitudinal process
 fitJTMult.po <- jmodelMult(fitLME, fitCOX, pbc, rho = 1)
 summary(fitJTMult.po)
 # joint model fit where the survival and longitudinal processes only share the same random effect
