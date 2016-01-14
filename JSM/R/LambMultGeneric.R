@@ -11,6 +11,8 @@ LambMultGeneric <- function (para, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st
   Ysigma2 <- (para.list$Ysigma) ^ 2
   Bsigma2 <- (para.list$Bsigma) ^ 2
   
+  M <- length(Index)
+  
   BTg <- lapply(B.st, function(x) as.vector(x %*% gamma))
   VY <- lapply(1:n, function(i) calc_VY(BTg[[i]], Bsigma2, Ysigma2)) 
   VB <-  lapply(1:n, function(i) calc_VB(M1 = Bsigma2,M2 =  BTg[[i]],  VY[[i]]))
@@ -19,15 +21,18 @@ LambMultGeneric <- function (para, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st
 
   bi <- do.call(rbind, bi.st) # n*nknot matrix #
 
+  Ztime_phi <- if (ncz > 0) Ztime %*% phi else rep(0, n)
+  Ztime2_phi <- if (ncz > 0) Ztime2 %*% phi else rep(0, M)
+  
   if (model == 1){
     Btime.b <- as.vector(Btime %*% gamma) * bi # n*nknot matrix #
     Btime2.b <- as.vector(Btime2 %*% gamma) * bi[Index, ] # M*nknot matrix #
   
-    eta.h <- as.vector(Ztime %*% phi) + alpha * Btime.b # n*nknot matrix #
-    exp.es <- exp( as.vector(Ztime2 %*% phi) + alpha * Btime2.b) # M*nknot matrix #
+    eta.h <- as.vector(Ztime_phi) + alpha * Btime.b # n*nknot matrix #
+    exp.es <- exp( as.vector(Ztime2_phi) + alpha * Btime2.b) # M*nknot matrix #
   } else if(model ==2){ 
-    eta.h <- as.vector(Ztime %*% phi) + alpha * bi # n*nknot matrix #
-    exp.es <- exp(as.vector(Ztime2 %*% phi) + alpha * bi[Index, ]) # M*nknot matrix #
+    eta.h <- as.vector(Ztime_phi) + alpha * bi # n*nknot matrix #
+    exp.es <- exp(as.vector(Ztime2_phi) + alpha * bi[Index, ]) # M*nknot matrix #
   } else {
     stop("Invalid model type")
   }   
@@ -51,10 +56,10 @@ LambMultGeneric <- function (para, lamb.init, tol, iter, ncz, ncb, B.st, n, Y.st
     Integral <- f.surv / deno # n*nknot matrix #
     CondExp <- (1 + d * rho) / (1 + rho * const) # conditional expectation E(xi|bi,Oi), n*GQ matrix #
      
-    tempLamb0 <- exp.es; tempLamb0[1] = tempLamb0[1] +0 # "touch the variable"
-    calc_M1_M2_M3_Hadamard(tempLamb0, CondExp ,  Integral, as.integer(Index-1))
-    tempLamb <- calc_M_v(v =wGQ, M =tempLamb0)   
-    postLamb <-calc_tapply_vect_sum(  v1=tempLamb, v2=  as.integer(Index1-1))
+    tempLamb0 <- exp.es; tempLamb0[1] = tempLamb0[1] + 0 # "touch the variable"
+    calc_M1_M2_M3_Hadamard(tempLamb0, CondExp , Integral, as.integer(Index - 1))
+    tempLamb <- calc_M_v(v = wGQ, M = tempLamb0)   
+    postLamb <- calc_tapply_vect_sum(v1 = tempLamb, v2 = as.integer(Index1 - 1))
     lamb.new <- Index2 / postLamb
     
     Lamb.new <- cumsum(lamb.new)

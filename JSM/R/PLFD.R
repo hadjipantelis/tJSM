@@ -16,7 +16,7 @@ PLFD <- function (model, theta, cvals, n, ncx, ncz, ncw, varNames, p, Z.st, Y.st
   Index2 = Indcs$Index2
 
 
-  pl <- LHGeneric(theta, n, Z.st, Y.st, X.st, b, Ztime, nk, Index0, model, Wtime, Xtime, Wtime2, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncz, Ztime2.st) / n
+  pl <- LHGeneric(theta, n, Z.st, Y.st, X.st, b, Ztime, nk, Index0, model, Wtime, Xtime, Wtime2, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncz, Ztime2.st, ncw) / n
  
   para <- List2Vec(theta)
   lamb.init <- theta$lamb
@@ -32,7 +32,7 @@ PLFD <- function (model, theta, cvals, n, ncx, ncz, ncw, varNames, p, Z.st, Y.st
       para1.list <- Vec2List(para1, ncx, ncz, ncw)
       theta.input1 <- list(beta = para1.list$beta, phi = para1.list$phi, alpha = para1.list$alpha, 
                            Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
-      PLs[i, j] <- LHGeneric(theta.input1, n, Z.st, Y.st, X.st, b, Ztime,  nk, Index0, model, Wtime, Xtime, Wtime2, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncz, Ztime2.st) / n
+      PLs[i, j] <- LHGeneric(theta.input1, n, Z.st, Y.st, X.st, b, Ztime,  nk, Index0, model, Wtime, Xtime, Wtime2, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncz, Ztime2.st, ncw) / n
     }
   }
   
@@ -44,7 +44,7 @@ PLFD <- function (model, theta, cvals, n, ncx, ncz, ncw, varNames, p, Z.st, Y.st
     para1.list <- Vec2List(para1, ncx, ncz, ncw)
     theta.input1 <- list(beta = para1.list$beta, phi = para1.list$phi, alpha = para1.list$alpha, 
                          Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
-    pls[i] <- LHGeneric(theta.input1, n, Z.st, Y.st, X.st, b, Ztime, nk, Index0, model, Wtime, Xtime, Wtime2, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncz, Ztime2.st) / n
+    pls[i] <- LHGeneric(theta.input1, n, Z.st, Y.st, X.st, b, Ztime, nk, Index0, model, Wtime, Xtime, Wtime2, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncz, Ztime2.st, ncw) / n
   }
   
   I <- matrix(0, len, len)

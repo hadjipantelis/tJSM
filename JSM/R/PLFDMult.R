@@ -3,7 +3,7 @@
 
 PLFDMult <- function (model, theta, tol, iter, delta, B.st, n, Y.st, b, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ, ncz, ncb, Index2, alpha.name, phi.names) {
   
-  pl <- LHMultGeneric(theta, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ) / n
+  pl <- LHMultGeneric(theta, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ, ncz) / n
   
   para <- List2VecMult(theta)
   lamb.init <- theta$lamb
@@ -19,7 +19,7 @@ PLFDMult <- function (model, theta, tol, iter, delta, B.st, n, Y.st, b, Btime, B
       para1.list <- Vec2ListMult(para1, ncz, ncb)
       theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
                            Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
-      PLs[i, j] <- LHMultGeneric(theta.input1, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ)/n
+      PLs[i, j] <- LHMultGeneric(theta.input1, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ, ncz)/n
     }
   }
   
@@ -31,7 +31,7 @@ PLFDMult <- function (model, theta, tol, iter, delta, B.st, n, Y.st, b, Btime, B
     para1.list <- Vec2ListMult(para1, ncz, ncb)
     theta.input1 <- list(gamma = para1.list$gamma, phi = para1.list$phi, alpha = para1.list$alpha, 
                          Ysigma = para1.list$Ysigma, Bsigma = para1.list$Bsigma, lamb = result$lamb)
-    pls[i] <- LHMultGeneric(theta.input1, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ) / n  
+    pls[i] <- LHMultGeneric(theta.input1, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ, ncz) / n  
   }
   
   I <- matrix(0, len, len)

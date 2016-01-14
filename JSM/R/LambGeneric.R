@@ -2,7 +2,7 @@
 #========== Function to Obtain Lamb Given Other Finite Dimensional Parameters for Model II ==========#
 #=============== Transformation model is fitted for the survival part ===============#
 
-LambGeneric <- function (para, lamb.init, tol, iter, ncz, ncx, ncw,n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, model, GQ, d, Index2){
+LambGeneric <- function (para, lamb.init, tol, iter, ncz, ncx, ncw, n, Z.st, Y.st, X.st, b, Ztime, Ztime2.st, nk, Wtime, Xtime, Wtime2, Xtime2, rho, Index0, Index1, Index, wGQ, model, GQ, d, Index2){
 
   para.list <- Vec2List(para, ncx, ncz, ncw)
   beta <- para.list$beta
@@ -10,6 +10,8 @@ LambGeneric <- function (para, lamb.init, tol, iter, ncz, ncx, ncw,n, Z.st, Y.st
   Bsigma <- para.list$Bsigma
   phi <- para.list$phi
   alpha <- para.list$alpha
+  
+  M <- nrow(Xtime2)
   
   VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = Bsigma, b = Ysigma2 ))  
   VB <-  lapply(1:n, function(i) calc_VB( Bsigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
@@ -19,20 +21,23 @@ LambGeneric <- function (para, lamb.init, tol, iter, ncz, ncx, ncw,n, Z.st, Y.st
   # each element is ncz*GQ matrix #
   bi <- do.call(rbind, bi.st) # (n*ncz)*GQ mat rix #
   Ztime.b <- do.call(rbind, lapply(1:n, function(i) Ztime[i, ] %*% bi.st[[i]])) # n*GQ matrix #
-  Ztime2.b <-fast_lapply_length(Ztime2.st, bi.st, (1:n)[nk !=      0] - 1)# M*GQ matrix #  
+  Ztime2.b <-fast_lapply_length(Ztime2.st, bi.st, (1:n)[nk != 0] - 1) # M*GQ matrix #  
   
-  if (model == 2){ 
-    eta.h <- as.vector(Wtime %*% phi) + alpha * Ztime.b # n*GQ matrix #
-  } else if(model ==1){
-    eta.h <- as.vector(Wtime %*% phi + alpha * Xtime %*% beta) + alpha * Ztime.b # n*GQ matrix #
+  Wtime_phi <- if (ncw > 0) Wtime %*% phi else rep(0, n)
+  Wtime2_phi <- if (ncw > 0) Wtime2 %*% phi else rep(0, M)
+  
+  if (model == 2) { 
+    eta.h <- as.vector(Wtime_phi) + alpha * Ztime.b # n*GQ matrix #
+  } else if(model ==1) {
+    eta.h <- as.vector(Wtime_phi + alpha * Xtime %*% beta) + alpha * Ztime.b # n*GQ matrix #
   } else {
     stop("Invalid model type")
   }
-  calc_v_a( Ztime2.b,alpha); # Ztime2.b gets altered
-  if ( model == 2){
-    exp.es<- as.numeric(Wtime2 %*% phi) + Ztime2.b  
+  calc_v_a( Ztime2.b, alpha); # Ztime2.b gets altered
+  if ( model == 2) {
+    exp.es<- as.numeric(Wtime2_phi) + Ztime2.b  
   } else {
-    exp.es<- as.numeric(Wtime2 %*% phi + alpha * Xtime2 %*% beta) + Ztime2.b  
+    exp.es<- as.numeric(Wtime2_phi + alpha * Xtime2 %*% beta) + Ztime2.b  
   }
   calc_expM2(exp.es)
   lamb.old <- lamb.init

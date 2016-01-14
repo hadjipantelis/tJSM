@@ -2,7 +2,7 @@
 #=============== Function to Calculate the Likelihood Value for Model I ===============#
 #================ Multiplicative Joint Modeling ===============#
 
-LHMultGeneric <- function (theta, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ) {
+LHMultGeneric <- function (theta, B.st, n, Y.st, b, model, Btime, Btime2, Index, Index0, Ztime, Ztime2, nknot, nk, Index1, rho, d, wGQ, ncz) {
   
   gamma <- theta$gamma
   phi <- theta$phi
@@ -10,6 +10,8 @@ LHMultGeneric <- function (theta, B.st, n, Y.st, b, model, Btime, Btime2, Index,
   Ysigma2 <- (theta$Ysigma) ^ 2
   Bsigma2 <- (theta$Bsigma) ^ 2
   lamb <- theta$lamb
+  
+  M <- length(Index)
   
   BTg <- lapply(B.st, function(x) as.vector(x %*% gamma))
   VY <- lapply(1:n, function(i) calc_VY(BTg[[i]], Bsigma2, Ysigma2)) 
@@ -23,14 +25,17 @@ LHMultGeneric <- function (theta, B.st, n, Y.st, b, model, Btime, Btime2, Index,
     Btime2.b <- as.vector(Btime2 %*% gamma) * bi[Index, ] # M*nknot matrix #
   }
   
+  Ztime_phi <- if (ncz > 0) Ztime %*% phi else rep(0, n)
+  Ztime2_phi <- if (ncz > 0) Ztime2 %*% phi else rep(0, M)
+  
   log.lamb <- log(lamb[Index0])
   log.lamb[is.na(log.lamb)] <- 0
   if (model==1){
-    log.density1 <- log.lamb + as.vector(Ztime %*% phi) + alpha * Btime.b # n*nknot matrix #
-    exp.es <- alpha * Btime2.b + as.vector(Ztime2 %*% phi)
+    log.density1 <- log.lamb + as.vector(Ztime_phi) + alpha * Btime.b # n*nknot matrix #
+    exp.es <- alpha * Btime2.b + as.vector(Ztime2_phi)
   } else {
-    log.density1 <- log.lamb + as.vector(Ztime %*% phi) + alpha * bi # n*nknot matrix # 
-    exp.es <- alpha * bi[Index, ] + as.vector(Ztime2 %*% phi)
+    log.density1 <- log.lamb + as.vector(Ztime_phi) + alpha * bi # n*nknot matrix # 
+    exp.es <- alpha * bi[Index, ] + as.vector(Ztime2_phi)
   }
   calc_expM2(exp.es);
 

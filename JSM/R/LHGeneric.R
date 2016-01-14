@@ -1,7 +1,7 @@
 
 #=============== Function to Calculate the Likelihood Value for Model II ===============#
 #LHGeneric <- function (theta){
-LHGeneric <- function (theta, n, Z.st, Y.st, X.st, b, Ztime,  nk, Index0, model, Wtime, Xtime, Wtime2, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncz, Ztime2.st) {
+LHGeneric <- function (theta, n, Z.st, Y.st, X.st, b, Ztime, nk, Index0, model, Wtime, Xtime, Wtime2, Xtime2, GQ, Index, Index1, rho, d, wGQ, ncz, Ztime2.st, ncw) {
   
   beta <- theta$beta
   Ysigma2 <- (theta$Ysigma) ^ 2
@@ -9,6 +9,8 @@ LHGeneric <- function (theta, n, Z.st, Y.st, X.st, b, Ztime,  nk, Index0, model,
   phi <- theta$phi
   alpha <- theta$alpha
   lamb <- theta$lamb
+  
+  M <- nrow(Xtime2)
 
   VY <- lapply(1:n, function(i) calc_VY(M = Z.st[[i]], A = Bsigma, b = Ysigma2 ))  
   VB <-  lapply(1:n, function(i) calc_VB( Bsigma ,M2 =  Z.st[[i]], M3 = VY[[i]])) 
@@ -22,20 +24,24 @@ LHGeneric <- function (theta, n, Z.st, Y.st, X.st, b, Ztime,  nk, Index0, model,
 
   log.lamb <- log(lamb[Index0])
   log.lamb[is.na(log.lamb)] <- 0  
-  if (model == 2){ 
-    log.density1 <- log.lamb + as.vector(Wtime %*% phi) + alpha * Ztime.b # n*GQ matrix #
+  
+  Wtime_phi <- if (ncw > 0) Wtime %*% phi else rep(0, n)
+  Wtime2_phi <- if (ncw > 0) Wtime2 %*% phi else rep(0, M)
+  
+  if (model == 2) { 
+    log.density1 <- log.lamb + as.vector(Wtime_phi) + alpha * Ztime.b # n*GQ matrix #
   } else if(model ==1){ 
-    log.density1 <- log.lamb + as.vector(Wtime %*% phi + alpha * Xtime %*% beta) + alpha * Ztime.b # n*GQ matrix # 
+    log.density1 <- log.lamb + as.vector(Wtime_phi + alpha * Xtime %*% beta) + alpha * Ztime.b # n*GQ matrix # 
   } else {
     stop("Invalid model type")
   }
 
-  calc_v_a( Ztime2.b,alpha); # Ztime2.b gets altered
+  calc_v_a( Ztime2.b, alpha); # Ztime2.b gets altered
 
-  if ( model == 2){
-    exp.es<- as.numeric(Wtime2 %*% phi) + Ztime2.b  
+  if ( model == 2) {
+    exp.es<- as.numeric(Wtime2_phi) + Ztime2.b  
   } else {
-    exp.es<- as.numeric(Wtime2 %*% phi + alpha * Xtime2 %*% beta) + Ztime2.b  
+    exp.es<- as.numeric(Wtime2_phi + alpha * Xtime2 %*% beta) + Ztime2.b  
   }
   calc_expM2(exp.es) 
 
