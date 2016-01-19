@@ -4,7 +4,7 @@
 
 // [[Rcpp::export]]
  
-Eigen::MatrixXd calc_mult_rowsum2(const Eigen::Map<Eigen::VectorXi> & v, const Eigen::Map<Eigen::MatrixXd> & L, const Eigen::Map<Eigen::MatrixXd> & M, const Eigen::Map<Eigen::ArrayXd> & A){ 
+Eigen::MatrixXd calc_mult_rowsum2(const Eigen::Map<Eigen::VectorXi> & v, const Eigen::Map<Eigen::MatrixXd> & L, const Eigen::Map<Eigen::MatrixXd> & M, const Eigen::Map<Eigen::ArrayXXd> & A){ 
 
   //  This function implements:
   //  A * rowsum( L * M  , v))
@@ -18,9 +18,10 @@ Eigen::MatrixXd calc_mult_rowsum2(const Eigen::Map<Eigen::VectorXi> & v, const E
 
   for (unsigned int i = 0; i < mc; ++i){
   unsigned int k = 0;
-    for(unsigned int j = 0; j != l; ++j){
-     Res(k,i) = Res(k,i) + M(j,i) * L(j,i); 
-      if (j  < mr ) {
+    for(unsigned int j = 0; j < l; ++j){
+      Res(k,i) = Res(k,i) + M(j,i) * L(j,i); 
+      //Rcpp::Rcout << "i, j, k: " << i <<", " << j <<", " << k << "\n";
+      if (j < mr - 1) {
         if( v[j] != v[j+1] ){ 
           k++;
         } 

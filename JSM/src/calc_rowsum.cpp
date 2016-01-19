@@ -15,15 +15,17 @@ Eigen::MatrixXd calc_rowsum(const Eigen::Map<Eigen::VectorXi> & v , const Eigen:
   const unsigned int m = M.cols();  
 
   Eigen::MatrixXd Res = Eigen::MatrixXd::Zero(v.maxCoeff() ,m);  
-
+  //Rcpp::Rcout << "Got here!\n"; 
+  // for each column 
   for (unsigned int i = 0; i < m; ++i){
     unsigned int k = 0;
-    for(unsigned int j = 0; j != l; ++j){
+    for(unsigned int j = 0; j < l; ++j){
+      // Rcpp::Rcout << " i, j, k: " << i<< ", " << j << ", " << k << " \n";
       Res(k,i) = Res(k,i) + M(j,i); 
-      if (j  < M.rows() ) {
+      if (j < M.rows()-1){
         if( v[j] != v[j+1] ){ 
           k++;
-        } 
+        }
       }
     }
   }
