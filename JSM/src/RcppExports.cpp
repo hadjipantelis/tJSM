@@ -152,7 +152,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // calc_mult_rowsum3
-Rcpp::List calc_mult_rowsum3(const Eigen::Map<Eigen::ArrayXi>& v, const Eigen::Map<Eigen::ArrayXXd>& B, const Eigen::Map<Eigen::ArrayXXd>& M, const Eigen::Map<Eigen::ArrayXd>& A, const double ncb2);
+Rcpp::List calc_mult_rowsum3(const Eigen::Map<Eigen::ArrayXi>& v, const Eigen::Map<Eigen::ArrayXXd>& B, const Eigen::Map<Eigen::ArrayXXd>& M, const Eigen::Map<Eigen::ArrayXXd>& A, const double ncb2);
 RcppExport SEXP JSM_calc_mult_rowsum3(SEXP vSEXP, SEXP BSEXP, SEXP MSEXP, SEXP ASEXP, SEXP ncb2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
@@ -160,7 +160,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::ArrayXi>& >::type v(vSEXP);
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::ArrayXXd>& >::type B(BSEXP);
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::ArrayXXd>& >::type M(MSEXP);
-    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::ArrayXd>& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::ArrayXXd>& >::type A(ASEXP);
     Rcpp::traits::input_parameter< const double >::type ncb2(ncb2SEXP);
     __result = Rcpp::wrap(calc_mult_rowsum3(v, B, M, A, ncb2));
     return __result;
