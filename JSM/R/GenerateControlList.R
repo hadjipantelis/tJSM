@@ -11,7 +11,7 @@
 GenerateControlList <- function( control ){
 
  controlVals <- list(tol.P = 10 ^ (-4), tol.L = 10 ^ (-8), max.iter = 200, SE.method = 'PRES', delta = 10 ^ (- 5), 
-                      nknot = 12)
+                      nknot = 11)
   control <- c(control)
   namec <- names(control)
   if(length(uname <- namec[!namec %in% names(controlVals)]) > 0){
