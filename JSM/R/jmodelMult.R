@@ -126,13 +126,15 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
     
     new.P <- c(theta.new$gamma, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$Bsigma)
     old.P <- c(theta.old$gamma, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$Bsigma)
-    err.P <- max(abs(new.P - old.P) / (abs(old.P) + cntrlLst$tol.P))
+    # err.P <- max(abs(new.P - old.P) / (abs(old.P) + cntrlLst$tol.P))
+    err.P <- max(abs(new.P - old.P) / (abs(old.P) + .Machine$double.eps *2))
     # add tol.P to avoid zero value of the estimated parameters #
     
     new.L <- theta.new$lgLik
     old.L <- theta.old$lgLik
-    err.L <- abs(new.L - old.L) / (abs(old.L) + cntrlLst$tol.P)
-    
+    # err.L <- abs(new.L - old.L) / (abs(old.L) + cntrlLst$tol.P)
+    err.L <- abs(new.L - old.L) / (abs(old.L) + .Machine$double.eps *2)
+    # print( c(old.L, err.L, err.P) )
     step <- step + 1
     theta.old <- theta.new
   }

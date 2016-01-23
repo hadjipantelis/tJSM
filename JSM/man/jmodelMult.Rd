@@ -121,9 +121,11 @@ fitJTMult.po2 <- jmodelMult(fitLME, fitCOX, pbc, model = 2, rho = 1)
 summary(fitJTMult.po2)
 
 # Cox proportional hazards model fit with a time-dependent covariate
-fitCOX2 <- coxph(Surv(start, stop, event) ~ drug + as.numeric(drug) : obstime, data = pbc, x = TRUE)
+fitCOX2 <- coxph(Surv(start, stop, event) ~ drug + as.numeric(drug) : obstime, 
+                 data = pbc, x = TRUE)
 # joint model fit in which \code{timeVarT} must be specified
-fitJTMult.ph4 <- jmodelMult(fitLME, fitCOX2, pbc, timeVarT = 'obstime')
+fitJTMult.ph4 <- jmodelMult(fitLME, fitCOX2, pbc, timeVarT = 'obstime', 
+                            control = list(max.iter = 300))
 summary(fitJTMult.ph4)
 
 }

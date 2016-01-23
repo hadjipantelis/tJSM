@@ -39,6 +39,7 @@ Thumbs.db
 # Specific to this repo
 *.pdf
 *.RData
+*.swp
 obsolete/
 basicSpeedTests/
 JSM_partially_OK/
