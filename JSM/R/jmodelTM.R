@@ -150,13 +150,13 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
     theta.new  <-   EMiterTMGeneric(theta.old, n = n, Z.st = Z.st, Ztime = Ztime, Ztime2.st = Ztime2.st, nk = nk, Indcs = Indcs, Wtime2 = Wtime2, Xtime2 = Xtime2, GQ = GQ, rho = rho, wGQ = wGQ, d = d, Y.st = Y.st, X.st = X.st, ncz = ncz, ncz2 = ncz2, b = b, model =  model, Wtime = Wtime, Xtime = Xtime, X = X, Y = Y, ID = ID, N = N, ncw = ncw, Wtime22 = Wtime22, ncx = ncx, Xtime22 = Xtime22, Z = Z, X2.sum = X2.sum)
     new.P <- c(theta.new$beta, theta.new$phi, theta.new$alpha, theta.new$Ysigma, theta.new$Bsigma)
     old.P <- c(theta.old$beta, theta.old$phi, theta.old$alpha, theta.old$Ysigma, theta.old$Bsigma)
-    err.P <- max(abs(new.P - old.P) / (abs(old.P) + cntrlLst$tol.P))
-    # add tol.P to avoid zero value of the estimated parameters #
-    
+    # err.P <- max(abs(new.P - old.P) / (abs(old.P) + cntrlLst$tol.P))
+      err.P <- max(abs(new.P - old.P) / (abs(old.P) + .Machine$double.eps *2))
+
     new.L <- theta.new$lgLik
     old.L <- theta.old$lgLik
-    err.L <- abs(new.L - old.L) / (abs(old.L) + cntrlLst$tol.P)
-    
+    # err.L <- abs(new.L - old.L) / (abs(old.L) + cntrlLst$tol.P)
+      err.L <- abs(new.L - old.L) / (abs(old.L) + .Machine$double.eps *2)
     step <- step + 1
     theta.old <- theta.new
   }
