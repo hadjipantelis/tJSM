@@ -34,7 +34,7 @@ GenerateControlList <- function( control ){
   }
   controlVals[namec] <- control
   if(controlVals$SE.method == 'PLFD' | controlVals$SE.method == 'PFDS'){
-    controlVals$delta <- 10 ^ (- 3)
+    controlVals$delta <- 10^(-5)
   }
   controlVals[namec] <- control
 
