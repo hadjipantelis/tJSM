@@ -28,6 +28,7 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
     stop("\n sample sizes in the longitudinal and event processes differ.")
   
   W <- as.matrix(fitCOX$x)
+  ncw <- ncol(W)
 
   varNames <- list()
   varNames$phi.names <- colnames(W)
@@ -39,9 +40,12 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
       stop("\n'timeVarT' does not correspond columns in the fixed-effect design matrix of 'fitCOX'.")
     mfSurv[timeVarT] <- Time
   }
-  Wtime <- as.matrix(model.matrix(formSurv, mfSurv))
-  if(attr(TermsSurv, 'intercept')) Wtime <- as.matrix(Wtime[, - 1])
-  # design matrix in survival part, one row for each subject, excluding intercept #
+  if (ncw > 0) {
+    Wtime <- as.matrix(model.matrix(formSurv, mfSurv))
+    if(attr(TermsSurv, 'intercept')) Wtime <- as.matrix(Wtime[, - 1])
+    # design matrix in survival part, one row for each subject, excluding intercept #
+  } else Wtime <- matrix(, ncol = 0, nrow = nSurv)
+
   
   TermsLongX <- fitLME$terms
   mydata <- fitLME$data[all.vars(TermsLongX)] 
@@ -97,8 +101,11 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   if(!is.null(timeVarT)){
     mfSurv2[timeVarT] <- times
   }
-  Wtime2 <- as.matrix(model.matrix(formSurv, mfSurv2))
-  if(attr(TermsSurv, 'intercept')) Wtime2 <- as.matrix(Wtime2[, - 1]) # excluding intercept #
+  if (ncw > 0) {
+    Wtime2 <- as.matrix(model.matrix(formSurv, mfSurv2))
+    if(attr(TermsSurv, 'intercept')) Wtime2 <- as.matrix(Wtime2[, - 1]) # excluding intercept #
+  } else Wtime2 <- matrix(, ncol = 0, nrow = M)
+
   
   n <- nLong
   N <- length(Y)
@@ -106,7 +113,6 @@ jmodelTM <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarY = NULL,
   nu <- length(U)
   ncz <- ncol(Z)
   ncx <- ncol(X)
-  ncw <- ncol(W)
   ncz2 <- ncz ^ 2
   p <- ncz * (ncz + 1) / 2
   

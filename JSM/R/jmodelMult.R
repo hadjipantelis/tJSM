@@ -27,6 +27,8 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
     stop("\n sample sizes in the longitudinal and event processes differ.")
   
   Z <- as.matrix(fitCOX$x)
+  ncz <- ncol(Z)
+  
   phi.names <- colnames(Z)
   formSurv <- formula(fitCOX)
   TermsSurv <- fitCOX$terms
@@ -36,9 +38,12 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
       stop("\n'timeVarT' does not correspond columns in the fixed-effect design matrix of 'fitCOX'.")
     mfSurv[timeVarT] <- Time
   }
-  Ztime <- as.matrix(model.matrix(formSurv, mfSurv))
-  if(attr(TermsSurv, 'intercept')) Ztime <- as.matrix(Ztime[, - 1])
-  # design matrix of the covariates in survival part, one row for each subject, excluding intercept #
+  if (ncz > 0) {
+    Ztime <- as.matrix(model.matrix(formSurv, mfSurv))
+    if(attr(TermsSurv, 'intercept')) Ztime <- as.matrix(Ztime[, - 1])
+    # design matrix of the covariates in survival part, one row for each subject, excluding intercept #
+  } else Ztime <- matrix(, ncol = 0, nrow = nSurv)
+
   
   TermsLongX <- fitLME$terms
   mydata <- fitLME$data[all.vars(TermsLongX)] 
@@ -78,13 +83,15 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
   if(!is.null(timeVarT)) {
     mfSurv2[timeVarT] <- times
   }
-  Ztime2 <- as.matrix(model.matrix(formSurv, mfSurv2))
-  if(attr(TermsSurv, 'intercept')) Ztime2 <- as.matrix(Ztime2[, - 1]) # excluding intercept #
+  if (ncz > 0) {
+    Ztime2 <- as.matrix(model.matrix(formSurv, mfSurv2))
+    if(attr(TermsSurv, 'intercept')) Ztime2 <- as.matrix(Ztime2[, - 1]) # excluding intercept #
+  } else Ztime2 <- matrix(, ncol = 0, nrow = M)
+
   
   n <- nLong
   N <- length(Y)
   nu <- length(U)
-  ncz <- ncol(Z)
   ncb <- ncol(B)
   
   GHQ <- gauss.quad(cntrlLst$nknot, kind = "hermite")
@@ -134,7 +141,7 @@ jmodelMult <- function (fitLME, fitCOX, data, model = 1, rho = 0, timeVarT = NUL
     old.L <- theta.old$lgLik
     # err.L <- abs(new.L - old.L) / (abs(old.L) + cntrlLst$tol.P)
     err.L <- abs(new.L - old.L) / (abs(old.L) + .Machine$double.eps *2)
-    # print( c(old.L, err.L, err.P) )
+
     step <- step + 1
     theta.old <- theta.new
   }
