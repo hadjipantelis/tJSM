@@ -1,0 +1,160 @@
+=============
+FIRST TIMINGS
+=============
+> OldTimings
+Unit: seconds
+                                                                     expr
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 0, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 0, timeVarY = "obstime")
+       min        lq      mean    median        uq       max neval
+  73.51227  75.65014  77.32699  76.40544  77.65283  87.05374    64
+ 136.02272 138.89037 140.28426 140.17169 141.65665 143.90712    64
+  58.33316  60.14173  61.33908  60.95286  61.55007  69.87562    64
+  98.70748 100.61024 101.76458 101.84957 103.23059 104.31509    64
+> NewTimings
+Unit: seconds
+                                                                     expr
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 0, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 0, timeVarY = "obstime")
+      min       lq     mean   median       uq      max neval
+ 29.76222 31.72976 35.74524 34.49934 39.42537 43.75010    64
+ 66.80873 68.66098 69.85027 70.01399 70.79932 73.24606    64
+ 23.76875 24.79497 27.63671 25.68511 30.82590 36.06901    64
+ 45.73723 46.83535 48.01872 47.96307 49.21332 51.06246    64
+
+==============
+SECOND TIMINGS
+==============
+> OldTimings
+Unit: seconds
+                                                                     expr
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 0, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 0, timeVarY = "obstime")
+       min        lq      mean    median        uq       max neval
+  72.92685  76.24420  77.99242  77.22955  78.93298  86.76031    66
+ 138.39163 139.64302 141.25455 140.78960 142.60677 146.08576    66
+  59.02219  61.19328  62.76255  61.89237  63.80514  70.28150    66
+  99.49444 101.43606 102.61522 102.56461 104.01362 105.75134    66
+> NewTimings
+Unit: seconds
+                                                                     expr
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 0, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 0, timeVarY = "obstime")
+      min       lq     mean   median       uq      max neval
+ 28.40009 30.47531 34.71489 32.89431 39.62265 42.47563    66
+ 60.70714 61.94795 63.50734 63.34474 64.87893 66.71421    66
+ 21.75463 23.65445 26.87544 25.67298 31.21723 35.44010    66
+ 40.46584 41.48471 42.42914 41.94330 43.70018 46.12867    66
+
+
+==============
+THIRD TIMINGS
+==============
+> OldTimings_Liver
+Unit: seconds
+                                                                      expr
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 0, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 1, rho = 0, timeVarY = "obstime")
+       min        lq      mean    median        uq       max neval
+  725.4296  740.9811  762.9135  763.4091  775.6334  828.6624    25
+ 1492.5290 1504.7254 1537.7109 1521.8376 1561.2308 1662.4135    25
+  477.1698  487.4253  495.2228  495.3050  502.8590  515.8500    25
+  764.2294  798.0608  805.2832  801.6692  808.3968  859.3338    25
+> NewTimings_Liver
+Unit: seconds
+                                                                      expr
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 0, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 1, rho = 0, timeVarY = "obstime")
+      min       lq     mean   median       uq      max neval
+ 476.4349 489.8517 496.2179 493.0832 502.7399 517.1065    25
+ 787.3017 797.9961 807.0188 801.8150 817.7272 828.0632    25
+ 346.7576 356.5414 358.1737 357.0513 357.7103 368.2935    25
+ 424.1620 436.5642 440.9470 441.0964 446.8879 455.6370    25
+==============
+FOURTH TIMINGS
+==============
+> NewTimings_Liver
+Unit: seconds
+                                                                      expr
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 0, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 1, rho = 0, timeVarY = "obstime")
+      min       lq     mean   median       uq      max neval
+ 411.7086 424.8816 430.5669 431.6776 436.0462 458.4223    25
+ 795.6487 809.7469 818.5553 822.7998 826.0446 837.7641    25
+ 288.0689 296.6629 300.4522 302.0832 303.4777 310.1969    25
+ 435.4070 445.3927 449.4408 450.1060 453.3933 459.5971    25
+
+==============
+FIFTH TIMINGS
+==============
+> NewTimings_Liver
+Unit: seconds
+                                                                      expr
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 0, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 1, rho = 0, timeVarY = "obstime")
+      min       lq     mean   median       uq      max neval
+ 350.1673 353.3203 354.6685 353.6093 356.5994 361.1795    30
+ 628.8956 633.0884 640.9719 634.9723 649.1283 670.6847    30
+ 235.8224 238.4154 239.8693 238.8344 242.4661 245.8104    30
+ 341.1729 344.3968 349.8871 348.8805 353.5030 371.0187    30
+
+==============
+SIXTH TIMINGS
+==============
+> NewTimings
+Unit: seconds
+                                                                     expr
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 2, rho = 0, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, aids, model = 1, rho = 0, timeVarY = "obstime")
+      min       lq     mean   median       uq      max neval
+ 22.63805 25.04475 27.31500 25.60705 26.65452 37.38661    66
+ 52.37759 56.41846 57.14256 57.05751 57.97723 60.15634    66
+ 15.93275 17.63411 18.94196 17.95660 18.84491 26.80800    66
+ 34.91539 35.95894 36.62774 36.58097 37.15714 39.90516    66
+
+
+==============
+SEVENTH TIMINGS
+==============
+
+> NewTimings_Liver
+Unit: seconds
+                                                                      expr
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 0, timeVarY = "obstime")
+      min       lq     mean   median       uq      max neval
+ 294.7494 305.2759 306.1418 305.8186 308.2857 309.1266    33
+ 186.9873 189.8504 190.6763 190.1564 192.1644 193.3060    33
+
+
+==============
+EIGHTH TIMINGS
+==============
+> OldTimings_Liver_Long
+Unit: seconds
+                                                                      expr
+ jmodelTM(fitLME, fitCOX, liver, model = 1, rho = 1, timeVarY = "obstime")
+ jmodelTM(fitLME, fitCOX, liver, model = 2, rho = 0, timeVarY = "obstime")
+       min        lq      mean    median       uq      max neval
+ 1552.3973 1652.4231 1659.1617 1665.6023 1670.025 1684.911    66
+  492.7285  534.6711  540.8671  544.5586  548.581  561.783    66
+
+
