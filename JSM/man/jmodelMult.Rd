@@ -95,6 +95,7 @@ Pantelis Z. Hadjipantelis \email{pantelis@ucdavis.edu}
 }
 
 \examples{
+\dontrun{
 # linear mixed-effects model fit where the fixed effect is modeled by 
 # quadratic B-splie basis with four internal knots
 fitLME <- lme(log(serBilir) ~ bs(obstime, df = 6, degree = 2), random = ~ 1 | ID, data = pbc)
@@ -127,7 +128,7 @@ fitCOX2 <- coxph(Surv(start, stop, event) ~ drug + as.numeric(drug) : obstime,
 fitJTMult.ph4 <- jmodelMult(fitLME, fitCOX2, pbc, timeVarT = 'obstime', 
                             control = list(max.iter = 300))
 summary(fitJTMult.ph4)
-
+}
 }
 
 \keyword{survival}

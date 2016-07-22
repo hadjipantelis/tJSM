@@ -4,7 +4,7 @@
  
 fitLME <- lme(sqrt(CD4) ~ bs(obstime, 4), random =~ 1 | ID, data = aids)
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
-control <- list( max.iter = 100, nknot = 5)
+control <- list( max.iter = 100, nknot = 5, tol.L = 1e-08, tol.P = 1e-04)
  
 #test_that(" basic jmodelMult test with for aids data model = 1, rho = 0 ", { 
 #  m_MULT <- jmodelMult(fitLME, fitCOX, aids, model = 1, rho=0,   control = control)

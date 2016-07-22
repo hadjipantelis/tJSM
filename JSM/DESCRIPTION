@@ -2,7 +2,7 @@ Package: JSM
 Type: Package
 Title: Semiparametric Joint Modeling of Survival and Longitudinal Data
 Version: 0.1.0
-Date: 2015-12-28
+Date: 2016-07-23
 Author: Cong Xu, Pantelis Z. Hadjipantelis and Jane-Ling Wang
 Maintainer: Pantelis Z. Hadjipantelis <pantelis@ucdavis.edu>
 Description: Maximum likelihood estimation for the semiparametric joint modeling of 

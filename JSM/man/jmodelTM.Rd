@@ -93,6 +93,7 @@ Pantelis Z. Hadjipantelis \email{pantelis@ucdavis.edu}
 }
 
 \examples{
+\dontrun{
 # linear mixed-effects model fit with random intercept
 fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), 
               random = ~ 1 | ID, data = aids)
@@ -126,7 +127,7 @@ fitCOX2 <- coxph(Surv(start, stop, event) ~ drug + as.numeric(drug) : obstime,
 # joint model fit in which \code{timeVarT} must be specified
 fitJT.ph4 <- jmodelTM(fitLME2, fitCOX2, aids, timeVarY = 'obstime', timeVarT = 'obstime')
 summary(fitJT.ph4)
-
+}
 }
 
 \keyword{survival}

@@ -4,7 +4,7 @@
 
 fitLME <- lme(sqrt(CD4) ~ drug + obstime + I(obstime ^ 2) + drug : obstime + drug : I(obstime ^2), random = ~ 1 | ID, data = aids)
 fitCOX <- coxph(Surv(start, stop, event) ~ drug, data = aids, x = TRUE)
-control <- list(nknot = 15)
+control <- list(nknot = 15, tol.L = 1e-08, tol.P = 1e-04)
 
 test_that(" basic jmodelTM test with for aids data model = 1, rho = 1 ", { 
   m_TM <- jmodelTM(fitLME, fitCOX, aids, model = 1, rho=1,timeVarY = 'obstime', control = control)
