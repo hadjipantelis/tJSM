@@ -1,3 +1,3 @@
 * Joint Statistcal Modelling
 
-This repo is depreciated. Please visit the new JSM repo project page [here](https://github.com/helenxu/JSM).
+This repo is depreciated. Please visit the new JSM repo project page at: https://github.com/helenxu/JSM.
